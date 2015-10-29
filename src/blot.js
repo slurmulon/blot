@@ -1,6 +1,6 @@
 'use strict'
 
-import * as hazy from '../node_modules/hazy/src/index.js'
+import * as hazy from '../node_modules/hazy/src/hazy.js'
 import protagonist from 'protagonist'
 import hercule from 'hercule'
 import _ from 'lodash'
@@ -12,31 +12,33 @@ export class Blueprint {
   constructor(markdown: String) {
     this.markdown = markdown
 
-    ['parse', 'transclude', 'compile', 'fixtures'].forEach(method => {
+    const statics = ['parse', 'transclude', 'compile', 'fixtures']
+
+    statics.forEach(method => {
       this[method] = () => Blueprint[method](this.markdown)
     })
   }
 
+  // exports API blueprint as either static html or an apiblueprint
   toFile(extension: String) {
     switch(extension) {
       case 'html': break;
       case 'apiblueprint': break;
-      default;
+      default: break;
     }
   }
 
+  // parses markdown into a functional object
   static parse(markdown: String): Promise {
     return new Promise((resolve, reject) => {
       if (markdown) {
-        protagonist.parse(markdown, (err, result) => {
+        protagonist.parse(markdown, (err, blueprint) => {
           if (!err) {
-            const blueprint = Object.assign({filepath, raw: data}, result)
-
             resolve(blueprint)
           } else {
             reject(`Failed to parse file as valid API blueprint: ${error}`)
           }
-        }
+        })
       } else {
         reject(new LoadError(`Filepath or Markdown data required`))
       }
@@ -71,9 +73,9 @@ export class Blueprint {
 
   // compiles and extracts fixtures from API blueprint markdown
   static fixtures(markdown: String): Promise {
-    return Blueprint.compile(markdown).then(blueprint => {
+    return new Promise((resolve, reject) => {
       let   fixtures        = []
-      const haziedBlueprint = hazy.lang.process(blueprint.raw)
+      const haziedBlueprint = hazy.lang.process(markdown)
       const jsonStrMatches  = blueprint.raw.match(haziedBlueprint)
 
       jsonStrMatches.forEach(jsonStr => {
@@ -81,14 +83,14 @@ export class Blueprint {
           fixtures.push(JSON.parse(jsonStr))
         } catch (e) {
           if (e instanceof SyntaxError) {
-            throw new ParseError(`Found invalid JSON in API blueprint ${blueprint.filepath}: ${jsonStr}\n\n${e}`)
+            reject(new ParseError(`Found invalid JSON in API blueprint ${blueprint.filepath}: ${jsonStr}\n\n${e}`))
           } else {
-            throw new ParseError(`Failed to parse JSON fixtures in API blueprint: ${e}`)
+            reject(new ParseError(`Failed to parse JSON fixtures in API blueprint: ${e}`))
           }
         }
       })
 
-      return fixtures
+      resolve(fixtures)
     })
   }
 
@@ -119,12 +121,12 @@ export function load(blueprints): Promise {
     } else if (docs instanceof String) {
       return new Blueprint(docs).compile()
     } else {
-      throw new LoadError('Documents must be represented as a String or Array')
+      reject(new LoadError('Documents must be represented as a String or Array'))
     }
   })
 }
 
 export const plainJson = /\{(.*?)\}$/gm
 
-export class LoadError  extends Error
-export class ParseError extends Error
+export class LoadError  extends Error {}
+export class ParseError extends Error {}
