@@ -1,0 +1,53 @@
+{
+  "name": "blot",
+  "version": "0.0.0",
+  "description": "Dynamically generated API Blueprints with lazy fixtures",
+  "main": "src/blot.js",
+  "scripts": {
+    "lint": "eslint src/blot.js",
+    "start": "babel-node src/blot.js",
+    "test": "mocha --reporter nyan --compilers js:babel/register test",
+    "auto-start": "nodemon --exec \"npm run lint && npm start\" --ignore public/js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/slurmulon/hazy-docs.git"
+  },
+  "keywords": [
+    "hazy",
+    "stub",
+    "json",
+    "fixture",
+    "api",
+    "blueprint",
+    "hercule",
+    "mardkwon",
+    "docs",
+    "documentation",
+    "blot"
+  ],
+  "author": "MadHax",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/slurmulon/blot/issues"
+  },
+  "dependencies": {
+    "babel": "^5.8.21",
+    "chance": "~0.7.5",
+    "glob": "^5.0.10",
+    "hercule": "^1.2.1",
+    "jsonpath": "^0.1.4",
+    "lodash": "~3.9.3",
+    "protagonist": "^1.1.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^4.0.10",
+    "blanket": "~1.1.7",
+    "chai": "^3.2.0",
+    "chai-as-promised": "^5.1.0",
+    "chai-things": "^0.2.0",
+    "eslint": "^1.1.0",
+    "mocha": "^2.3.2",
+    "nodemon": "^1.4.1"
+  }
+}
