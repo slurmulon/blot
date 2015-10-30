@@ -22,9 +22,9 @@ export class Blueprint {
   // exports API blueprint as either static html or an apiblueprint
   toFile(extension: String) {
     switch(extension) {
-      case 'html': break;
-      case 'apiblueprint': break;
-      default: break;
+      case 'html': break
+      case 'apiblueprint': break
+      default: break
     }
   }
 
@@ -40,7 +40,7 @@ export class Blueprint {
           }
         })
       } else {
-        reject(new LoadError(`Filepath or Markdown data required`))
+        reject(`Filepath or Markdown data required`)
       }
     })
   }
@@ -49,7 +49,7 @@ export class Blueprint {
   static transclude(markdown: String): Promise {
     return new Promise((resolve, reject) => {
       if (markdown) {
-        const transcludedMarkdown = hercule.transcludeString(markdown, output => output)
+        const transcludedMarkdown = hercule.transcludeString(markdown, _ => _)
 
         if (transcludedMarkdown) {
           resolve(transcludedMarkdown)
@@ -64,7 +64,8 @@ export class Blueprint {
 
   // compiles API blueprint markdown data by translcuding it and then parsing it for fixtures
   static compile(markdown: String): Promise {
-    return Blueprint.transclude(markdown)
+    return Blueprint
+      .transclude(markdown)
       .then(transMd => Blueprint.parse(transMd))
       .then(parseMd => Blueprint.fixtures(parseMd).then(fixtures => {
         return {fixtures, content: parseMd}
@@ -74,18 +75,20 @@ export class Blueprint {
   // compiles and extracts fixtures from API blueprint markdown
   static fixtures(markdown: String): Promise {
     return new Promise((resolve, reject) => {
-      let   fixtures        = []
-      const haziedBlueprint = hazy.lang.process(markdown)
-      const jsonStrMatches  = blueprint.raw.match(haziedBlueprint)
+      let fixtures = []
+      const haziedMarkdown = hazy.lang.process(markdown)
+      const jsonStrMatches = haziedMarkdown.match(plainJson)
 
       jsonStrMatches.forEach(jsonStr => {
         try {
-          fixtures.push(JSON.parse(jsonStr))
+          const fixture = JSON.parse(jsonStr)
+
+          fixtures.push(fixture)
         } catch (e) {
           if (e instanceof SyntaxError) {
-            reject(new ParseError(`Found invalid JSON in API blueprint ${blueprint.filepath}: ${jsonStr}\n\n${e}`))
+            reject(`Found invalid JSON in API blueprint ${blueprint.filepath}: ${jsonStr}\n\n${e}`)
           } else {
-            reject(new ParseError(`Failed to parse JSON fixtures in API blueprint: ${e}`))
+            reject(`Failed to parse JSON fixtures in API blueprint: ${e}`)
           }
         }
       })
@@ -94,18 +97,19 @@ export class Blueprint {
     })
   }
 
+  // parses and compiles a blueprint from the file system
   static fromFile(filepath: String): Promise {
     return new Promise((resolve, reject) => {
       if (filepath) {
-        fs.readFile(__dirname + '/' + filepath, (err, data) => {
+        fs.readFile(__dirname + '/' + filepath, 'utf-8', (err, data) => {
           if (!err) {
             resolve(new Blueprint(data).compile())
           } else {
-            reject(new LoadError(`Failed to read file: ${error}`))
+            reject(`Failed to read file: ${error}`)
           }
         })
       } else {
-        reject(new LoadError(`File to read file, filepath required.`))
+        reject(`File to read file, filepath required`)
       }  
     })
   }
@@ -118,15 +122,15 @@ export function load(blueprints): Promise {
       return Promise.all(
         blueprints.map(bp => new Blueprint(bp).compile())
       )
-    } else if (docs instanceof String) {
-      return new Blueprint(docs).compile()
+    } else if (blueprints instanceof String) {
+      return new Blueprint(blueprints).compile()
     } else {
-      reject(new LoadError('Documents must be represented as a String or Array'))
+      reject('Documents must be represented as a String or Array')
     }
   })
 }
 
-export const plainJson = /\{(.*?)\}$/gm
+export const plainJson = /\{(.*?)\}/gm
 
-export class LoadError  extends Error {}
-export class ParseError extends Error {}
+// export class LoadError  extends Error {}
+// export class ParseError extends Error {}

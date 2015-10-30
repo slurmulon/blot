@@ -5,48 +5,56 @@ import _ from 'lodash'
 import fs from 'fs'
 
 import chai from 'chai'
-// import chaiThings from 'chai-things'
+import chaiThings from 'chai-things'
 import chaiAsPromised from 'chai-as-promised'
 
 chai.should()
-// chai.use(chaiThings)
+chai.use(chaiThings)
 chai.use(chaiAsPromised)
 
-const blueprintFixture = (filepath: String): String => fs.readFileSync(__dirname + '/fixtures/apiblueprint/' + filepath)
+const loadFixture = (filepath) => fs.readFileSync(__dirname + '/fixtures/' + filepath, 'utf-8')
 
 describe('Blueprint', () => {
-  let blueprintStub
+  let blueprintStubs = {
+    basic : null,
+    json  : null
+  }
 
   beforeEach(() => {
-    blueprintStub = new blot.Blueprint('# Stubbin')
+    blueprintStubs.basic = new blot.Blueprint('# Basic Stub')
+    blueprintStubs.json  = new blot.Blueprint(`
+      # Retrieve User Id [GET]
+      ## Request {"name": "|~person:name|"}
+      ## Response {"id": "|~misc:guid|"}')`
+    )
   })
 
   describe('constructor', () => {
     it('should be a function', () => {
-      blot.Blueprint.constructor.should.be.a('function')  
+      blot.Blueprint.constructor.should.be.a('function')
     })
 
     it('should bind the following own methods', () => {
       ['parse', 'transclude', 'compile', 'fixtures'].forEach(method => {
-        blueprintStub.should.have.ownProperty(method)
+        blueprintStubs.basic.should.have.ownProperty(method)
       })
     })
   })
 
   describe('parse', () => {
     it('should be a function', () => {
-      blueprintStub.parse.should.be.a('function')  
+      blueprintStubs.basic.parse.should.be.a('function')
     })
 
     it('should return a Promise', () => {
-      blueprintStub.parse('#').should.eventually.be.fulfilled
+      blueprintStubs.basic.parse().should.be.a('promise')
     })
 
     it('should resolve with a parsed API blueprint if valid', () => {
-      const fixture = blueprintFixture('simple.md')
-      const result  = blueprintStub.parse(fixture)
+      const fixture = loadFixture('apiblueprint/simple.md')
+      const result  = blueprintStubs.basic.parse(fixture)
 
-      // FIXME - these don't even assert properly, wut?
+      // FIXME - these don't even assert properly (always true), wut?
       result.should.eventually.be.an('object')
       result.should.eventually.have.ownProperty('element')
       result.should.eventually.have.ownProperty('content')
@@ -55,11 +63,11 @@ describe('Blueprint', () => {
 
   describe('transclude', () => {
     it('should be a function', () => {
-      blueprintStub.parse.should.be.a('function')  
+      blueprintStubs.basic.parse.should.be.a('function')
     })
 
     it('should return a Promise', () => {
-      blueprintStub.transclude().should.eventually.be.fulfilled
+      blueprintStubs.basic.transclude().should.be.a('promise')
     })
 
     it('should be rejected when a Markdown string is not provided', () => {
@@ -71,22 +79,84 @@ describe('Blueprint', () => {
     })
   })
 
-  describe('fixtures', () => {
-    beforeEach(() => {
-      blueprintStub = new blot.Blueprint('# Foo {"name": "|~misc:name|"}')
-    })
-
+  describe('compile', () => {
     it('should be a function', () => {
-      blueprintStub.fixtures.should.be.a('function')  
+      blueprintStubs.basic.compile.should.be.a('function')
     })
 
     it('should return a Promise', () => {
-      blueprintStub.fixtures().should.eventually.be.fulfilled
+      blueprintStubs.basic.compile().should.be.a('promise')
     })
 
-    it('should process all Hazy fixtures present in the Markdown', () => {
-      blueprintStub.fixtures().should.eventually.contain.an('object')
+    it('should sequentially call: transclude -> parse -> fixtures', () => {
+      // TODO
+      // blueprintStubs.basic.compile().should.eventually.deep.equal({fixtures: })
     })
   })
-  
+
+  describe('fixtures', () => {
+    it('should be a function', () => {
+      blueprintStubs.json.fixtures.should.be.a('function')
+    })
+
+    it('should return a Promise', () => {
+      blueprintStubs.json.fixtures().should.be.a('promise')
+    })
+
+    it('should process and resolve with all Hazy fixtures present in the Markdown', () => {
+      blueprintStubs.json.fixtures().should.eventually.be.an('array')
+      blueprintStubs.json.fixtures().should.eventually.have.length(1)
+      blueprintStubs.json.fixtures().should.eventually.contain.an('object')
+    })
+
+    it('should reject when provided malformed JSON', () => {
+      blot.Blueprint.fixtures('{"invalid":').should.eventually.be.rejected
+    })
+  })
+
+  describe('fromFile', () => {
+    it('should be a function', () => {
+      blot.Blueprint.fromFile.should.be.a('function')
+    })
+
+    it('should return a Promise', () => {
+      blot.Blueprint.fromFile().should.be.a('promise')
+    })
+
+    it('should compile the API Blueprint file found at the filepath', () => {
+      blot.Blueprint.fromFile('../test/fixtures/apiblueprint/simple.md').should.be.resolved
+    })
+
+    it('should reject if no API Blueprint can be found', () => {
+      blot.Blueprint.fromFile().should.be.rejected
+    })
+  })
+})
+
+describe('load', () => {
+  let loadStub
+
+  beforeEach(() => {
+    loadStub = '## Response {"id": "|~misc:guid|"}'
+  })
+
+  it('should be a function', () => {
+    blot.load.should.be.a('function')
+  })
+
+  it('should return a Promise', () => {
+    blot.load('#').should.be.a('promise')
+  })
+
+  it('should compile each API Blueprint when provided an Array', () => {
+    blot.load([loadStub]).should.be.resolved
+  })
+
+  it('should compile the API Blueprint when provided a String', () => {
+    blot.load(loadStub).should.be.resolved
+  })
+
+  it('should reject if provided anything other than an Array or String', () => {
+    blot.load(false).should.be.rejected
+  })
 })
