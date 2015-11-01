@@ -3,6 +3,7 @@
 import * as hazy from '../node_modules/hazy/src/hazy.js'
 import protagonist from 'protagonist'
 import hercule from 'hercule'
+
 import _ from 'lodash'
 import fs from 'fs'
 import glob from 'glob'
@@ -19,11 +20,11 @@ export class Blueprint {
     })
   }
 
-  // exports API blueprint as either static html or an apiblueprint
+  // exports API blueprint as either static html or an apib
   toFile(extension: String) {
     switch(extension) {
       case 'html': break
-      case 'apiblueprint': break
+      case 'apib': break
       default: break
     }
   }

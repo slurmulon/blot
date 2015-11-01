@@ -30,7 +30,7 @@ on top of Hazy and provides an abstract API blueprint parser and generator.
 ## Hazy
 
 [Hazy](https://github.com/slurmulon/hazy) is a simple specification (with an accompanying node library) for lazily
-generating dynamic test fixtures. It provides a simple syntax for interpolating random data (and more) in your fixtures.
+generating dynamic test fixtures. It provides a simple syntax for interpolating random data (and more) into your fixtures.
 It alleviates the need for developers to constantly come up with names, addresses, etc. for their enormous amount of test data.
 
 The most powerful feature of hazy is that it allows developers to dynamically embed fixtures via `JsonPath` patterns or by a simple string.
