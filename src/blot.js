@@ -8,8 +8,16 @@ import _ from 'lodash'
 import fs from 'fs'
 import glob from 'glob'
 
+/**
+ * Parses, transcludes and compiles API blueprint files
+ * and their associated fixtures. Allows compiled
+ * API blueprints to be exported to the filesystem.
+ */
 export class Blueprint {
 
+  /**
+   * @param {String} markdown Valid API blueprint Markdown
+   */
   constructor(markdown: String) {
     this.markdown = markdown
 
@@ -20,16 +28,11 @@ export class Blueprint {
     })
   }
 
-  // exports API blueprint as either static html or an apib
-  toFile(extension: String) {
-    switch(extension) {
-      case 'html': break
-      case 'apib': break
-      default: break
-    }
-  }
-
-  // parses markdown into a functional object
+  /**
+   * Parses markdown into a usable object
+   *
+   * @param {String} markdown Valid API blueprint markdown
+   */
   static parse(markdown: String): Promise {
     return new Promise((resolve, reject) => {
       if (markdown) {
@@ -37,16 +40,21 @@ export class Blueprint {
           if (!err) {
             resolve(blueprint)
           } else {
-            reject(`Failed to parse file as valid API blueprint: ${error}`)
+            reject(`Failed to parse file as valid API blueprint: ${err}`)
           }
         })
       } else {
-        reject(`Filepath or Markdown data required`)
+        reject(`Markdown data required`)
       }
     })
   }
 
-  // parses string data for Markdown references and embeds them
+  /**
+   * Scans API blueprint markdown for Hercule references and transcludes them
+   *
+   * @param {String} markdown
+   * @returns {Promise}
+   */
   static transclude(markdown: String): Promise {
     return new Promise((resolve, reject) => {
       if (markdown) {
@@ -63,7 +71,12 @@ export class Blueprint {
     })
   }
 
-  // compiles API blueprint markdown data by translcuding it and then parsing it for fixtures
+  /**
+   * Compiles API blueprint markdown data by translcuding it and then parsing it for fixtures
+   *
+   * @param {String} markdown
+   * @returns {Promise}
+   */
   static compile(markdown: String): Promise {
     return Blueprint
       .transclude(markdown)
@@ -73,7 +86,12 @@ export class Blueprint {
       }))
   }
 
-  // compiles and extracts fixtures from API blueprint markdown
+  /**
+   * Compiles and extracts fixtures from API blueprint markdown
+   *
+   * @param {String} markdown
+   * @returns {Promise}
+   */
   static fixtures(markdown: String): Promise {
     return new Promise((resolve, reject) => {
       let fixtures = []
@@ -98,7 +116,12 @@ export class Blueprint {
     })
   }
 
-  // parses and compiles a blueprint from the file system
+  /**
+   * Parses and compiles an API blueprint from the file system
+   *
+   * @param {String} markdown
+   * @returns {Promise}
+   */
   static fromFile(filepath: String): Promise {
     return new Promise((resolve, reject) => {
       if (filepath) {
@@ -115,8 +138,61 @@ export class Blueprint {
     })
   }
 
+  /**
+   * Exports API blueprint as either a static html or apib file
+   *
+   * @param {String} destination
+   * @returns {Promise}
+   */
+  toFile(destination: String): Promise {
+    return new Promise((resolve, reject) => {
+      const extension = destination.match(/\.(.*?)$/)
+
+      if (extension) {
+        this.compile()
+          .then(compiled   => this.marshall(compiled.content, extension[0]))
+          .then(marshalled => {
+            fs.writeFile(destination, marshalled, 'utf-8', err => {
+              if (!err) {
+                resolve(content)
+              } else {
+                reject(`An error occured while saving file: ${err}`)
+              }
+            })
+          })
+      } else {
+        reject(`File destinations must contain an extension (.apib or .html)`)
+      }
+    })
+  }
+
+  /**
+   * Attempts to marshall API blueprint content into a specific type.
+   *
+   * @param {String} markdown
+   * @param {String} filetype 'apib' or 'html'
+   * @returns {Promise}
+   */
+  marshall(markdown: String, filetype: String): Promise {
+    return new Promise((resolve, reject) => {
+      if (filetype === 'apib') {
+        resolve(markdown)
+      } else if (filetype === 'html') {
+        resolve(null) // TODO
+      } else {
+        reject(`Unknown filetype provided: ${filetype}`)
+      }
+    })
+  }
+
 }
 
+/**
+ * Reads in valid API blueprint(s) and compiles them
+ *
+ * @param {Array|String} blueprints
+ * @returns {Promise}
+ */
 export function load(blueprints): Promise {
   return new Promise((resolve, reject) => {
     if (blueprints instanceof Array) {
@@ -131,6 +207,9 @@ export function load(blueprints): Promise {
   })
 }
 
+/**
+ * A janky regex for finding "JSON" objects in markdown.
+ */
 export const plainJson = /\{(.*?)\}/gm
 
 // export class LoadError  extends Error {}
