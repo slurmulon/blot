@@ -119,7 +119,7 @@ export class Blueprint {
   /**
    * Parses and compiles an API blueprint from the file system
    *
-   * @param {String} markdown
+   * @param {String} filepath
    * @returns {Promise}
    */
   static fromFile(filepath: String): Promise {
@@ -140,13 +140,14 @@ export class Blueprint {
 
   /**
    * Exports API blueprint as either a static html or apib file
+   * to the provided file path.
    *
-   * @param {String} destination
+   * @param {String} filepath
    * @returns {Promise}
    */
-  toFile(destination: String): Promise {
+  toFile(filepath: String): Promise {
     return new Promise((resolve, reject) => {
-      const extension = destination.match(/\.(.*?)$/)
+      const extension = filepath.match(/\.(.*?)$/)
 
       if (extension) {
         this.compile()
