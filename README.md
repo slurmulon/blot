@@ -97,7 +97,7 @@ shows how you can reference and embed large fixtures that live on the filesystem
 If you are using a build tool such as `gulp`, you can utilize the `@` operator
 to incorporate functionality around your fixtures:
 
-```
+```javascript
 import gulp from 'gulp'
 import hazy from 'hazy'
 import blot from 'blot'
