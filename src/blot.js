@@ -96,7 +96,7 @@ export class Blueprint {
   static fixtures(markdown: String): Promise {
     return new Promise((resolve, reject) => {
       let fixtures = []
-      const haziedMarkdown = hazy.lang.process(markdown)
+      const haziedMarkdown = this.hazy.lang.process(markdown)
       const jsonStrMatches = haziedMarkdown.match(plainJson)
 
       jsonStrMatches.forEach(jsonStr => {
