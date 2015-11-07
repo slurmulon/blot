@@ -16,10 +16,11 @@ import glob from 'glob'
 export class Blueprint {
 
   /**
-   * @param {String} markdown Valid API blueprint Markdown
+   * @param {String} markdown Valid API blueprint markdown
    */
-  constructor(markdown: String) {
+  constructor(markdown: String, hazy?: Object = hazy) {
     this.markdown = markdown
+    this.hazy     = hazy
 
     const statics = ['parse', 'transclude', 'compile', 'fixtures']
 
@@ -63,7 +64,7 @@ export class Blueprint {
         if (transcludedMarkdown) {
           resolve(transcludedMarkdown)
         } else {
-          reject('Failed to parse Markdown for Hercule transclusions!')
+          reject('Failed to parse markdown for Hercule transclusions!')
         }
       } else {
         reject('Valid markdown required for transclusion')
@@ -133,7 +134,7 @@ export class Blueprint {
           }
         })
       } else {
-        reject(`File to read file, filepath required`)
+        reject(`Failed to read file, filepath required`)
       }  
     })
   }
@@ -145,12 +146,12 @@ export class Blueprint {
    * @param {String} filepath
    * @returns {Promise}
    */
-  toFile(filepath: String): Promise {
+  toFile(fixtures, filepath: String): Promise {
     return new Promise((resolve, reject) => {
       const extension = filepath.match(/\.(.*?)$/)
 
       if (extension) {
-        this.compile()
+        this.read(fixtures)
           .then(compiled   => this.marshall(compiled.content, extension[0]))
           .then(marshalled => {
             fs.writeFile(destination, marshalled, 'utf-8', err => {
@@ -181,7 +182,7 @@ export class Blueprint {
       } else if (filetype === 'html') {
         resolve(null) // TODO
       } else {
-        reject(`Unknown filetype provided: ${filetype}`)
+        reject(`Unsupported filetype: ${filetype}`)
       }
     })
   }
@@ -189,12 +190,13 @@ export class Blueprint {
 }
 
 /**
- * Reads in valid API blueprint(s) and compiles them
+ * Reads in valid API blueprint(s) from Strings or 
+ * Arrays of Strings and compiles them
  *
  * @param {Array|String} blueprints
  * @returns {Promise}
  */
-export function load(blueprints): Promise {
+export function read(blueprints): Promise {
   return new Promise((resolve, reject) => {
     if (blueprints instanceof Array) {
       return Promise.all(
@@ -207,6 +209,28 @@ export function load(blueprints): Promise {
     }
   })
 }
+
+/**
+ * Globs and reads in valid API blueprint(s) from the filesystem and compiles them
+ *
+ * @param {Array|String} blueprints
+ * @returns {Promise}
+ */
+export function load(pattern, options): Promise {
+  return new Promise((resolve, reject) => {
+    glob(pattern, options, (err, files) => {
+      if (!err) {
+        return Promise.all(
+          files.map(file => new Blueprint(file).compile())
+        )
+      } else {
+        reject(`Failed to load file: ${err}`)
+      }
+    })
+  })
+}
+
+
 
 /**
  * A janky regex for finding "JSON" objects in markdown.
