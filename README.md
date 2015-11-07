@@ -83,10 +83,6 @@ shows how you can reference and embed large fixtures that live on the filesystem
 
 ### Fetch a user [GET]
 
-+ Request (application/json)
-
-  |> authed-user-req.json|
-
 + Response 200 (application/json)
 
   |> authed-user-res.json|
