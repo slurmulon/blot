@@ -58,10 +58,6 @@ The `~` keyword tells hazy to replace the token with categorized random data:
 
 ### Fetch a user [GET]
 
-+ Request (application/json)
-
-  { "token": "|~misc:guid|", "refresh_token": "|~misc:guid|" }
-
 + Response authentication (application/json)
 
   { "username": "|~text:word|", "first": "|~person:first|", "last": "|~person:last|", "address": "|~geo:address|" }
