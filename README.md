@@ -94,8 +94,7 @@ shows how you can reference and embed large fixtures that live on the filesystem
 
 ### Gulp
 
-If you are using a build tool such as `gulp`, you can utilize the `@` operator
-to incorporate functionality around your fixtures:
+If you are using a build tool such as `gulp`, you can incorporate special functionality or data around your fixtures:
 
 ```javascript
 import gulp from 'gulp'
