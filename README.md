@@ -1,12 +1,12 @@
 # blot
 
-> Dynamically generated API Blueprints with lazy fixtures
+> Dynamic and de-centralized API Blueprints
 
 ## tl;dr
 
 API Blueprint + Hercule + Hazy = Magical documentation, fixtures, and tests
 
-* Establishes a centralized source for documentation and test data
+* Establishes a centralized source for documentation and test fixtures
 * Reference and embed documentation / test fixtures by patterns or name
 * Increases readability and dramatically eases maintenance of documentation, fixtures and tests
 
@@ -84,9 +84,27 @@ shows how you can reference and embed large fixtures that live on the filesystem
   |> authed-user-res.json|
 ```
 
-### Gulp
+## Command Line
 
-If you are using a build tool such as `gulp`, you can incorporate special functionality or data around your fixtures:
+The easiest way to use blot is by running it as a command.
+
+You can specify an API blueprint to parse and export:
+
+```bash
+blot compile -i docs.blot.apib -o docs.apib
+```
+
+or simply pass in the raw data:
+
+```bash
+blot compile -d 'FORMAT: 1A # The Simplest API # GET /message + Response 200 (text/json) {"message": "Hello |~person:name|"}' -o docs.apib
+```
+
+### Node
+
+The node module allows you to incorporate special functionality or data around your fixtures.
+It's primary benefit is allowing you to configure and inject your own hazy fixture pool before
+your API blueprint is processed:
 
 ```javascript
 import gulp from 'gulp'
@@ -95,15 +113,15 @@ import blot from 'blot'
 import moment from 'moment'
 
 gulp.task('fixtures', ['clean'], () => {
-  // ensure all fixtures contain a stub and created property
+  // ensure all fixtures have a created date
   hazy.matcher.config({
     path   : '$',
     handle : (fixture) => {
-      return Object.assign({stub: true, created: moment()}, fixture)
+      return Object.assign({created: moment()}, fixture)
     }
   })
 
-  // ensure any urls are appended with a '?fixture' query param
+  // ensure any fixture urls are appended with a '&fixture' query param
   hazy.matcher.config({
     path   : '$..url',
     handle : (url) => {
@@ -115,10 +133,10 @@ gulp.task('fixtures', ['clean'], () => {
   hazy.fixture.load('**/fixtures/*.json', null, (key) => key.replace('.json'))
 
   // tell blot to use the newly configured hazy object (and, by association, its fixture pool)
-  blot.hazy = hazy
+  blot.interpolator = hazy
 
   // load api blueprint, process fixtures against configured hazy pool, then export as a static blueprint file
-  blot
+  blot.Blueprint
     .load('documentation.apib')
     .then(compiled => blot.toFile(compiled.content, 'dist/documentation.apib'))
 })

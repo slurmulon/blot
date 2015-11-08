@@ -1,0 +1,64 @@
+#! /usr/bin/env node
+
+'use strict'
+
+var blot = require('../lib/blot')
+var program = require('commander')
+var colors = require('colors')
+
+function info(action, msg) {
+  console.log('[' + 'blot'.bold.green + '.' + action + '] ' + msg)
+}
+
+function error(msg) {
+  console.log('[' + 'blot:ERROR'.red + ']', msg)
+}
+
+function section(msg) {
+  console.log('\n==================================================\n'.rainbow)
+  console.log(msg)
+  console.log('\n==================================================\n'.rainbow)
+}
+
+console.time('Finished in'.green)
+
+program
+  .version('0.0.1')
+  .command('compile')
+  .description('process documentation and compile it into a static form')
+  .option('-i, --in-files [files]', 'Source files (*.blot or *.apib)', 'files')
+  .option('-d, --in-data [markdown]', 'Read in Markdown (UTF-8)', 'markdown')
+  .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
+  .action(function(cmd) {
+    var inFiles  = cmd.inFiles
+    var inData   = cmd.inData
+    var outFiles = cmd.outFile
+
+    var blotAction = (function() {
+      if (inFiles && inFiles !== 'files') {
+        console.log('[' + blot.green + '.' + 'load'.orange + '] loading files...')
+
+        return blot.load(inFiles)
+          .then(function(blueprint) {
+            // blot.toFile() // TODO
+          })
+          .catch(error)
+      } else if (inData) {
+        info('load', 'processing API blueprint markdown...')
+        
+        return blot.read(inData)
+          .then(function(blueprint) {
+            section(blueprint.compiled.markdown.cyan)
+          })
+          .catch(error)
+      } else {
+        error('malformed command')
+      }
+    })
+    
+    blotAction().then(function(result) {
+      console.timeEnd('Finished in'.green)
+    })
+  })
+
+program.parse(process.argv)

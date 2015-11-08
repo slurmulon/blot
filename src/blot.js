@@ -1,6 +1,6 @@
 'use strict'
 
-import * as hazy from '../node_modules/hazy/src/hazy.js'
+import * as hazy from '../node_modules/hazy/lib/hazy.js'
 import protagonist from 'protagonist'
 import hercule from 'hercule'
 
@@ -18,9 +18,8 @@ export class Blueprint {
   /**
    * @param {String} markdown Valid API blueprint markdown
    */
-  constructor(markdown: String, hazy?: Object = hazy) {
+  constructor(markdown: String) {
     this.markdown = markdown
-    this.hazy     = hazy
 
     const statics = ['parse', 'transclude', 'compile', 'fixtures']
 
@@ -30,7 +29,51 @@ export class Blueprint {
   }
 
   /**
-   * Parses markdown into a usable object
+   * Extracts JSON fixtures from API blueprint markdown
+   *
+   * @param {String} markdown
+   * @returns {Promise}
+   */
+  static fixtures(markdown: String): Promise {
+    return new Promise((resolve, reject) => {
+      let fixtures = []
+      const jsonStrMatches = markdown.match(plainJson)
+
+      jsonStrMatches.forEach(jsonStr => {
+        try {
+          const fixture = JSON.parse(jsonStr)
+
+          fixtures.push(fixture)
+        } catch (e) {
+          if (e instanceof SyntaxError) {
+            reject(`Found invalid JSON in API blueprint ${blueprint.filepath}: ${jsonStr}\n\n${e}`)
+          } else {
+            reject(`Failed to parse JSON fixtures in API blueprint: ${e}`)
+          }
+        }
+      })
+
+      resolve(fixtures)
+    })
+  }
+
+  /**
+   * Compiles API blueprint markdown data by translcuding it and then parsing it for fixtures
+   *
+   * @param {String} markdown
+   * @returns {Promise}
+   */
+  static compile(markdown: String): Promise {
+    return Blueprint
+      .transclude(markdown)
+      .then(embedMd => Blueprint.interpolate(embedMd))
+      .then(finalMd => Blueprint.fixtures(finalMd).then(fixtures => {
+        return Object.assign(this, {compiled: {fixtures, markdown: finalMd}})
+      }))
+  }
+
+  /**
+   * Parses markdown into a usable object via protagonist
    *
    * @param {String} markdown Valid API blueprint markdown
    */
@@ -73,48 +116,13 @@ export class Blueprint {
   }
 
   /**
-   * Compiles API blueprint markdown data by translcuding it and then parsing it for fixtures
+   * Parses and compiles an API blueprint from the file system
    *
-   * @param {String} markdown
+   * @param {String} filepath
    * @returns {Promise}
    */
-  static compile(markdown: String): Promise {
-    return Blueprint
-      .transclude(markdown)
-      .then(transMd => Blueprint.parse(transMd))
-      .then(parseMd => Blueprint.fixtures(parseMd).then(fixtures => {
-        return {fixtures, content: parseMd}
-      }))
-  }
-
-  /**
-   * Compiles and extracts fixtures from API blueprint markdown
-   *
-   * @param {String} markdown
-   * @returns {Promise}
-   */
-  static fixtures(markdown: String): Promise {
-    return new Promise((resolve, reject) => {
-      let fixtures = []
-      const haziedMarkdown = this.hazy.lang.process(markdown)
-      const jsonStrMatches = haziedMarkdown.match(plainJson)
-
-      jsonStrMatches.forEach(jsonStr => {
-        try {
-          const fixture = JSON.parse(jsonStr)
-
-          fixtures.push(fixture)
-        } catch (e) {
-          if (e instanceof SyntaxError) {
-            reject(`Found invalid JSON in API blueprint ${blueprint.filepath}: ${jsonStr}\n\n${e}`)
-          } else {
-            reject(`Failed to parse JSON fixtures in API blueprint: ${e}`)
-          }
-        }
-      })
-
-      resolve(fixtures)
-    })
+  static interpolate(markdown: String): Promise {
+    return new Promise((resolve, reject) => resolve(interpolator.lang.process(markdown)))
   }
 
   /**
@@ -152,7 +160,7 @@ export class Blueprint {
 
       if (extension) {
         this.read(fixtures)
-          .then(compiled   => this.marshall(compiled.content, extension[0]))
+          .then(consumed => this.marshall(consumed.compiled.content, extension[0]))
           .then(marshalled => {
             fs.writeFile(destination, marshalled, 'utf-8', err => {
               if (!err) {
@@ -198,14 +206,14 @@ export class Blueprint {
  */
 export function read(blueprints): Promise {
   return new Promise((resolve, reject) => {
-    if (blueprints instanceof Array) {
-      return Promise.all(
+    if (_.isArray(blueprints)) {
+      resolve(Promise.all(
         blueprints.map(bp => new Blueprint(bp).compile())
-      )
-    } else if (blueprints instanceof String) {
-      return new Blueprint(blueprints).compile()
+      ))
+    } else if (_.isString(blueprints)) {
+      resolve(new Blueprint(blueprints).compile())
     } else {
-      reject('Documents must be represented as a String or Array')
+      reject('Documents must be represented as a String or Array, got ' + typeof blueprints)
     }
   })
 }
@@ -230,7 +238,10 @@ export function load(pattern, options): Promise {
   })
 }
 
-
+/**
+ * Allows develoeprs to configure and override the default instance of hazy
+ */
+export var interpolator = hazy
 
 /**
  * A janky regex for finding "JSON" objects in markdown.

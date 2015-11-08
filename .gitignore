@@ -5,3 +5,5 @@ coverage/
 coverage.html
 npm-debug.log
 private/
+exec/
+lib/

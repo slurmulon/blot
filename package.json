@@ -1,13 +1,18 @@
 {
   "name": "blot",
-  "version": "0.0.0",
-  "description": "Dynamically generated API Blueprints with lazy fixtures",
+  "version": "0.0.1",
+  "description": "Dyanamic and de-centralized API Blueprints",
   "main": "src/blot.js",
   "scripts": {
     "lint": "eslint src/blot.js",
     "start": "babel-node src/blot.js",
+    "build": "babel src --out-dir lib && babel bin/blot --out-dir exec",
     "test": "mocha --reporter nyan --compilers js:babel/register test",
+    "prepublish": "npm run build",
     "auto-start": "nodemon --exec \"npm run lint && npm start\" --ignore public/js"
+  },
+  "bin": {
+    "blot": "./exec/bin/blot.js"
   },
   "repository": {
     "type": "git",
@@ -34,6 +39,8 @@
   "dependencies": {
     "babel": "^5.8.21",
     "chance": "~0.7.5",
+    "colors": "^1.1.2",
+    "commander": "^2.9.0",
     "glob": "^5.0.10",
     "hercule": "^1.2.1",
     "jsonpath": "^0.1.4",
