@@ -20,7 +20,7 @@ automate integration testing, allow exportation of requests to tools such as Pos
 A limitation of API blueprints is that they are static, and there are few (if any) plugins for parsing
 documented requests and responses for programmatic (in-code) use in your integration and unit tests.
 My philosophy is that you should strive for a canonical source of fixtures in which all of your tests and documentation inherit from.
-[Hercule](https://github.com/jamesramsay/hercule), which blot also integrates, helps enable centralization by allowing
+[Hercule](https://github.com/jamesramsay/hercule), which blot also integrates, helps enable decentralization by allowing
 Markdown documents to be transcluded. However, this does not address the issue of having decentralized __fixtures__ with
 repeated content.
 
@@ -63,7 +63,7 @@ The `~` keyword tells hazy to replace the token with categorized random data:
   { "username": "|~text:word|", "first": "|~person:first|", "last": "|~person:last|", "address": "|~geo:address|" }
 ```
 
-Alternatively, you can be more lazy, which is encouraged for centralization. The following example
+Alternatively, you can be more lazy, which is encouraged for increased decentralization. The following example
 shows how you can reference and embed large fixtures that live on the filesystem using the `>` operator:
 
 ```
@@ -137,7 +137,7 @@ gulp.task('fixtures', ['clean'], () => {
 
   // load api blueprint, process fixtures against configured hazy pool, then export as a static blueprint file
   blot.Blueprint
-    .load('documentation.apib')
+    .load('documentation.blot.apib')
     .then(compiled => blot.toFile(compiled.content, 'dist/documentation.apib'))
 })
 ```
