@@ -6,21 +6,36 @@ var blot = require('../lib/blot')
 var program = require('commander')
 var colors = require('colors')
 
+var config = {
+  verbose: false,
+  pretty: false,
+}
+
 function info(action, msg) {
-  console.log('[' + 'blot'.bold.green + '.' + action + '] ' + msg)
+  if (config.pretty) {
+    console.log('[' + 'blot'.bold.green + '.' + action.magenta + ']', msg)
+  } else if (config.verbose) {
+    console.log('[blot.' + action + ']', msg)
+  }
 }
 
 function error(msg) {
-  console.log('[' + 'blot:ERROR'.red + ']', msg)
+  if (config.pretty) {
+    console.log('[' + 'blot:ERROR'.red + ']', msg)
+  } else if (config.verbose) {
+    console.log('[blot:ERROR]', msg)
+  }
 }
 
 function section(msg) {
-  console.log('\n==================================================\n'.rainbow)
-  console.log(msg)
-  console.log('\n==================================================\n'.rainbow)
+  if (config.pretty) {
+    console.log('\n==================================================\n'.rainbow)
+    console.log(msg.cyan)
+    console.log('\n==================================================\n'.rainbow)
+  } else if (config.verbose) {
+    console.log(msg)
+  }
 }
-
-console.time('Finished in'.green)
 
 program
   .version('0.0.1')
@@ -29,14 +44,18 @@ program
   .option('-i, --in-files [files]', 'Source files (*.blot or *.apib)', 'files')
   .option('-d, --in-data [markdown]', 'Read in Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
+  .option('-v, --verbose', 'Enables verbose logging of blot events')
+  .option('-p, --pretty', 'Formats results into visually pleasing output')
   .action(function(cmd) {
     var inFiles  = cmd.inFiles
     var inData   = cmd.inData
     var outFiles = cmd.outFile
+    var verbose  = config.verbose = !!cmd.verbose
+    var pretty   = config.pretty  = !!cmd.pretty
 
     var blotAction = (function() {
       if (inFiles && inFiles !== 'files') {
-        console.log('[' + blot.green + '.' + 'load'.orange + '] loading files...')
+        info('load', 'loading files...\n')
 
         return blot.load(inFiles)
           .then(function(blueprint) {
@@ -44,11 +63,11 @@ program
           })
           .catch(error)
       } else if (inData) {
-        info('load', 'processing API blueprint markdown...')
+        info('load', 'processing API blueprint markdown...\n')
         
         return blot.read(inData)
           .then(function(blueprint) {
-            section(blueprint.compiled.markdown.cyan)
+            section(blueprint.compiled.markdown)
           })
           .catch(error)
       } else {
@@ -56,9 +75,7 @@ program
       }
     })
     
-    blotAction().then(function(result) {
-      console.timeEnd('Finished in'.green)
-    })
+    blotAction().then()
   })
 
 program.parse(process.argv)
