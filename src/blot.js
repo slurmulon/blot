@@ -54,7 +54,7 @@ export class Blueprint {
       let fixtures = []
       const jsonStrMatches = markdown.match(plainJson)
 
-      jsonStrMatches.forEach(jsonStr => {
+      jsonStrMatches && jsonStrMatches.forEach(jsonStr => {
         try {
           const fixture = JSON.parse(jsonStr)
 
@@ -102,13 +102,14 @@ export class Blueprint {
   static transclude(markdown: String): Promise {
     return new Promise((resolve, reject) => {
       if (markdown) {
-        const transcludedMarkdown = hercule.transcludeString(markdown, _ => _)
+        hercule.transcludeString(markdown, (transMd) => {
+          if (transMd) {
+            resolve(transMd)
+          } else {
+            reject('Failed to parse markdown for Hercule transclusions!')
+          }
+        })
 
-        if (transcludedMarkdown) {
-          resolve(transcludedMarkdown)
-        } else {
-          reject('Failed to parse markdown for Hercule transclusions!')
-        }
       } else {
         reject('Valid markdown required for transclusion')
       }
