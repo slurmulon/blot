@@ -187,6 +187,8 @@ export class Blueprint {
     return new Promise((resolve, reject) => {
       if (filetype === 'apib') {
         resolve(markdown)
+      } else if (filetype === 'json') {
+        resolve(Blueprint.fixtures(markdown))
       } else if (filetype === 'html') {
         resolve(null) // TODO
       } else {
