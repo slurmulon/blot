@@ -7,14 +7,14 @@ var colors = require('colors')
 var program = require('commander')
 
 var config = {
-  verbose: false,
+  logging: false,
   pretty: false,
 }
 
 function info(action, msg) {
   if (config.pretty) {
     console.log('[' + 'blot'.bold.green + '.' + action.magenta + ']', msg)
-  } else if (config.verbose) {
+  } else if (config.logging) {
     console.log('[blot.' + action + ']', msg)
   }
 }
@@ -22,7 +22,7 @@ function info(action, msg) {
 function error(msg) {
   if (config.pretty) {
     console.log('[' + 'blot:ERROR'.red + ']', msg)
-  } else if (config.verbose) {
+  } else if (config.logging) {
     console.log('[blot:ERROR]', msg)
   }
 }
@@ -32,7 +32,7 @@ function section(msg) {
     console.log('\n==================================================\n'.rainbow)
     console.log(msg.cyan)
     console.log('\n==================================================\n'.rainbow)
-  } else if (config.verbose) {
+  } else if (config.logging) {
     console.log(msg)
   }
 }
@@ -44,13 +44,13 @@ program
   .option('-i, --in-files [files]', 'Source files (*.blot or *.apib)', 'files')
   .option('-d, --in-data [markdown]', 'Read in Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
-  .option('-v, --verbose', 'Enables verbose logging of blot events')
+  .option('-l, --logging', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')
   .action(function(cmd) {
     var inFiles  = cmd.inFiles
     var inData   = cmd.inData
     var outFiles = cmd.outFile
-    var verbose  = config.verbose = !!cmd.verbose
+    var logging  = config.logging = !!cmd.logging
     var pretty   = config.pretty  = !!cmd.pretty
 
     var blotAction = (function() {
