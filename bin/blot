@@ -7,6 +7,7 @@ var colors = require('colors')
 var program = require('commander')
 
 var config = {
+  echo: true,
   logging: false,
   pretty: false,
 }
@@ -29,10 +30,10 @@ function error(msg) {
 
 function section(msg) {
   if (config.pretty) {
-    console.log('\n==================================================\n'.rainbow)
+    console.log('\n--------------------------------------------------\n'.rainbow)
     console.log(msg.cyan)
-    console.log('\n==================================================\n'.rainbow)
-  } else if (config.logging) {
+    console.log('\n--------------------------------------------------\n'.rainbow)
+  } else if (config.logging || config.echo) {
     console.log(msg)
   }
 }
@@ -44,18 +45,20 @@ program
   .option('-i, --in-files [files]', 'Source files (*.blot or *.apib)', 'files')
   .option('-d, --in-data [markdown]', 'Read in Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
+  .option('-e, --echo', 'Prints compiled result to stdout')
   .option('-l, --logging', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')
   .action(function(cmd) {
     var inFiles  = cmd.inFiles
     var inData   = cmd.inData
     var outFiles = cmd.outFile
+    var echo     = config.echo    = !!cmd.echo
     var logging  = config.logging = !!cmd.logging
     var pretty   = config.pretty  = !!cmd.pretty
 
     var blotAction = (function() {
       if (inFiles && inFiles !== 'files') {
-        info('load', 'loading files...\n')
+        info('load', 'loading and compiling files...\n')
 
         return blot.load(inFiles)
           .then(function(blueprint) {
@@ -63,7 +66,7 @@ program
           })
           .catch(error)
       } else if (inData) {
-        info('load', 'processing API blueprint markdown...\n')
+        info('load', 'compiling API blueprint markdown...')
         
         return blot.read(inData)
           .then(function(blueprint) {
