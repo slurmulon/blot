@@ -147,6 +147,16 @@ blot.Blueprint
   .then(compiled => blot.dist(compiled.content, 'dist/documentation.apib'))
 ```
 
+## Install
+
+```
+$ git clone git@github.com:slurmulon/blot.git
+$ cd blot
+$ npm link
+```
+
+You can now use blot as either an npm module in your own projects or as an executable command.
+
 ## TODO
 
  - [ ] `--config` CLI flag
