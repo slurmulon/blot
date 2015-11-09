@@ -21,11 +21,26 @@ export class Blueprint {
   constructor(markdown: String) {
     this.markdown = markdown
 
-    const statics = ['parse', 'transclude', 'compile', 'fixtures']
+    const statics = ['compile', 'fixtures', 'parse', 'transclude']
 
     statics.forEach(method => {
       this[method] = () => Blueprint[method](this.markdown)
     })
+  }
+
+  /**
+   * Compiles API blueprint markdown data by translcuding it and then parsing it for fixtures
+   *
+   * @param {String} markdown
+   * @returns {Promise}
+   */
+  static compile(markdown: String): Promise {
+    return Blueprint
+      .transclude(markdown)
+      .then(embedMd => Blueprint.interpolate(embedMd))
+      .then(finalMd => Blueprint.fixtures(finalMd).then(fixtures => {
+        return Object.assign(this, {compiled: {fixtures, markdown: finalMd}})
+      }))
   }
 
   /**
@@ -55,21 +70,6 @@ export class Blueprint {
 
       resolve(fixtures)
     })
-  }
-
-  /**
-   * Compiles API blueprint markdown data by translcuding it and then parsing it for fixtures
-   *
-   * @param {String} markdown
-   * @returns {Promise}
-   */
-  static compile(markdown: String): Promise {
-    return Blueprint
-      .transclude(markdown)
-      .then(embedMd => Blueprint.interpolate(embedMd))
-      .then(finalMd => Blueprint.fixtures(finalMd).then(fixtures => {
-        return Object.assign(this, {compiled: {fixtures, markdown: finalMd}})
-      }))
   }
 
   /**
