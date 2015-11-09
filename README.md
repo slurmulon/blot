@@ -109,7 +109,7 @@ $ blot compile -d 'FORMAT: 1A
 ### Node
 
 The node module allows you to monkey-patch special functionality and data to your fixtures.
-You can then inject your patched hazy fixture pool which whenever your API blueprints are processed.
+You can then inject your monkey-patched hazy pool, which is used whenever API blueprints are processed.
 
 ```javascript
 #! /usr/bin/env node
