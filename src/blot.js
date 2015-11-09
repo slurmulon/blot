@@ -21,7 +21,7 @@ export class Blueprint {
   constructor(markdown: String) {
     this.markdown = markdown
 
-    const statics = ['compile', 'fixtures', 'parse', 'transclude']
+    const statics = ['compile', 'fixtures', 'interpolate', 'parse', 'transclude']
 
     statics.forEach(method => {
       this[method] = () => Blueprint[method](this.markdown)
@@ -106,7 +106,7 @@ export class Blueprint {
           if (transMd) {
             resolve(transMd)
           } else {
-            reject('Failed to parse markdown for Hercule transclusions!')
+            reject('Failed to parse markdown for Hercule transclusions')
           }
         })
 
@@ -164,7 +164,7 @@ export class Blueprint {
         this.read(fixtures)
           .then(consumed => this.marshall(consumed.compiled.content, extension[0]))
           .then(marshalled => {
-            fs.writeFile(destination, marshalled, 'utf-8', err => {
+            fs.writeFile(destination, marshalled, 'utf-8', (err) => {
               if (!err) {
                 resolve(content)
               } else {
