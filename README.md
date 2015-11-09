@@ -91,17 +91,19 @@ The easiest way to use blot is by running it as a command.
 You can specify an API blueprint to parse and export:
 
 ```bash
-blot compile -i docs.blot.apib -o docs.apib --pretty
+$ blot compile -i docs.blot.apib -o docs.apib --pretty
 ```
 
 or simply pass in the raw data:
 
 ```bash
-blot compile -d 'FORMAT: 1A
+$ blot compile -d 'FORMAT: 1A
 # The Simplest API
+
 # GET /message
 + Response 200 (text/json)
-{"message": "Hello, |~person:name|!", "id": "|~misc:guid|"}' -o docs.apib --pretty
+
+{"message": "Hello, |~person:name|!", "id": "|~misc:guid|"}' --pretty
 ```
 
 ### Node
@@ -147,6 +149,7 @@ blot.Blueprint
 
 ## TODO
 
+ - [ ] `--config` CLI flag
  - [ ] Static fixture export
  - [ ] Static HTML export
  - [ ] Support `beforeCompile` and `afterCompile` configuration files (root of project)
