@@ -116,9 +116,10 @@ export class Blueprint {
   }
 
   /**
-   * Parses and compiles an API blueprint from the file system
+   * Interpolates markdown with relevant replaces. Uses hazy's random
+   * fixture data interpolator by default
    *
-   * @param {String} filepath
+   * @param {String} markdown
    * @returns {Promise}
    */
   static interpolate(markdown: String): Promise {
@@ -149,7 +150,7 @@ export class Blueprint {
 
   /**
    * Exports API blueprint as either a static html or apib file
-   * to the provided file path.
+   * to the provided file path
    *
    * @param {String} filepath
    * @returns {Promise}
@@ -177,7 +178,7 @@ export class Blueprint {
   }
 
   /**
-   * Attempts to marshall API blueprint content into a specific type.
+   * Attempts to marshall API blueprint content into a specific type
    *
    * @param {String} markdown
    * @param {String} filetype 'apib' or 'html'
@@ -249,6 +250,3 @@ export var interpolator = hazy
  * A janky regex for finding "JSON" objects in markdown.
  */
 export const plainJson = /\{(.*?)\}/gm
-
-// export class LoadError  extends Error {}
-// export class ParseError extends Error {}
