@@ -97,7 +97,11 @@ blot compile -i docs.blot.apib -o docs.apib
 or simply pass in the raw data:
 
 ```bash
-blot compile -d 'FORMAT: 1A # The Simplest API # GET /message + Response 200 (text/json) {"message": "Hello |~person:name|"}' -o docs.apib
+blot compile -d 'FORMAT: 1A
+# The Simplest API
+# GET /message
++ Response 200 (text/json)
+{"message": "Hello, |~person:name|!", "id": "|~misc:guid|"}' -o docs.apib --pretty
 ```
 
 ### Node
@@ -141,3 +145,9 @@ gulp.task('fixtures', ['clean'], () => {
     .then(compiled => blot.toFile(compiled.content, 'dist/documentation.apib'))
 })
 ```
+
+## TODO
+
+ - [ ] Static fixture export
+ - [ ] Static HTML export
+ - [ ] Support `beforeCompile` and `afterCompile` configuration files (root of project)

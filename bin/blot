@@ -3,8 +3,8 @@
 'use strict'
 
 var blot = require('../lib/blot')
-var program = require('commander')
 var colors = require('colors')
+var program = require('commander')
 
 var config = {
   verbose: false,
@@ -40,7 +40,7 @@ function section(msg) {
 program
   .version('0.0.1')
   .command('compile')
-  .description('process documentation and compile it into a static form')
+  .description('process documentation and compile it into a static format')
   .option('-i, --in-files [files]', 'Source files (*.blot or *.apib)', 'files')
   .option('-d, --in-data [markdown]', 'Read in Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
