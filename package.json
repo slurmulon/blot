@@ -1,7 +1,7 @@
 {
   "name": "blot",
   "version": "0.0.1",
-  "description": "Dyanamic and de-centralized API Blueprints",
+  "description": "Dynamic API Blueprints unified with lazy fixtures",
   "main": "src/blot.js",
   "scripts": {
     "lint": "eslint src/blot.js",

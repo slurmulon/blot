@@ -1,12 +1,12 @@
 # blot
 
-> Dynamic and de-centralized API Blueprints
+> Dynamic API Blueprints unified with lazy fixtures
 
 ## tl;dr
 
 API Blueprint + Hercule + Hazy = Magical documentation, fixtures, and tests
 
-* Establishes a centralized source for documentation and test fixtures
+* Unifies documentation and fixtures
 * Reference and embed documentation / test fixtures by patterns or name
 * Increases readability and dramatically eases maintenance of documentation, fixtures and tests
 
@@ -20,7 +20,7 @@ automate integration testing, allow exportation of requests to tools such as Pos
 A limitation of API blueprints is that they are static, and there are few (if any) plugins for parsing
 documented requests and responses for programmatic (in-code) use in your integration and unit tests.
 My philosophy is that you should strive for a canonical source of fixtures in which all of your tests and documentation inherit from.
-[Hercule](https://github.com/jamesramsay/hercule), which blot also integrates, helps enable decentralization by allowing
+[Hercule](https://github.com/jamesramsay/hercule), which blot also integrates, helps promote normalization by allowing
 Markdown documents to be transcluded. However, this does not address the issue of having decentralized __fixtures__ with
 repeated content.
 
