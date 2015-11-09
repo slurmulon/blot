@@ -103,13 +103,14 @@ $ blot compile -d 'FORMAT: 1A
 # GET /message
 + Response 200 (text/json)
 
-{"message": "Hello, |~person:name|!", "id": "|~misc:guid|"}' --pretty
+{"message": "Hello, |~person:name|!", "id": "|~misc:guid|"}' -o docs.apib --pretty
 ```
 
 ### Node
 
 The node module allows you to monkey-patch special functionality and data to your fixtures.
-You can then inject your monkey-patched hazy pool, which is used whenever API blueprints are processed.
+You can then inject your monkey-patched hazy pool by setting `blot.interpolator`, which is
+used whenever API blueprints are processed.
 
 ```javascript
 #! /usr/bin/env node
