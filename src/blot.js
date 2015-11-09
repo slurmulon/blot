@@ -116,7 +116,7 @@ export class Blueprint {
   }
 
   /**
-   * Interpolates markdown with relevant replaces. Uses hazy's random
+   * Interpolates markdown with relevant replacements. Uses hazy's random
    * fixture data interpolator by default
    *
    * @param {String} markdown
@@ -132,7 +132,7 @@ export class Blueprint {
    * @param {String} filepath
    * @returns {Promise}
    */
-  static fromFile(filepath: String): Promise {
+  static src(filepath: String): Promise {
     return new Promise((resolve, reject) => {
       if (filepath) {
         fs.readFile(__dirname + '/' + filepath, 'utf-8', (err, data) => {
@@ -155,7 +155,7 @@ export class Blueprint {
    * @param {String} filepath
    * @returns {Promise}
    */
-  toFile(fixtures, filepath: String): Promise {
+  dist(fixtures, filepath: String): Promise {
     return new Promise((resolve, reject) => {
       const extension = filepath.match(/\.(.*?)$/)
 
@@ -189,7 +189,7 @@ export class Blueprint {
       if (filetype === 'apib') {
         resolve(markdown)
       } else if (filetype === 'json') {
-        resolve(Blueprint.fixtures(markdown))
+        resolve(Blueprint.fixtures(markdown)) // FIXME
       } else if (filetype === 'html') {
         resolve(null) // TODO
       } else {

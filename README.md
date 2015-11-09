@@ -138,18 +138,19 @@ hazy.matcher.config({
 // globs and loads fixtures from filesystem into hazy's pool
 hazy.fixture.load('**/fixtures/*.json', null, (key) => key.replace('.json'))
 
-// tell blot to use the newly configured hazy object (and, by association, its fixture pool)
+// use the newly configured hazy object (and, by association, its fixture pool) when parsing API blueprints
 blot.interpolator = hazy
 
 // load api blueprint, process fixtures against configured hazy pool, then export as a static API blueprint file
 blot.Blueprint
   .load('documentation.blot.apib')
-  .then(compiled => blot.toFile(compiled.content, 'dist/documentation.apib'))
+  .then(compiled => blot.dist(compiled.content, 'dist/documentation.apib'))
 ```
 
 ## TODO
 
  - [ ] `--config` CLI flag
+ - [ ] Support [fury.js](https://github.com/apiaryio/fury.js)
  - [ ] Static fixture export
  - [ ] Static HTML export
  - [ ] Support `beforeCompile` and `afterCompile` configuration files (root of project)

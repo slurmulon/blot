@@ -15,4 +15,4 @@ Also please keep in mind that every single example in this course is a **real AP
 # GET /message
 + Response 200 (text/plain)
 
-        Hello World!
+    Hello World!
