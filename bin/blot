@@ -7,7 +7,7 @@ var colors = require('colors')
 var program = require('commander')
 
 var config = {
-  echo: true,
+  echo: false,
   logging: false,
   pretty: false,
 }
