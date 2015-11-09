@@ -111,39 +111,39 @@ It's primary benefit is allowing you to configure and inject your own hazy fixtu
 your API blueprint is processed:
 
 ```javascript
+#! /usr/bin/env node
+
 import gulp from 'gulp'
 import hazy from 'hazy'
 import blot from 'blot'
 import moment from 'moment'
 
-gulp.task('fixtures', ['clean'], () => {
-  // ensure all fixtures have a created date
-  hazy.matcher.config({
-    path   : '$',
-    handle : (fixture) => {
-      return Object.assign({created: moment()}, fixture)
-    }
-  })
-
-  // ensure any fixture urls are appended with a '&fixture' query param
-  hazy.matcher.config({
-    path   : '$..url',
-    handle : (url) => {
-      return `${url}&fixture=true`
-    }
-  })
-
-  // globs and loads fixtures from filesystem into hazy's pool
-  hazy.fixture.load('**/fixtures/*.json', null, (key) => key.replace('.json'))
-
-  // tell blot to use the newly configured hazy object (and, by association, its fixture pool)
-  blot.interpolator = hazy
-
-  // load api blueprint, process fixtures against configured hazy pool, then export as a static blueprint file
-  blot.Blueprint
-    .load('documentation.blot.apib')
-    .then(compiled => blot.toFile(compiled.content, 'dist/documentation.apib'))
+// ensure all fixtures have a created date
+hazy.matcher.config({
+  path   : '$',
+  handle : (fixture) => {
+    return Object.assign({created: moment()}, fixture)
+  }
 })
+
+// ensure any fixture urls are appended with a '&fixture' query param
+hazy.matcher.config({
+  path   : '$..url',
+  handle : (url) => {
+    return `${url}&fixture=true`
+  }
+})
+
+// globs and loads fixtures from filesystem into hazy's pool
+hazy.fixture.load('**/fixtures/*.json', null, (key) => key.replace('.json'))
+
+// tell blot to use the newly configured hazy object (and, by association, its fixture pool)
+blot.interpolator = hazy
+
+// load api blueprint, process fixtures against configured hazy pool, then export as a static blueprint file
+blot.Blueprint
+  .load('documentation.blot.apib')
+  .then(compiled => blot.toFile(compiled.content, 'dist/documentation.apib'))
 ```
 
 ## TODO
