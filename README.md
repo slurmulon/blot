@@ -91,7 +91,7 @@ The easiest way to use blot is by running it as a command.
 You can specify an API blueprint to parse and export:
 
 ```bash
-blot compile -i docs.blot.apib -o docs.apib
+blot compile -i docs.blot.apib -o docs.apib --pretty
 ```
 
 or simply pass in the raw data:
@@ -106,9 +106,8 @@ blot compile -d 'FORMAT: 1A
 
 ### Node
 
-The node module allows you to incorporate special functionality or data around your fixtures.
-It's primary benefit is allowing you to configure and inject your own hazy fixture pool before
-your API blueprint is processed:
+The node module allows you to monkey-patch special functionality and data to your fixtures.
+You can then inject your patched hazy fixture pool which whenever your API blueprints are processed.
 
 ```javascript
 #! /usr/bin/env node
@@ -140,7 +139,7 @@ hazy.fixture.load('**/fixtures/*.json', null, (key) => key.replace('.json'))
 // tell blot to use the newly configured hazy object (and, by association, its fixture pool)
 blot.interpolator = hazy
 
-// load api blueprint, process fixtures against configured hazy pool, then export as a static blueprint file
+// load api blueprint, process fixtures against configured hazy pool, then export as a static API blueprint file
 blot.Blueprint
   .load('documentation.blot.apib')
   .then(compiled => blot.toFile(compiled.content, 'dist/documentation.apib'))

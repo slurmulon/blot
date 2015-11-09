@@ -241,7 +241,7 @@ export function load(pattern, options): Promise {
 }
 
 /**
- * Allows develoeprs to configure and override the default instance of hazy
+ * Allows developers to configure and override the default instance of hazy
  */
 export var interpolator = hazy
 
