@@ -182,17 +182,18 @@ export class Blueprint {
    * Attempts to marshall API blueprint content into a specific type
    *
    * @param {String} markdown
-   * @param {String} filetype 'apib' or 'html'
+   * @param {String} filetype 'apib' or 'json'
    * @returns {Promise}
    */
   marshall(markdown: String, filetype: String): Promise {
     return new Promise((resolve, reject) => {
-      if (filetype === 'apib') {
-        resolve(markdown)
-      } else if (filetype === 'json') {
-        resolve(Blueprint.fixtures(markdown)) // FIXME
-      } else if (filetype === 'html') {
-        resolve(null) // TODO
+      const filetypes = {
+        apib: () => resolve(markdown),
+        json: () => Blueprint.fixtures(markdown).then(resolve)
+      }
+
+      if (filetype in filetypes) {
+        filetypes[filetype]()
       } else {
         reject(`Unsupported filetype: ${filetype}`)
       }
