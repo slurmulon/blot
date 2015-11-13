@@ -150,6 +150,47 @@ export class Blueprint {
   }
 
   /**
+   * Globs and reads in valid API blueprint(s) from the filesystem and compiles them
+   *
+   * @param {Array|String} blueprints
+   * @returns {Promise}
+   */
+  static glob(pattern, options): Promise {
+    return new Promise((resolve, reject) => {
+      glob(pattern, options, (err, files) => {
+        if (!err) {
+          return Promise.all(
+            files.map(file => new Blueprint(file).compile())
+          )
+        } else {
+          reject(`Failed to load file: ${err}`)
+        }
+      })
+    })
+  }
+
+  /**
+   * Reads in valid API blueprint(s) from Strings or 
+   * Arrays of Strings and compiles them
+   *
+   * @param {Array|String} blueprints
+   * @returns {Promise}
+   */
+  static read(blueprints): Promise {
+    return new Promise((resolve, reject) => {
+      if (_.isArray(blueprints)) {
+        resolve(Promise.all(
+          blueprints.map(bp => new Blueprint(bp).compile())
+        ))
+      } else if (_.isString(blueprints)) {
+        resolve(new Blueprint(blueprints).compile())
+      } else {
+        reject('Documents must be represented as a String or Array, got ' + typeof blueprints)
+      }
+    })
+  }
+
+  /**
    * Exports API blueprint as either a static html or apib file
    * to the provided file path
    *
@@ -202,46 +243,7 @@ export class Blueprint {
 
 }
 
-/**
- * Reads in valid API blueprint(s) from Strings or 
- * Arrays of Strings and compiles them
- *
- * @param {Array|String} blueprints
- * @returns {Promise}
- */
-export function read(blueprints): Promise {
-  return new Promise((resolve, reject) => {
-    if (_.isArray(blueprints)) {
-      resolve(Promise.all(
-        blueprints.map(bp => new Blueprint(bp).compile())
-      ))
-    } else if (_.isString(blueprints)) {
-      resolve(new Blueprint(blueprints).compile())
-    } else {
-      reject('Documents must be represented as a String or Array, got ' + typeof blueprints)
-    }
-  })
-}
 
-/**
- * Globs and reads in valid API blueprint(s) from the filesystem and compiles them
- *
- * @param {Array|String} blueprints
- * @returns {Promise}
- */
-export function load(pattern, options): Promise {
-  return new Promise((resolve, reject) => {
-    glob(pattern, options, (err, files) => {
-      if (!err) {
-        return Promise.all(
-          files.map(file => new Blueprint(file).compile())
-        )
-      } else {
-        reject(`Failed to load file: ${err}`)
-      }
-    })
-  })
-}
 
 /**
  * Allows developers to configure and override the default instance of hazy
