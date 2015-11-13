@@ -114,22 +114,26 @@ describe('Blueprint', () => {
     })
   })
 
-  describe('fromFile', () => {
+  describe('src', () => {
     it('should be a function', () => {
-      blot.Blueprint.fromFile.should.be.a('function')
+      blot.Blueprint.src.should.be.a('function')
     })
 
     it('should return a Promise', () => {
-      blot.Blueprint.fromFile().should.be.a('promise')
+      blot.Blueprint.src().should.be.a('promise')
     })
 
     it('should compile the API Blueprint file found at the filepath', () => {
-      blot.Blueprint.fromFile('../test/fixtures/apiblueprint/simple.md').should.be.resolved
+      blot.Blueprint.src('../test/fixtures/apiblueprint/simple.md').should.be.resolved
     })
 
     it('should reject if no API Blueprint can be found', () => {
-      blot.Blueprint.fromFile().should.be.rejected
+      blot.Blueprint.src().should.be.rejected
     })
+  })
+
+  xdescribe('dist', () => {
+
   })
 })
 
