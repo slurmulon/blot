@@ -241,7 +241,7 @@ export class Blueprint {
       }
 
       if (filetype in filetypes) {
-        return filetypes[filetype]()
+        return filetypes[filetype || 'apib']()
       } else {
         reject(`Unsupported filetype: ${filetype}`)
       }
@@ -258,6 +258,6 @@ export class Blueprint {
 export var interpolator = hazy.lang.process
 
 /**
- * A janky regex for finding "JSON" objects in markdown.
+ * A janky regex for finding "JSON" objects in markdown. Need a more loveable solution
  */
 export const plainJson = /\{(.*?)\}/gm

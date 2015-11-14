@@ -148,9 +148,7 @@ hazy.matcher.config({
 // ensure any fixture urls are appended with a '&fixture' query param
 hazy.matcher.config({
   path   : '$..url',
-  handle : (url) => {
-    return `${url}&fixture=true`
-  }
+  handle : (url) => `${url}&fixture=true`
 })
 
 // globs and loads fixtures from filesystem into hazy's pool
