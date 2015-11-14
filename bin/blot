@@ -51,24 +51,40 @@ program
   .action(function(cmd) {
     var inFiles  = cmd.inFiles
     var inData   = cmd.inData
-    var outFiles = cmd.outFile
+    var outFile  = cmd.outFile
     var echo     = config.echo    = !!cmd.echo
     var logging  = config.logging = !!cmd.logging
     var pretty   = config.pretty  = !!cmd.pretty
 
-    var blotAction = (function() {
+    ;(function() {
       if (inFiles && inFiles !== 'files') {
-        info('load', 'loading and compiling files...\n')
+        info('load', 'loading and compiling files... ' + inFiles + '\n')
 
-        return blot.load(inFiles)
-          .then(function(blueprint) {
-            // blot.toFile() // TODO
+        return blot.Blueprint.glob(inFiles)
+          .then(function(blueprints) {
+            blueprints.forEach(function(blueprint,i) {
+              section(blueprint.compiled.markdown)
+
+              // FIXME - support outFile as an array
+              if (!!outFile && outFile !== 'file') {
+                var indexedOutFile = outFile + '.' + i + '.apib'
+                
+                blot.Blueprint
+                  .dist(blueprint.compiled.markdown, indexedOutFile)
+                  .then(function(content) {
+                    info('dist', 'exported compiled API blueprint to ' + indexedOutFile)
+                  })
+                  .catch(function(err) {
+                    error('failed to export ' + indexedOutFile + ': ' + err)
+                  })
+              }
+            })
           })
           .catch(error)
       } else if (inData) {
         info('load', 'compiling API blueprint markdown...')
         
-        return blot.read(inData)
+        return blot.Blueprint.read(inData)
           .then(function(blueprint) {
             section(blueprint.compiled.markdown)
           })
@@ -76,9 +92,7 @@ program
       } else {
         error('malformed command')
       }
-    })
-    
-    blotAction().then()
+    })().then()
   })
 
 program.parse(process.argv)

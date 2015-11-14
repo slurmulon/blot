@@ -20,7 +20,7 @@ This action has **two** responses defined: One returing a plain text and the oth
 
     + Body
 
-            { "username": "|~basic:string|_|~basic:number|", "password": "|~basic:string|" }
+            { "username": "|~basic:string|_|~basic:integer|", "password": "|~basic:string|" }
 
 + Response 200 (application/json)
 

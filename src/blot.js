@@ -39,7 +39,7 @@ export class Blueprint {
       .transclude(markdown)
       .then(embedMd => Blueprint.interpolate(embedMd))
       .then(finalMd => Blueprint.fixtures(finalMd).then(fixtures => {
-        return Object.assign(this, {compiled: {fixtures, markdown: finalMd}})
+        return Object.assign({compiled: {fixtures, markdown: finalMd}}, this)
       }))
   }
 
@@ -52,7 +52,7 @@ export class Blueprint {
   static fixtures(markdown: String): Promise {
     return new Promise((resolve, reject) => {
       let fixtures = []
-      const jsonStrMatches = markdown.match(plainJson)
+      const jsonStrMatches = (markdown.match) ? markdown.match(plainJson) : []
 
       jsonStrMatches && jsonStrMatches.forEach(jsonStr => {
         try {
@@ -124,7 +124,7 @@ export class Blueprint {
    * @returns {Promise}
    */
   static interpolate(markdown: String): Promise {
-    return new Promise((resolve, reject) => resolve(interpolator.lang.process(markdown)))
+    return new Promise((resolve, reject) => resolve(interpolator(markdown)))
   }
 
   /**
@@ -136,11 +136,11 @@ export class Blueprint {
   static src(filepath: String): Promise {
     return new Promise((resolve, reject) => {
       if (filepath) {
-        fs.readFile(__dirname + '/' + filepath, 'utf-8', (err, data) => {
+        fs.readFile(__dirname + '/../' + filepath, 'utf-8', (err, data) => {
           if (!err) {
             resolve(new Blueprint(data).compile())
           } else {
-            reject(`Failed to read file: ${error}`)
+            reject(`Failed to read file: ${err}`)
           }
         })
       } else {
@@ -159,9 +159,12 @@ export class Blueprint {
     return new Promise((resolve, reject) => {
       glob(pattern, options, (err, files) => {
         if (!err) {
-          return Promise.all(
-            files.map(file => new Blueprint(file).compile())
-          )
+          Promise
+            .all(
+              files.map(filepath => Blueprint.src(filepath))
+            )
+            .then(resolve)
+            .catch(reject)
         } else {
           reject(`Failed to load file: ${err}`)
         }
@@ -179,9 +182,12 @@ export class Blueprint {
   static read(blueprints): Promise {
     return new Promise((resolve, reject) => {
       if (_.isArray(blueprints)) {
-        resolve(Promise.all(
-          blueprints.map(bp => new Blueprint(bp).compile())
-        ))
+        Promise
+          .all(
+            blueprints.map(bp => new Blueprint(bp).compile())
+          )
+          .then(resolve)
+          .catch(reject)
       } else if (_.isString(blueprints)) {
         resolve(new Blueprint(blueprints).compile())
       } else {
@@ -191,23 +197,24 @@ export class Blueprint {
   }
 
   /**
-   * Exports API blueprint as either a static html or apib file
+   * Reads in and then exports API blueprints as either a static html or apib file
    * to the provided file path
    *
+   * @param {String} markdown
    * @param {String} filepath
    * @returns {Promise}
    */
-  dist(fixtures, filepath: String): Promise {
+  static dist(markdown, filepath: String): Promise {
     return new Promise((resolve, reject) => {
-      const extension = filepath.match(/\.(.*?)$/)
+      const extension = filepath.match(/\.([0-9a-z]+)$/i)
 
       if (extension) {
-        this.read(fixtures)
-          .then(consumed => this.marshall(consumed.compiled.content, extension[0]))
+        Blueprint.read(markdown)
+          .then(consumed => Blueprint.marshall(consumed.compiled.markdown, extension[1]))
           .then(marshalled => {
-            fs.writeFile(destination, marshalled, 'utf-8', (err) => {
+            fs.writeFile(filepath, marshalled, 'utf-8', (err) => {
               if (!err) {
-                resolve(content)
+                resolve(marshalled)
               } else {
                 reject(`An error occured while saving file: ${err}`)
               }
@@ -226,7 +233,7 @@ export class Blueprint {
    * @param {String} filetype 'apib' or 'json'
    * @returns {Promise}
    */
-  marshall(markdown: String, filetype: String): Promise {
+  static marshall(markdown: String, filetype: String): Promise {
     return new Promise((resolve, reject) => {
       const filetypes = {
         apib: () => resolve(markdown),
@@ -234,7 +241,7 @@ export class Blueprint {
       }
 
       if (filetype in filetypes) {
-        filetypes[filetype]()
+        return filetypes[filetype]()
       } else {
         reject(`Unsupported filetype: ${filetype}`)
       }
@@ -248,7 +255,7 @@ export class Blueprint {
 /**
  * Allows developers to configure and override the default instance of hazy
  */
-export var interpolator = hazy
+export var interpolator = hazy.lang.process
 
 /**
  * A janky regex for finding "JSON" objects in markdown.
