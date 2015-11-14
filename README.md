@@ -65,7 +65,7 @@ The `~` keyword tells hazy to replace the token with categorized random data:
   { "username": "|~text:word|", "first": "|~person:first|", "last": "|~person:last|", "address": "|~geo:address|" }
 ```
 
-Alternatively, you can be more lazy, which is encouraged for increased decentralization. The following example
+Alternatively, you can be more lazy, which is encouraged for increased normalization. The following example
 shows how you can reference and embed large fixtures that live on the filesystem using the `>` operator:
 
 ```
@@ -86,6 +86,28 @@ shows how you can reference and embed large fixtures that live on the filesystem
 + Response 200 (application/json)
 
   |> authed-user-res.json|
+```
+
+You may also freely leverage `JsonPath` in order to transclude fixtures by patterns:
+
+```
+# POST /v1/auth
+### Login a user [POST]
+
++ Request (application/json)
+
+  |> auth-req.json|
+
++ Response 200 (application/json)
+
+  |* $..user[0]|
+
+# GET /v1/user/{id}
+### Fetch a user [GET]
+
++ Response 200 (application/json)
+
+  |* $..user[0]|
 ```
 
 ### Command Line
