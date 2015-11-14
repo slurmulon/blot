@@ -51,7 +51,7 @@ The `~` keyword tells hazy to replace the token with categorized random data:
 # POST /v1/auth
 + Request (application/json)
 
-    { "username": "|~text:word|", "password": "|~text:word|" }
+  { "username": "|~text:word|", "password": "|~text:word|" }
 
 + Response 200 (application/json)
 
@@ -157,7 +157,7 @@ hazy.matcher.config({
 hazy.fixture.load('**/fixtures/*.json', null, (key) => key.replace('.json'))
 
 // use the newly configured hazy object (and, by association, its fixture pool) when parsing API blueprints
-blot.interpolator = hazy
+blot.interpolator = hazy.lang.process
 
 // load api blueprint, process fixtures against configured hazy pool, then export as a static API blueprint file
 blot.Blueprint
