@@ -1,6 +1,6 @@
 'use strict'
 
-import * as hazy from '../node_modules/hazy/lib/hazy.js'
+import hazy from 'hazy'
 import protagonist from 'protagonist'
 import hercule from 'hercule'
 
