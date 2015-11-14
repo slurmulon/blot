@@ -68,7 +68,7 @@ program
               // FIXME - support outFile as an array
               if (!!outFile && outFile !== 'file') {
                 var indexedOutFile = outFile + '.' + i + '.apib'
-                
+
                 blot.Blueprint
                   .dist(blueprint.compiled.markdown, indexedOutFile)
                   .then(function(content) {

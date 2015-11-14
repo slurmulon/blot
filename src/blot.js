@@ -6,12 +6,13 @@ import hercule from 'hercule'
 
 import _ from 'lodash'
 import fs from 'fs'
+import path from 'path'
 import glob from 'glob'
 
 /**
  * Parses, transcludes and compiles API blueprint files
  * and their associated fixtures. Allows compiled
- * API blueprints to be exported to the filesystem.
+ * API blueprints to be exported to the filesystem
  */
 export class Blueprint {
 
@@ -21,9 +22,9 @@ export class Blueprint {
   constructor(markdown: String) {
     this.markdown = markdown
 
-    const statics = ['compile', 'fixtures', 'interpolate', 'parse', 'transclude']
+    const markdownFuncs = ['compile', 'fixtures', 'interpolate', 'parse', 'transclude']
 
-    statics.forEach(method => {
+    markdownFuncs.forEach(method => {
       this[method] = () => Blueprint[method](this.markdown)
     })
   }
@@ -38,9 +39,9 @@ export class Blueprint {
     return Blueprint
       .transclude(markdown)
       .then(embedMd => Blueprint.interpolate(embedMd))
-      .then(finalMd => Blueprint.fixtures(finalMd).then(fixtures => {
-        return Object.assign({compiled: {fixtures, markdown: finalMd}}, this)
-      }))
+      .then(finalMd => Blueprint.fixtures(finalMd).then(fixtures =>
+        Object.assign({compiled: {fixtures, markdown: finalMd}}, this)
+      ))
   }
 
   /**
@@ -52,7 +53,7 @@ export class Blueprint {
   static fixtures(markdown: String): Promise {
     return new Promise((resolve, reject) => {
       let fixtures = []
-      const jsonStrMatches = (markdown.match) ? markdown.match(plainJson) : []
+      const jsonStrMatches = (markdown.match instanceof Function) ? markdown.match(plainJson) : []
 
       jsonStrMatches && jsonStrMatches.forEach(jsonStr => {
         try {
@@ -109,7 +110,6 @@ export class Blueprint {
             reject('Failed to parse markdown for Hercule transclusions')
           }
         })
-
       } else {
         reject('Valid markdown required for transclusion')
       }
@@ -136,7 +136,7 @@ export class Blueprint {
   static src(filepath: String): Promise {
     return new Promise((resolve, reject) => {
       if (filepath) {
-        fs.readFile(__dirname + '/../' + filepath, 'utf-8', (err, data) => {
+        fs.readFile(path.resolve(filepath), 'utf-8', (err, data) => {
           if (!err) {
             resolve(new Blueprint(data).compile())
           } else {
@@ -146,6 +146,36 @@ export class Blueprint {
       } else {
         reject(`Failed to read file, filepath required`)
       }  
+    })
+  }
+
+  /**
+   * Reads in and then exports API blueprints as either a static html or apib file
+   * to the provided file path
+   *
+   * @param {String} markdown
+   * @param {String} filepath
+   * @returns {Promise}
+   */
+  static dist(markdown, filepath: String): Promise {
+    return new Promise((resolve, reject) => {
+      const extension = filepath.match(/\.([0-9a-z]+)$/i)
+
+      if (extension) {
+        Blueprint.read(markdown)
+          .then(consumed => Blueprint.marshall(consumed.compiled.markdown, extension[1]))
+          .then(marshalled => {
+            fs.writeFile(filepath, marshalled, 'utf-8', (err) => {
+              if (!err) {
+                resolve(marshalled)
+              } else {
+                reject(`An error occured while saving file: ${err}`)
+              }
+            })
+          })
+      } else {
+        reject(`File destinations must contain an extension (.apib or .html)`)
+      }
     })
   }
 
@@ -197,37 +227,7 @@ export class Blueprint {
   }
 
   /**
-   * Reads in and then exports API blueprints as either a static html or apib file
-   * to the provided file path
-   *
-   * @param {String} markdown
-   * @param {String} filepath
-   * @returns {Promise}
-   */
-  static dist(markdown, filepath: String): Promise {
-    return new Promise((resolve, reject) => {
-      const extension = filepath.match(/\.([0-9a-z]+)$/i)
-
-      if (extension) {
-        Blueprint.read(markdown)
-          .then(consumed => Blueprint.marshall(consumed.compiled.markdown, extension[1]))
-          .then(marshalled => {
-            fs.writeFile(filepath, marshalled, 'utf-8', (err) => {
-              if (!err) {
-                resolve(marshalled)
-              } else {
-                reject(`An error occured while saving file: ${err}`)
-              }
-            })
-          })
-      } else {
-        reject(`File destinations must contain an extension (.apib or .html)`)
-      }
-    })
-  }
-
-  /**
-   * Attempts to marshall API blueprint content into a specific type
+   * Attempts to marshall API blueprint content into a specific filetype
    *
    * @param {String} markdown
    * @param {String} filetype 'apib' or 'json'
@@ -250,10 +250,8 @@ export class Blueprint {
 
 }
 
-
-
 /**
- * Allows developers to configure and override the default instance of hazy
+ * Allows developers to configure and override the default interpolator (hazy.lang.process)
  */
 export var interpolator = hazy.lang.process
 
