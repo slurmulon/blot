@@ -30,7 +30,7 @@ on top of Hazy and provides an abstract API blueprint parser and generator.
 ## Hazy
 
 [Hazy](https://github.com/slurmulon/hazy) is a simple specification (with an accompanying node library) for lazily
-generating dynamic test fixtures. It provides a simple syntax for interpolating random data (and more) into your fixtures.
+processing dynamic test fixtures. It provides a simple syntax for interpolating random data (and more) into your fixtures.
 It alleviates the need for developers to constantly come up with names, addresses, etc. for their enormous amount of test data.
 
 The most powerful feature of hazy is that it allows developers to dynamically embed fixtures via `JsonPath` patterns or by a simple string.
@@ -51,7 +51,7 @@ The `~` keyword tells hazy to replace the token with categorized random data:
 # POST /v1/auth
 + Request (application/json)
 
-  { "username": "|~text:word|", "password": "|~text:word|" }
+  { "username": "|~web:email|", "password": "|~text:word|" }
 
 + Response 200 (application/json)
 
@@ -62,7 +62,7 @@ The `~` keyword tells hazy to replace the token with categorized random data:
 
 + Response authentication (application/json)
 
-  { "username": "|~text:word|", "first": "|~person:first|", "last": "|~person:last|", "address": "|~geo:address|" }
+  { "username": "|~web:email|", "first": "|~person:first|", "last": "|~person:last|", "address": "|~geo:address|" }
 ```
 
 Alternatively, you can be more lazy, which is encouraged for increased normalization. The following example
@@ -200,5 +200,4 @@ You can now use blot as either an npm module in your own projects or as an execu
  - [ ] `--config` CLI flag
  - [ ] Support [fury.js](https://github.com/apiaryio/fury.js)
  - [ ] Static fixture export
- - [ ] Static HTML export
  - [ ] Support `beforeCompile` and `afterCompile` configuration files (root of project)
