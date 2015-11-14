@@ -48,6 +48,7 @@ The `~` keyword tells hazy to replace the token with categorized random data:
 ```
 ### Login a user [POST]
 
+# POST /v1/auth
 + Request (application/json)
 
     { "username": "|~text:word|", "password": "|~text:word|" }
@@ -56,6 +57,7 @@ The `~` keyword tells hazy to replace the token with categorized random data:
 
   { "token": "|~misc:guid|", "refresh_token": "|~misc:guid|", "expires": "|~time:date|" }
 
+# GET /v1/user/{id}
 ### Fetch a user [GET]
 
 + Response authentication (application/json)
@@ -67,6 +69,7 @@ Alternatively, you can be more lazy, which is encouraged for increased decentral
 shows how you can reference and embed large fixtures that live on the filesystem using the `>` operator:
 
 ```
+# POST /v1/auth
 ### Login a user [POST]
 
 + Request (application/json)
@@ -77,6 +80,7 @@ shows how you can reference and embed large fixtures that live on the filesystem
 
   |> auth-res.json|
 
+# GET /v1/user/{id}
 ### Fetch a user [GET]
 
 + Response 200 (application/json)
@@ -84,17 +88,23 @@ shows how you can reference and embed large fixtures that live on the filesystem
   |> authed-user-res.json|
 ```
 
-## Command Line
+### Command Line
 
 The easiest way to use blot is by running it as a command.
 
-You can specify an API blueprint to parse and export:
+You can specify an API blueprint file to parse and export:
 
+**Native Output**
+```bash
+$ blot compile -i docs.blot.apib --echo > docs.apib
+```
+
+**Snazzy**
 ```bash
 $ blot compile -i docs.blot.apib -o docs.apib --pretty
 ```
 
-or simply pass in the raw data:
+You may also pass in the raw data:
 
 ```bash
 $ blot compile -d 'FORMAT: 1A
@@ -105,6 +115,13 @@ $ blot compile -d 'FORMAT: 1A
 
 {"message": "Hello, |~person:name|!", "id": "|~misc:guid|"}' -o docs.apib --pretty
 ```
+
+#### Need help?
+
+```
+blot compile --help
+```
+(thorough documentation coming soon!)
 
 ### Node
 
