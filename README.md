@@ -21,8 +21,8 @@ A limitation of API blueprints is that they are static, and there are few (if an
 documented requests and responses for programmatic (in-code) use in your integration and unit tests.
 My philosophy is that you should strive for a canonical source of fixtures in which all of your tests and documentation inherit from.
 [Hercule](https://github.com/jamesramsay/hercule), which blot also integrates, helps promote normalization by allowing
-Markdown documents to be transcluded. However, this does not address the issue of having decentralized __fixtures__ with
-repeated content.
+data to be transcluded in markdown documents. blot also supports this through hazy, and either syntax may be used as they will
+both be processed.
 
 blot minimizes duplication and introduces unification between documentation, fixtures, and API test suites. It sits
 on top of Hazy and provides an abstract API blueprint parser and generator.
