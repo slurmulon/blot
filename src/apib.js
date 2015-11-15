@@ -164,7 +164,7 @@ export class Blueprint {
 /**
  * Bunyan log for the API Blueprint module
  */
-export const log = logger.child({widget_type: 'blueprint'})
+export const log = logger.child({module: 'blueprint'})
 
 /**
  * Allows developers to configure and override the default interpolator (hazy.lang.process)

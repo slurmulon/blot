@@ -171,4 +171,4 @@ export const util = {
   // TODO uri
 }
 
-export const log = logger.child({widget_type: 'io'})
+export const log = logger.child({module: 'io'})

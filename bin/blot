@@ -56,11 +56,11 @@ program
 
     ;(function() {
       if (inFiles && inFiles !== 'files') {
-        info('glob', 'reading and compiling files: ' + inFiles)
+        info('glob', 'start')
 
         return blot.io.glob(inFiles)
           .then(function(blueprints) {
-            info('glob', 'done')
+            info('glob', 'end')
 
             blueprints.forEach(function(blueprint, i) {
               section(blueprint.compiled.markdown)
@@ -82,10 +82,11 @@ program
           })
           .catch(error)
       } else if (inData) {
-        info('read', 'parsing and compiling API blueprint markdown')
+        info('read', 'start')
         
         return blot.io.read(inData)
           .then(function(blueprint) {
+            info('read', 'end')
             section(blueprint.compiled.markdown)
           })
           .catch(error)
