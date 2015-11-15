@@ -64,7 +64,7 @@ export function dist(markdown, filepath: String): Promise {
  * @returns {Promise}
  */
 export function glob(pattern, options): Promise {
-  log.info(`globbing against ${pattern}`)
+  // log.info(`globbing against ${pattern}`)
 
   return new Promise((resolve, reject) => {
     _glob(pattern, options, (err, files) => {
