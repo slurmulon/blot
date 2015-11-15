@@ -58,18 +58,18 @@ program
 
     ;(function() {
       if (inFiles && inFiles !== 'files') {
-        info('load', 'loading and compiling files... ' + inFiles + '\n')
+        info('load', 'loading and compiling files: ' + inFiles + '\n')
 
-        return blot.Blueprint.glob(inFiles)
+        return blot.io.glob(inFiles)
           .then(function(blueprints) {
-            blueprints.forEach(function(blueprint,i) {
+            blueprints.forEach(function(blueprint, i) {
               section(blueprint.compiled.markdown)
 
               // FIXME - support outFile as an array
               if (!!outFile && outFile !== 'file') {
                 var indexedOutFile = outFile + '.' + i + '.apib'
 
-                blot.Blueprint
+                blot.io
                   .dist(blueprint.compiled.markdown, indexedOutFile)
                   .then(function(content) {
                     info('dist', 'exported compiled API blueprint to ' + indexedOutFile)
@@ -84,7 +84,7 @@ program
       } else if (inData) {
         info('load', 'compiling API blueprint markdown...')
         
-        return blot.Blueprint.read(inData)
+        return blot.io.read(inData)
           .then(function(blueprint) {
             section(blueprint.compiled.markdown)
           })
