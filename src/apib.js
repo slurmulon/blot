@@ -3,7 +3,6 @@
 import hazy from 'hazy'
 import protagonist from 'protagonist'
 import hercule from 'hercule'
-// import io from './io'
 
 import _ from 'lodash'
 import fs from 'fs'
@@ -127,105 +126,6 @@ export class Blueprint {
   static interpolate(markdown: String): Promise {
     return new Promise((resolve, reject) => resolve(interpolator(markdown)))
   }
-
-  /**
-   * Parses and compiles an API blueprint from the file system
-   *
-   * @param {String} filepath
-   * @returns {Promise}
-   */
-  // static src(filepath: String): Promise {
-  //   return new Promise((resolve, reject) => {
-  //     if (filepath) {
-  //       fs.readFile(path.resolve(filepath), 'utf-8', (err, data) => {
-  //         if (!err) {
-  //           resolve(new Blueprint(data).compile())
-  //         } else {
-  //           reject(`Failed to read file: ${err}`)
-  //         }
-  //       })
-  //     } else {
-  //       reject(`Failed to read file, filepath required`)
-  //     }  
-  //   })
-  // }
-
-  // /**
-  //  * Reads in and then exports API blueprints as either a static html or apib file
-  //  * to the provided file path
-  //  *
-  //  * @param {String} markdown
-  //  * @param {String} filepath
-  //  * @returns {Promise}
-  //  */
-  // static dist(markdown, filepath: String): Promise {
-  //   return new Promise((resolve, reject) => {
-  //     const extension = filepath.match(/\.([0-9a-z]+)$/i)
-
-  //     if (extension) {
-  //       Blueprint.read(markdown)
-  //         .then(consumed => Blueprint.marshall(consumed.compiled.markdown, extension[1]))
-  //         .then(marshalled => {
-  //           fs.writeFile(filepath, marshalled, 'utf-8', (err) => {
-  //             if (!err) {
-  //               resolve(marshalled)
-  //             } else {
-  //               reject(`An error occured while saving file: ${err}`)
-  //             }
-  //           })
-  //         })
-  //     } else {
-  //       reject(`File destinations must contain an extension (.apib or .html)`)
-  //     }
-  //   })
-  // }
-
-  // /**
-  //  * Globs and reads in valid API blueprint(s) from the filesystem and compiles them
-  //  *
-  //  * @param {Array|String} blueprints
-  //  * @returns {Promise}
-  //  */
-  // static glob(pattern, options): Promise {
-  //   return new Promise((resolve, reject) => {
-  //     glob(pattern, options, (err, files) => {
-  //       if (!err) {
-  //         Promise
-  //           .all(
-  //             files.map(filepath => Blueprint.src(filepath))
-  //           )
-  //           .then(resolve)
-  //           .catch(reject)
-  //       } else {
-  //         reject(`Failed to load file: ${err}`)
-  //       }
-  //     })
-  //   })
-  // }
-
-  // /**
-  //  * Reads in valid API blueprint(s) from Strings or 
-  //  * Arrays of Strings and compiles them
-  //  *
-  //  * @param {Array|String} blueprints
-  //  * @returns {Promise}
-  //  */
-  // static read(blueprints): Promise {
-  //   return new Promise((resolve, reject) => {
-  //     if (_.isArray(blueprints)) {
-  //       Promise
-  //         .all(
-  //           blueprints.map(bp => new Blueprint(bp).compile())
-  //         )
-  //         .then(resolve)
-  //         .catch(reject)
-  //     } else if (_.isString(blueprints)) {
-  //       resolve(new Blueprint(blueprints).compile())
-  //     } else {
-  //       reject('Documents must be represented as a String or Array, got ' + typeof blueprints)
-  //     }
-  //   })
-  // }
 
   /**
    * Attempts to marshall API blueprint content into a specific filetype
