@@ -20,13 +20,7 @@ import path from 'path'
 export function src(filepath: String): Promise {
   return new Promise((resolve, reject) => {
     if (filepath) {
-      fs.readFile(path.resolve(filepath), 'utf-8', (err, data) => {
-        if (!err) {
-          resolve(new Blueprint(data).compile())
-        } else {
-          reject(`Failed to read file: ${err}`)
-        }
-      })
+      util.fs.src(filepath).then(resolve)
     } else {
       reject(`Failed to read file, filepath required`)
     }  
@@ -47,16 +41,10 @@ export function dist(markdown, filepath: String): Promise {
 
     if (extension) {
       read(markdown)
-        .then(consumed => Blueprint.marshall(consumed.compiled.markdown, extension[1]))
-        .then(marshalled => {
-          fs.writeFile(filepath, marshalled, 'utf-8', (err) => {
-            if (!err) {
-              resolve(marshalled)
-            } else {
-              reject(`An error occured while saving file: ${err}`)
-            }
-          })
-        })
+        .then(consumed   => Blueprint.marshall(consumed.compiled.markdown, extension[1]))
+        .then(marshalled => util.fs.dist(filepath, marshalled))
+        .then(resolve)
+        .catch(reject)
     } else {
       reject(`File destinations must contain an extension (.apib or .html)`)
     }
@@ -108,4 +96,57 @@ export function read(blueprints): Promise {
       reject('Documents must be represented as a String or Array, got ' + typeof blueprints)
     }
   })
+}
+
+export class Config { // WIP!
+
+  constructor(src: Object, dist: Object) {
+    this.src = src
+    this.dist = dist
+  }
+
+  static load(filepath: String): Promise {
+    return new Promise((resolve, reject) => {
+      if (filepath) {
+        fs.readFile(path.resolve(filepath), 'utf-8', (err, data) => {
+          if (!err) {
+            resolve(new Config(data))
+          } else {
+            reject(`Failed to read file: ${err}`)
+          }
+        })
+      } else {
+        reject(`Failed to read file, filepath required`)
+      }
+    })
+  }
+
+}
+
+export const util = {
+  fs: {
+    src: (filepath) => {
+      return new Promise((resolve, reject) => {
+        fs.readFile(path.resolve(filepath), 'utf-8', (err, data) => {
+          if (!err) {
+            resolve(new Blueprint(data).compile())
+          } else {
+            reject(`Failed to read file: ${err}`)
+          }
+        })
+      })
+    },
+
+    dist: (filepath, markdown) => {
+      return new Promise((resolve, reject) => {
+        fs.writeFile(filepath, markdown, 'utf-8', (err) => {
+          if (!err) {
+            resolve(markdown)
+          } else {
+            reject(`An error occured while saving file: ${err}`)
+          }
+        })
+      })
+    }
+  }
 }

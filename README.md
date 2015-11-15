@@ -180,9 +180,10 @@ hazy.fixture.load('**/fixtures/*.json', null, (key) => key.replace('.json'))
 blot.interpolator = hazy.lang.process
 
 // load api blueprint, process fixtures against configured hazy pool, then export as a static API blueprint file
-blot.Blueprint
-  .load('documentation.blot.apib')
+blot.io
+  .src('documentation.blot.apib')
   .then(compiled => blot.dist(compiled.content, 'dist/documentation.apib'))
+  .then(result   => console.log('[blot] done exporting!'))
 ```
 
 ## Install
