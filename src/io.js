@@ -11,6 +11,8 @@ import _glob from 'glob'
 import fs from 'fs'
 import path from 'path'
 
+import {logger} from './log'
+
 /**
  * Parses and compiles an API blueprint from the file system
  *
@@ -18,6 +20,8 @@ import path from 'path'
  * @returns {Promise}
  */
 export function src(filepath: String): Promise {
+  log.info(`importing content from ${filepath}`)
+
   return new Promise((resolve, reject) => {
     if (filepath) {
       util.fs.src(filepath).then(resolve)
@@ -36,6 +40,8 @@ export function src(filepath: String): Promise {
  * @returns {Promise}
  */
 export function dist(markdown, filepath: String): Promise {
+  log.info(`exporting content to ${filepath}`)
+
   return new Promise((resolve, reject) => {
     const extension = filepath.match(/\.([0-9a-z]+)$/i)
 
@@ -58,6 +64,8 @@ export function dist(markdown, filepath: String): Promise {
  * @returns {Promise}
  */
 export function glob(pattern, options): Promise {
+  log.info(`globbing against ${pattern}`)
+
   return new Promise((resolve, reject) => {
     _glob(pattern, options, (err, files) => {
       if (!err) {
@@ -68,7 +76,7 @@ export function glob(pattern, options): Promise {
           .then(resolve)
           .catch(reject)
       } else {
-        reject(`Failed to load file: ${err}`)
+        reject(`failed to load globbed file: ${err}`)
       }
     })
   })
@@ -82,6 +90,8 @@ export function glob(pattern, options): Promise {
  * @returns {Promise}
  */ 
 export function read(blueprints): Promise {
+  log.info('reading in content')
+
   return new Promise((resolve, reject) => {
     if (_.isArray(blueprints)) {
       Promise
@@ -129,7 +139,13 @@ export const util = {
       return new Promise((resolve, reject) => {
         fs.readFile(path.resolve(filepath), 'utf-8', (err, data) => {
           if (!err) {
-            resolve(new Blueprint(data).compile())
+            log.info(`finished importing contents of ${filepath}`)
+
+            //resolve(new Blueprint(data).compile())
+            new Blueprint(data)
+              .compile()
+              .then(resolve)
+              .catch(reject)
           } else {
             reject(`Failed to read file: ${err}`)
           }
@@ -141,6 +157,8 @@ export const util = {
       return new Promise((resolve, reject) => {
         fs.writeFile(filepath, markdown, 'utf-8', (err) => {
           if (!err) {
+            log.info(`finished exporting content to ${filepath}`)
+
             resolve(markdown)
           } else {
             reject(`An error occured while saving file: ${err}`)
@@ -149,4 +167,8 @@ export const util = {
       })
     }
   }
+
+  // TODO uri
 }
+
+export const log = logger.child({widget_type: 'io'})

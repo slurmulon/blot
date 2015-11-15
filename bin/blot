@@ -8,23 +8,21 @@ var program = require('commander')
 
 var config = {
   echo: false,
-  logging: false,
+  log: false,
   pretty: false,
 }
 
 function info(action, msg) {
   if (config.pretty) {
-    console.log('[' + 'blot'.bold.green + '.' + action.magenta + ']', msg)
-  } else if (config.logging) {
-    console.log('[blot.' + action + ']', msg)
+    blot.log.info(action.magenta + ' ' + msg.green)
+  } else if (config.log) {
+    blot.log.info('action: ' + msg)
   }
 }
 
 function error(msg) {
-  if (config.pretty) {
-    console.log('[' + 'blot:ERROR'.red + ']', msg)
-  } else if (config.logging) {
-    console.log('[blot:ERROR]', msg)
+  if (config.pretty || config.log) {
+    blot.log.error(msg)
   }
 }
 
@@ -33,7 +31,7 @@ function section(msg) {
     console.log('\n--------------------------------------------------\n'.rainbow)
     console.log(msg.cyan)
     console.log('\n--------------------------------------------------\n'.rainbow)
-  } else if (config.logging || config.echo) {
+  } else if (config.log || config.echo) {
     console.log(msg)
   }
 }
@@ -46,22 +44,24 @@ program
   .option('-d, --in-data [markdown]', 'Read in Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
   .option('-e, --echo', 'Prints compiled result to stdout')
-  .option('-l, --logging', 'Enables logging of blot events')
+  .option('-l, --log', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')
   .action(function(cmd) {
     var inFiles  = cmd.inFiles
     var inData   = cmd.inData
     var outFile  = cmd.outFile
     var echo     = config.echo    = !!cmd.echo
-    var logging  = config.logging = !!cmd.logging
+    var log      = config.log     = !!cmd.log // TODO - make this output raw bunyon logs
     var pretty   = config.pretty  = !!cmd.pretty
 
     ;(function() {
       if (inFiles && inFiles !== 'files') {
-        info('load', 'loading and compiling files: ' + inFiles + '\n')
+        info('glob', 'reading and compiling files: ' + inFiles)
 
         return blot.io.glob(inFiles)
           .then(function(blueprints) {
+            info('glob', 'done')
+
             blueprints.forEach(function(blueprint, i) {
               section(blueprint.compiled.markdown)
 
@@ -82,7 +82,7 @@ program
           })
           .catch(error)
       } else if (inData) {
-        info('load', 'compiling API blueprint markdown...')
+        info('read', 'parsing and compiling API blueprint markdown')
         
         return blot.io.read(inData)
           .then(function(blueprint) {

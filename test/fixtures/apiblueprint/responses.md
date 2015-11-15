@@ -1,7 +1,7 @@
 FORMAT: 1A
 
 # Responses API
-SSome description
+Some description
 
 ## API Blueprint
 + [Previous: Grouping Resources](04.%20Grouping%20Resources.md)

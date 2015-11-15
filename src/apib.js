@@ -9,6 +9,8 @@ import fs from 'fs'
 import path from 'path'
 import glob from 'glob'
 
+import {logger} from './log'
+
 /**
  * Parses, transcludes and compiles API blueprint files
  * and their associated fixtures. Allows compiled
@@ -36,6 +38,8 @@ export class Blueprint {
    * @returns {Promise}
    */
   static compile(markdown: String): Promise {
+    log.info('compiling contents')
+
     return Blueprint
       .transclude(markdown)
       .then(embedMd => Blueprint.interpolate(embedMd))
@@ -51,6 +55,8 @@ export class Blueprint {
    * @returns {Promise}
    */
   static fixtures(markdown: String): Promise {
+    log.info('extracting fixtures')
+
     return new Promise((resolve, reject) => {
       let fixtures = []
       const jsonStrMatches = (markdown.match instanceof Function) ? markdown.match(plainJson) : []
@@ -61,11 +67,7 @@ export class Blueprint {
 
           fixtures.push(fixture)
         } catch (e) {
-          if (e instanceof SyntaxError) {
-            reject(`Found invalid JSON in API blueprint ${blueprint.filepath}: ${jsonStr}\n\n${e}`)
-          } else {
-            reject(`Failed to parse JSON fixtures in API blueprint: ${e}`)
-          }
+          log.warn(`attempted to parse invalid JSON in API blueprint: ${jsonStr}`, e)
         }
       })
 
@@ -79,17 +81,19 @@ export class Blueprint {
    * @param {String} markdown Valid API blueprint markdown
    */
   static parse(markdown: String): Promise {
+    log.info('parsing content into protagonist object')
+
     return new Promise((resolve, reject) => {
       if (markdown) {
         protagonist.parse(markdown, (err, blueprint) => {
           if (!err) {
             resolve(blueprint)
           } else {
-            reject(`Failed to parse file as valid API blueprint: ${err}`)
+            reject(`failed to parse file as valid API blueprint: ${err}`)
           }
         })
       } else {
-        reject(`Markdown data required`)
+        reject(`markdown data required`)
       }
     })
   }
@@ -102,16 +106,18 @@ export class Blueprint {
    */
   static transclude(markdown: String): Promise {
     return new Promise((resolve, reject) => {
+      log.info('transcluding hercule content')
+
       if (markdown) {
         hercule.transcludeString(markdown, (transMd) => {
           if (transMd) {
             resolve(transMd)
           } else {
-            reject('Failed to parse markdown for Hercule transclusions')
+            reject('failed to parse markdown for Hercule transclusions')
           }
         })
       } else {
-        reject('Valid markdown required for transclusion')
+        reject('valid markdown required for transclusion')
       }
     })
   }
@@ -124,6 +130,8 @@ export class Blueprint {
    * @returns {Promise}
    */
   static interpolate(markdown: String): Promise {
+    log.info('interpolating random tokens')
+
     return new Promise((resolve, reject) => resolve(interpolator(markdown)))
   }
 
@@ -136,6 +144,8 @@ export class Blueprint {
    */
   static marshall(markdown: String, filetype: String): Promise {
     return new Promise((resolve, reject) => {
+      log.info(`marshalling markdown to ${filetype}`)
+
       const filetypes = {
         apib: () => resolve(markdown),
         json: () => Blueprint.fixtures(markdown).then(resolve)
@@ -144,12 +154,17 @@ export class Blueprint {
       if (filetype in filetypes) {
         return filetypes[filetype || 'apib']()
       } else {
-        reject(`Unsupported filetype: ${filetype}`)
+        reject(`unsupported filetype: ${filetype}`)
       }
     })
   }
 
 }
+
+/**
+ * Bunyan log for the API Blueprint module
+ */
+export const log = logger.child({widget_type: 'blueprint'})
 
 /**
  * Allows developers to configure and override the default interpolator (hazy.lang.process)
