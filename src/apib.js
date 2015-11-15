@@ -38,7 +38,7 @@ export class Blueprint {
    * @returns {Promise}
    */
   static compile(markdown: String): Promise {
-    log.info('compiling contents')
+    // log.info('compiling contents')
 
     return Blueprint
       .transclude(markdown)
@@ -55,7 +55,7 @@ export class Blueprint {
    * @returns {Promise}
    */
   static fixtures(markdown: String): Promise {
-    log.info('extracting fixtures')
+    // log.info('extracting fixtures')
 
     return new Promise((resolve, reject) => {
       let fixtures = []
@@ -81,7 +81,7 @@ export class Blueprint {
    * @param {String} markdown Valid API blueprint markdown
    */
   static parse(markdown: String): Promise {
-    log.info('parsing content into protagonist object')
+    // log.info('parsing content into protagonist object')
 
     return new Promise((resolve, reject) => {
       if (markdown) {
@@ -106,7 +106,7 @@ export class Blueprint {
    */
   static transclude(markdown: String): Promise {
     return new Promise((resolve, reject) => {
-      log.info('transcluding hercule content')
+      // log.info('transcluding hercule content')
 
       if (markdown) {
         hercule.transcludeString(markdown, (transMd) => {
@@ -130,7 +130,7 @@ export class Blueprint {
    * @returns {Promise}
    */
   static interpolate(markdown: String): Promise {
-    log.info('interpolating random tokens')
+    // log.info('interpolating random tokens')
 
     return new Promise((resolve, reject) => resolve(interpolator(markdown)))
   }
@@ -144,7 +144,7 @@ export class Blueprint {
    */
   static marshall(markdown: String, filetype: String): Promise {
     return new Promise((resolve, reject) => {
-      log.info(`marshalling markdown to ${filetype}`)
+      // log.info(`marshalling markdown to ${filetype}`)
 
       const filetypes = {
         apib: () => resolve(markdown),
@@ -162,11 +162,6 @@ export class Blueprint {
 }
 
 /**
- * Bunyan log for the API Blueprint module
- */
-export const log = logger.child({module: 'blueprint'})
-
-/**
  * Allows developers to configure and override the default interpolator (hazy.lang.process)
  */
 export var interpolator = hazy.lang.process
@@ -175,3 +170,8 @@ export var interpolator = hazy.lang.process
  * A janky regex for finding "JSON" objects in markdown. Need a more loveable solution
  */
 export const plainJson = /\{(.*?)\}/gm
+
+/**
+ * Bunyan log for the API Blueprint module
+ */
+export const log = logger.child({module: 'blueprint'})

@@ -20,7 +20,7 @@ import {logger} from './log'
  * @returns {Promise}
  */
 export function src(filepath: String): Promise {
-  log.info(`importing content from ${filepath}`)
+  // log.info(`importing content from ${filepath}`)
 
   return new Promise((resolve, reject) => {
     if (filepath) {
@@ -40,7 +40,7 @@ export function src(filepath: String): Promise {
  * @returns {Promise}
  */
 export function dist(markdown, filepath: String): Promise {
-  log.info(`exporting content to ${filepath}`)
+  // log.info(`exporting content to ${filepath}`)
 
   return new Promise((resolve, reject) => {
     const extension = filepath.match(/\.([0-9a-z]+)$/i)
@@ -90,7 +90,7 @@ export function glob(pattern, options): Promise {
  * @returns {Promise}
  */ 
 export function read(blueprints): Promise {
-  log.info('reading in content')
+  // log.info('reading in content')
 
   return new Promise((resolve, reject) => {
     if (_.isArray(blueprints)) {
@@ -139,7 +139,7 @@ export const util = {
       return new Promise((resolve, reject) => {
         fs.readFile(path.resolve(filepath), 'utf-8', (err, data) => {
           if (!err) {
-            log.info(`finished importing contents of ${filepath}`)
+            // log.info(`finished importing contents of ${filepath}`)
 
             //resolve(new Blueprint(data).compile())
             new Blueprint(data)
@@ -157,7 +157,7 @@ export const util = {
       return new Promise((resolve, reject) => {
         fs.writeFile(filepath, markdown, 'utf-8', (err) => {
           if (!err) {
-            log.info(`finished exporting content to ${filepath}`)
+            // log.info(`finished exporting content to ${filepath}`)
 
             resolve(markdown)
           } else {
