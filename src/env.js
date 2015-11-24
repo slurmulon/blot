@@ -5,8 +5,8 @@ import _ from 'lodash'
 import fs from 'fs'
 import path from 'path'
 
-const enviros = {}
-let selected  = null
+let enviros  = {}
+let selected = null
 
 export class Config {
 
@@ -14,7 +14,7 @@ export class Config {
     this.name  = name  || 'local'
     this.host  = host  || '127.0.0.1'
     this.base  = base  || '.'
-    this.docs  = docs  || {src: this.uri('docs/src'), dest: this.uri('dist/docs'),  export: true,}
+    this.docs  = docs  || {src: this.uri('docs/src'), dest: this.uri('dist/docs'),  export: true }
     this.stubs = stubs || {src: this.uri('docs/src'), dest: this.uri('dist/stubs'), export: false}
 
     this.logging = logging
@@ -32,6 +32,18 @@ export class Config {
     return path.resolve(`${this.base}/${filepath}`)
   }
 
+  rootUri(): String {
+    return Config.rootUri(this.name)
+  }
+
+  static rootUri(name: String): String {
+    return name ? `./index.blot.${name}.apib` : `./index.blot.apib`
+  }
+
+  static isProject(): Boolean {
+    return Config.existsAt(Config.rootUri())
+  }
+
   static existsAt(filepath: String): Boolean {
     try {
       fs.accessSync(path.resolve(filepath), fs.R_OK)
@@ -42,11 +54,7 @@ export class Config {
     }
   }
 
-  static isProject(): Boolean {
-    return Config.existsAt('./index.blot.apib')
-  }
-
-  static readFrom(filepath: String = './index.blot.apib'): Promise {
+  static readFrom(filepath: String = './index.blot.apib'): Promise { // TODO - consider env name
     return new Promise((resolve, reject) => {
       return fs.readFile(path.resolve(filepath), 'utf-8', (err, data) => {
         if (!err) {

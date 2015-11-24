@@ -110,6 +110,8 @@ export class Blueprint {
    * @returns {Promise}
    */
   static validate(markdown: String): Promise {
+    log().info('validating content')
+
     return new Promise((resolve, reject) => {
       Blueprint
         .parse(markdown)
@@ -119,7 +121,7 @@ export class Blueprint {
           resolve(content)
         })
         .catch(err => {
-          log().error('error found in API Blueprint', err)
+          log().error('error found in API blueprint', err)
 
           reject(false)
         })
