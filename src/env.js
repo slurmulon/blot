@@ -22,7 +22,6 @@ export class Config {
 
     enviros[name] = this
 
-    // TODO - cleanup / improve
     ;['name', 'host', 'base'].forEach(prop => {
       hazy.fixture.register(`blot.config.${prop}`, this[prop])
     })
@@ -37,7 +36,7 @@ export class Config {
   }
 
   static rootUri(name: String): String {
-    return name ? `./index.blot.${name}.apib` : `./index.blot.apib`
+    return name ? `./blot.${name}.json` : `./blot.json`
   }
 
   static isProject(): Boolean {
