@@ -65,8 +65,9 @@ The `~` keyword tells hazy to replace the token with categorized random data:
   { "username": "|~web:email|", "first": "|~person:first|", "last": "|~person:last|", "address": "|~geo:address|" }
 ```
 
-Alternatively, you can be more lazy, which is encouraged for increased normalization. The following example
-shows how you can reference and embed large fixtures that live on the filesystem using the `>` operator:
+Alternatively, you can be even more lazy, which is encouraged for increased normalization. The following example
+shows how you can reference and embed large fixtures that live on the filesystem using the `>` operator, or even
+alongside hercule by using `:[]`:
 
 ```
 # POST /v1/auth
@@ -78,7 +79,7 @@ shows how you can reference and embed large fixtures that live on the filesystem
 
 + Response 200 (application/json)
 
-  |> auth-res.json|
+  :[](auth-req.json)
 
 # GET /v1/user/{id}
 ### Fetch a user [GET]
@@ -96,7 +97,7 @@ You may also freely leverage `JsonPath` in order to transclude fixtures by patte
 
 + Request (application/json)
 
-  |> auth-req.json|
+  :[](auth-req.json)
 
 + Response 200 (application/json)
 
@@ -174,7 +175,7 @@ The node module allows you to monkey-patch special functionality and data to you
 You can then inject your monkey-patched hazy pool by setting `blot.interpolator`, which is
 used whenever API blueprints are processed.
 
-The following example attaches a `created` property ao all fixtures. It also appends a 
+The following example attaches a `created` property to all fixtures. It also appends a 
 `fixture` query parameter to any fixture with a `url` property (deep):
 
 ```javascript
