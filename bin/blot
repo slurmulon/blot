@@ -15,8 +15,9 @@ var config = {
 }
 
 function loadConfig() {
-  if (blot.env.Config.isProject()) { // use project config
-    blot.env.Config
+  // use project config
+  if (blot.env.Config.isProject()) {
+    return blot.env.Config
       .src()
       .then(function() {
         return blot.env.Config.parse()
@@ -26,11 +27,12 @@ function loadConfig() {
         config.log    = envConfig.logging
         config.pretty = envConfig.pretty
 
-        blot.env.use(envConfig)
+        return blot.env.use(envConfig)
       })
-  } else { // otherwise use default values
-    blot.env.use({name: config.env, logging: config.log, pretty: config.pretty})
   }
+
+  // otherwise use default values
+  return blot.env.use({name: config.env, logging: config.log, pretty: config.pretty})
 }
 
 function parseFiles(files) {
@@ -63,6 +65,9 @@ function parseText(data) {
 }
 
 function exportBlueprints(outFile, blueprints) {
+  if (!outFile || outFile == 'file')
+    return
+
   info('export', 'start')
 
   blueprints.forEach(function(blueprint, i) {
@@ -130,19 +135,20 @@ program
     var log      = config.log    = !!cmd.log // FIXME - make this output raw bunyon logs
     var pretty   = config.pretty = !!cmd.pretty
 
-    loadConfig()
-
-    if (inFiles && inFiles !== 'files') {
-      parseFiles(inFiles).then(function(blueprints) {
-        if (outFile && outFile !== 'file') {
+    loadConfig().then(function() {
+      if (inFiles && inFiles !== 'files') {
+        parseFiles(inFiles).then(function(blueprints) {
           exportBlueprints(outFile, blueprints)
-        }
-      })
-    } else if (inData) {
-      parseText(inData)
-    } else {
-      error('malformed command')
-    }
+        })
+      } else if (inData) {
+        parseText(inData).then(function(blueprints) {
+          exportBlueprints(outFile, blueprints)
+        })
+      } else {
+        error('malformed command')
+      }
+    })
+
   })
 
 program.parse(process.argv)

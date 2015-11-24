@@ -79,15 +79,18 @@ export class Config {
 
 export function use(env) {
   if (_.isString(env)) {
-    if (!env in envros) {
+    if (env in enviros) {
       selected = env
     } else {
       // WARN - enviro not defined
     }
   } else if (_.isObject(env)) {
     const conf = configure(env)
+    
     selected = conf.name
   }
+
+  return env
 }
 
 export const configure = ({name, base, host, docs, stubs, logging, pretty}) => new Config(name, base, host, docs, stubs, logging, pretty)
