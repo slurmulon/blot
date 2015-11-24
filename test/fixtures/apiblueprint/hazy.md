@@ -1,5 +1,5 @@
 FORMAT: 1A
-HOST: |+ config.local.host|
+HOST: |+ blot.config.host|
 
 # Hazy Responses API
 Some description

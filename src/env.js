@@ -24,7 +24,7 @@ export class Config {
 
     // TODO - cleanup / improve
     ;['name', 'host', 'base'].forEach(prop => {
-      hazy.fixture.register(`config.${name}.${prop}`, this[prop])
+      hazy.fixture.register(`blot.config.${prop}`, this[prop])
     })
   }
 
