@@ -10,7 +10,7 @@ let   selected = null
 export class Config {
 
   constructor(name, base, docs, stubs, logging = false) {
-    this.name    = name  || 'default'
+    this.name    = name  || 'local'
     this.base    = base  || '.'
     this.docs    = docs  || {src: this.uri('docs/src'), dest: this.uri('dist/docs'),  export: true,}
     this.stubs   = stubs || {src: this.uri('docs/src'), dest: this.uri('dist/stubs'), export: false}
@@ -62,7 +62,7 @@ export function use(env) {
     }
   } else if (_.isObject(env)) {
     const conf = configure(env)
-    selected   = conf.name
+    selected = conf.name
   }
 }
 

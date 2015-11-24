@@ -7,10 +7,66 @@ var colors = require('colors')
 var program = require('commander')
 
 var config = {
-  echo: false,
-  log: false,
-  pretty: false,
+  env    : 'local',
+  echo   : false,
+  log    : false,
+  pretty : false
 }
+
+function loadConfig() { // TODO - support env
+  if (blot.env.Config.isProject()) {
+    blot.env.Config
+      .readFrom()
+      .then(function() {
+        info('config', 'found default project config at index.blot.apib')
+      })
+  } else {
+    blot.env.use({name: config.env, logging: config.pretty || config.log})
+  }
+}
+
+function parseFiles(files) {
+  return blot.io
+    .glob(files)
+    .then(function(blueprints) {
+      info('glob', 'end')
+
+      blueprints.forEach(function(blueprint, i) {
+        section(blueprint.compiled.markdown)
+      })
+    })
+    .catch(error)
+}
+
+function parseText(data) {
+  return blot.io.read(data)
+    .then(function(blueprint) {
+      info('read', 'end')
+
+      section(blueprint.compiled.markdown)
+    })
+    .catch(error)
+}
+
+function exportBlueprints(outFile, blueprints) {
+  info('export', 'start')
+
+  blueprints.forEach(function(blueprint, i) {
+    // FIXME - support outFile as an array
+    var indexedOutFile = cmd.outFile + '.apib' // outFile + '.' + i + '.apib'
+
+    blot.io
+      .dist(blueprint.compiled.markdown, indexedOutFile)
+      .then(function(content) {
+        info('export', 'compiled and exported API blueprint to ' + indexedOutFile)
+      })
+      .catch(function(err) {
+        error('failed to export ' + indexedOutFile + ': ' + err)
+      })
+  })
+}
+
+// Logging
 
 function info(action, msg) {
   if (config.pretty) {
@@ -36,6 +92,8 @@ function section(msg) {
   }
 }
 
+// Binding
+
 program
   .version('0.0.2')
   .command('compile [env]')
@@ -51,63 +109,30 @@ program
     var inFiles  = cmd.inFiles
     var inData   = cmd.inData
     var outFile  = cmd.outFile
-    var echo     = config.echo    = !!cmd.echo
-    var log      = config.log     = !!cmd.log // TODO - make this output raw bunyon logs
-    var pretty   = config.pretty  = !!cmd.pretty
+    var echo     = config.echo   = !!cmd.echo
+    var log      = config.log    = !!cmd.log // FIXME - make this output raw bunyon logs
+    var pretty   = config.pretty = !!cmd.pretty
+
+    loadConfig()
 
     ;(function() {
       if (inFiles && inFiles !== 'files') {
         info('glob', 'start')
 
-        // TODO - if config file exists at project root, use it
-        if (blot.env.Config.isProject()) {
-          blot.env.Config
-            .readFrom()
-            .then(function() {
-              info('config', 'found default project config at index.blot.apib')
-            })
-        } else {
-          blot.env.use({name: env, logging: log})
-        }
-
-        blot.env.current().logging = true //log || pretty
-
-        return blot.io.glob(inFiles)
-          .then(function(blueprints) {
-            info('glob', 'end')
-
-            blueprints.forEach(function(blueprint, i) {
-              section(blueprint.compiled.markdown)
-
-              // FIXME - support outFile as an array
-              if (!!outFile && outFile !== 'file') {
-                var indexedOutFile = outFile + '.' + i + '.apib'
-
-                blot.io
-                  .dist(blueprint.compiled.markdown, indexedOutFile)
-                  .then(function(content) {
-                    info('dist', 'exported compiled API blueprint to ' + indexedOutFile)
-                  })
-                  .catch(function(err) {
-                    error('failed to export ' + indexedOutFile + ': ' + err)
-                  })
-              }
-            })
-          })
-          .catch(error)
+        parseFiles(inFiles).then(function(blueprints) {
+          if (!!outFile && outFile !== 'file') {
+            exportBlueprints(outFile, blueprints)
+          }
+        })
+        exportBlueprints
       } else if (inData) {
         info('read', 'start')
         
-        return blot.io.read(inData)
-          .then(function(blueprint) {
-            info('read', 'end')
-            section(blueprint.compiled.markdown)
-          })
-          .catch(error)
+        parseText(inData)
       } else {
         error('malformed command')
       }
-    })().then()
+    })()
   })
 
 program.parse(process.argv)
