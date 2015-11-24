@@ -1,6 +1,6 @@
 {
   "name": "local_test",
   "host": "http://madhax.io",
-  "logging": true,
-  "pretty": true
+  "logging": false,
+  "pretty": false
 }

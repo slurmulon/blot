@@ -15,24 +15,28 @@ var config = {
 }
 
 function loadConfig() {
-  // use project config
-  if (blot.env.Config.isProject()) {
-    return blot.env.Config
-      .src()
-      .then(function() {
-        return blot.env.Config.parse()
-      })
-      .then(function(envConfig) {
-        // TODO - create a mapper or just be more consistent
-        config.log    = envConfig.logging
-        config.pretty = envConfig.pretty
+  return new Promise(function(resolve) {
+    // use project config
+    if (blot.env.Config.isProject()) {
+      resolve(
+        blot.env.Config
+          .src()
+          .then(function() {
+            return blot.env.Config.parse()
+          })
+          .then(function(envConfig) {
+            // TODO - create a mapper or just be more consistent
+            config.log    = envConfig.logging
+            config.pretty = envConfig.pretty
 
-        return blot.env.use(envConfig)
-      })
-  }
+            return blot.env.use(envConfig)
+          })
+        )
+    }
 
-  // otherwise use default values
-  return blot.env.use({name: config.env, logging: config.log, pretty: config.pretty})
+    // otherwise use default values
+    resolve(blot.env.use({name: config.env, logging: config.log, pretty: config.pretty}))
+  })
 }
 
 function parseFiles(files) {
