@@ -199,7 +199,6 @@ export var interpolator = hazy.lang.process
  * My janky regex for finding "JSON" objects in markdown. Need a more loveable solution, has obvious
  * issues with validating nested structures (regex isn't suited for this)
  */
-// export const plainJson = /\{(.*?)\}/gm
 export const plainJson = /{["|']?([0-9a-z]+)['|"]?:[ ]?(.*?)\}/gm
 
 /**

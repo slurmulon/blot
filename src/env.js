@@ -54,9 +54,11 @@ export class Config {
     }
   }
 
-  static readFrom(filepath: String = './index.blot.apib'): Promise { // TODO - consider env name
+  static readFrom(filepath: String): Promise { // TODO - consider env name
     return new Promise((resolve, reject) => {
-      return fs.readFile(path.resolve(filepath), 'utf-8', (err, data) => {
+      const relPath = path.resolve(filepath || Config.rootUri())
+
+      return fs.readFile(relPath, 'utf-8', (err, data) => {
         if (!err) {
           resolve(
             new Config(JSON.parse(data))
