@@ -190,7 +190,6 @@ export class Blueprint {
 
   // TODO - juggle (obfiscates fixture data by randomizing it with hazy tokens)
   // TODO - struct (pretty prints your API blueprint by components (like `ps auxf`))
-
 }
 
 /**
@@ -199,10 +198,11 @@ export class Blueprint {
 export var interpolator = hazy.lang.process
 
 /**
- * A janky regex for finding "JSON" objects in markdown. Need a more loveable solution
+ * My janky regex for finding "JSON" objects in markdown. Need a more loveable solution, has obvious
+ * issues with validating nested structures (regex isn't suited for this)
  */
 // export const plainJson = /\{(.*?)\}/gm
-export const plainJson = /\{([0-9a-z]+):(.*?)\}/gm
+export const plainJson = /{["|']?([0-9a-z]+)['|"]?:[ ]?(.*?)\}/gm
 
 /**
  * Bunyan log for the API Blueprint module
