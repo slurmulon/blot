@@ -116,7 +116,7 @@ program
   .command('compile [env]')
   .description('process documentation and compile it into a static format')
   .option('-i, --in-files [files]', 'Source files (*.blot or *.apib)', 'files')
-  .option('-d, --in-data [markdown]', 'Read in Markdown (UTF-8)', 'markdown')
+  .option('-d, --in-data [markdown]', 'Read in plain Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
   .option('-v, --validate', 'Determines if provided content is a valid API Blueprint')
   .option('-e, --echo', 'Prints compiled result to stdout')
@@ -134,7 +134,7 @@ program
 
     if (inFiles && inFiles !== 'files') {
       parseFiles(inFiles).then(function(blueprints) {
-        if (!!outFile && outFile !== 'file') {
+        if (outFile && outFile !== 'file') {
           exportBlueprints(outFile, blueprints)
         }
       })
