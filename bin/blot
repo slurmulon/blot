@@ -14,14 +14,21 @@ var config = {
   pretty : false
 }
 
-function loadConfig() { // TODO - support env
-  if (blot.env.Config.isProject()) {
+function loadConfig() {
+  if (blot.env.Config.isProject()) { // use project config
     blot.env.Config
-      .readFrom()
+      .src()
       .then(function() {
-        info('config', 'found default project config at index.blot.apib')
+        return blot.env.Config.parse()
       })
-  } else {
+      .then(function(envConfig) {
+        // TODO - create a mapper or just be more consistent
+        config.log    = envConfig.logging
+        config.pretty = envConfig.pretty
+
+        blot.env.use(envConfig)
+      })
+  } else { // otherwise use default values
     blot.env.use({name: config.env, logging: config.log, pretty: config.pretty})
   }
 }

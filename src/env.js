@@ -1,5 +1,7 @@
 'use strict'
 
+import * as fsConfig from 'config.json'
+
 import hazy from 'hazy'
 import _ from 'lodash'
 import fs from 'fs'
@@ -53,7 +55,11 @@ export class Config {
     }
   }
 
-  static readFrom(filepath: String): Promise { // TODO - consider env name
+  static parse(filepath: String): Object {
+    return fsConfig.default(filepath || Config.rootUri())
+  }
+
+  static src(filepath: String): Promise {
     return new Promise((resolve, reject) => {
       const relPath = path.resolve(filepath || Config.rootUri())
 
