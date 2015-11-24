@@ -122,19 +122,17 @@ program
 
     loadConfig()
 
-    ;(function() {
-      if (inFiles && inFiles !== 'files') {
-        parseFiles(inFiles).then(function(blueprints) {
-          if (!!outFile && outFile !== 'file') {
-            exportBlueprints(outFile, blueprints)
-          }
-        })
-      } else if (inData) {
-        parseText(inData)
-      } else {
-        error('malformed command')
-      }
-    })()
+    if (inFiles && inFiles !== 'files') {
+      parseFiles(inFiles).then(function(blueprints) {
+        if (!!outFile && outFile !== 'file') {
+          exportBlueprints(outFile, blueprints)
+        }
+      })
+    } else if (inData) {
+      parseText(inData)
+    } else {
+      error('malformed command')
+    }
   })
 
 program.parse(process.argv)

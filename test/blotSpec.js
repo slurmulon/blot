@@ -21,8 +21,8 @@ describe('Blueprint', () => {
   }
 
   beforeEach(() => {
-    blueprintStubs.basic = new blot.Blueprint('# Basic Stub')
-    blueprintStubs.json  = new blot.Blueprint(`
+    blueprintStubs.basic = new blot.apib.Blueprint('# Basic Stub')
+    blueprintStubs.json  = new blot.apib.Blueprint(`
       # Retrieve User Id [GET]
       ## Request {"name": "|~person:name|"}
       ## Response {"id": "|~misc:guid|"}')`
@@ -31,7 +31,7 @@ describe('Blueprint', () => {
 
   describe('constructor', () => {
     it('should be a function', () => {
-      blot.Blueprint.constructor.should.be.a('function')
+      blot.apib.Blueprint.constructor.should.be.a('function')
     })
 
     it('should bind the following own methods', () => {
@@ -71,7 +71,7 @@ describe('Blueprint', () => {
     })
 
     it('should be rejected when a Markdown string is not provided', () => {
-      blot.Blueprint.transclude().should.eventually.be.rejected
+      blot.apib.Blueprint.transclude().should.eventually.be.rejected
     })
 
     xit('should passively parse the provided API blueprint and transclude as appropriate', () => {
@@ -110,25 +110,27 @@ describe('Blueprint', () => {
     })
 
     it('should reject when provided malformed JSON', () => {
-      blot.Blueprint.fixtures('{"invalid":').should.eventually.be.rejected
+      blot.apib.Blueprint.fixtures('{"invalid":').should.eventually.be.rejected
     })
   })
+})
 
+describe('io', () => {
   describe('src', () => {
     it('should be a function', () => {
-      blot.Blueprint.src.should.be.a('function')
+      blot.io.src.should.be.a('function')
     })
 
     it('should return a Promise', () => {
-      blot.Blueprint.src().should.be.a('promise')
+      blot.io.src().should.be.a('promise')
     })
 
     it('should compile the API Blueprint file found at the filepath', () => {
-      blot.Blueprint.src('../test/fixtures/apiblueprint/simple.md').should.be.resolved
+      blot.io.src('../test/fixtures/apiblueprint/simple.md').should.be.resolved
     })
 
     it('should reject if no API Blueprint can be found', () => {
-      blot.Blueprint.src().should.be.rejected
+      blot.io.src().should.be.rejected
     })
   })
 
@@ -144,23 +146,23 @@ describe('Blueprint', () => {
     })
 
     it('should be a function', () => {
-      blot.Blueprint.glob.should.be.a('function')
+      blot.io.glob.should.be.a('function')
     })
 
     it('should return a Promise', () => {
-      blot.Blueprint.glob('#').should.be.a('promise')
+      blot.io.glob('#').should.be.a('promise')
     })
 
     it('should compile each API Blueprint when provided an Array', () => {
-      blot.Blueprint.glob([globStub]).should.be.resolved
+      blot.io.glob([globStub]).should.be.resolved
     })
 
     it('should compile the API Blueprint when provided a String', () => {
-      blot.Blueprint.glob(globStub).should.be.resolved
+      blot.io.glob(globStub).should.be.resolved
     })
 
     it('should reject if provided anything other than an Array or String', () => {
-      blot.Blueprint.glob(false).should.be.rejected
+      blot.io.glob(false).should.be.rejected
     })
   })
 
@@ -168,5 +170,3 @@ describe('Blueprint', () => {
 
   })
 })
-
-
