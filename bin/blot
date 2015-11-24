@@ -5,6 +5,7 @@
 var blot = require('../../lib/blot')
 var colors = require('colors')
 var program = require('commander')
+var _ = require('lodash')
 
 var config = {
   env    : 'local',
@@ -21,11 +22,13 @@ function loadConfig() { // TODO - support env
         info('config', 'found default project config at index.blot.apib')
       })
   } else {
-    blot.env.use({name: config.env, logging: config.pretty || config.log})
+    blot.env.use({name: config.env, logging: config.log, pretty: config.pretty})
   }
 }
 
 function parseFiles(files) {
+  info('glob', 'start')
+
   return blot.io
     .glob(files)
     .then(function(blueprints) {
@@ -39,6 +42,8 @@ function parseFiles(files) {
 }
 
 function parseText(data) {
+  info('read', 'start')
+
   return blot.io.read(data)
     .then(function(blueprint) {
       info('read', 'end')
@@ -70,7 +75,7 @@ function exportBlueprints(outFile, blueprints) {
 
 function info(action, msg) {
   if (config.pretty) {
-    blot.log().info(action.magenta + ' ' + msg.green)
+    blot.log(true).info(action.magenta + ' ' + msg.green)
   } else if (config.log) {
     blot.log().info(action + ': ' + msg)
   }
@@ -78,7 +83,7 @@ function info(action, msg) {
 
 function error(msg) {
   if (config.pretty || config.log) {
-    blot.log().error(msg)
+    blot.log(config.pretty).error(msg)
   }
 }
 
@@ -87,7 +92,9 @@ function section(msg) {
     console.log('\n--------------------------------------------------\n'.rainbow)
     console.log(msg.cyan)
     console.log('\n--------------------------------------------------\n'.rainbow)
-  } else if (config.log || config.echo) {
+  } else if (config.log) {
+    blot.log().info(msg)
+  } else if (config.echo) {
     console.log(msg)
   }
 }
@@ -117,17 +124,12 @@ program
 
     ;(function() {
       if (inFiles && inFiles !== 'files') {
-        info('glob', 'start')
-
         parseFiles(inFiles).then(function(blueprints) {
           if (!!outFile && outFile !== 'file') {
             exportBlueprints(outFile, blueprints)
           }
         })
-        exportBlueprints
       } else if (inData) {
-        info('read', 'start')
-        
         parseText(inData)
       } else {
         error('malformed command')

@@ -10,15 +10,23 @@ var prettyStdOut = new PrettyStream()
 prettyStdOut.pipe(process.stdout)
 
 export const logger = () => {
-  if (env.current().logging) {
-    return bunyan.createLogger({
-      name: 'blot',
-      streams: [{
-        level: 'debug',
-        type: 'raw',
-        stream: prettyStdOut
-      }]
-    })
+  const enviro  = env.current()
+  const enabled = enviro.logging || enviro.pretty
+  const pretty  = enviro.pretty
+
+  if (enabled) {
+    if (pretty) {
+      return bunyan.createLogger({
+        name: 'blot',
+        streams: [{
+          level: 'debug',
+          type: 'raw',
+          stream: prettyStdOut
+        }]
+      })
+    } else {
+      return bunyan.createLogger({name: 'blot'})
+    }
   }
 
   return nothing()

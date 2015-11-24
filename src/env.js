@@ -9,12 +9,13 @@ let   selected = null
 
 export class Config {
 
-  constructor(name, base, docs, stubs, logging = false) {
+  constructor(name, base, docs, stubs, logging = false, pretty = false) {
     this.name    = name  || 'local'
     this.base    = base  || '.'
     this.docs    = docs  || {src: this.uri('docs/src'), dest: this.uri('dist/docs'),  export: true,}
     this.stubs   = stubs || {src: this.uri('docs/src'), dest: this.uri('dist/stubs'), export: false}
     this.logging = logging
+    this.pretty  = pretty
 
     enviros[name] = this
   }
@@ -66,6 +67,6 @@ export function use(env) {
   }
 }
 
-export const configure = ({name, base, docs, stubs, logging}) => new Config(name, base, docs, stubs, logging)
+export const configure = ({name, base, docs, stubs, logging, pretty}) => new Config(name, base, docs, stubs, logging, pretty)
 
 export const current = () => enviros[selected] || new Config()
