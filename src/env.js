@@ -16,8 +16,8 @@ export class Config {
     this.name  = name  || 'local'
     this.host  = host  || '127.0.0.1'
     this.base  = base  || '.'
-    this.docs  = docs  || {src: this.uri('docs/src'), dest: this.uri('dist/docs'),  export: true }
-    this.stubs = stubs || {src: this.uri('docs/src'), dest: this.uri('dist/stubs'), export: false}
+    this.docs  = docs  || {src: this.uri('src/docs'), dest: this.uri('dist/docs'),  export: true }
+    this.stubs = stubs || {src: this.uri('src/docs'), dest: this.uri('dist/stubs'), export: false}
 
     this.logging = logging
     this.pretty  = pretty

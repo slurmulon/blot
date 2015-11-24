@@ -40,22 +40,14 @@ export function src(filepath: String): Promise {
  * @param {String} filepath
  * @returns {Promise}
  */
-export function dist(markdown, filepath: String): Promise {
+export function dest(markdown, filepath: String): Promise {
   log().info(`writing content to ${filepath}`)
 
-  return new Promise((resolve, reject) => {
-    const extension = filepath.match(/\.([0-9a-z]+)$/i)
-
-    if (extension) {
-      read(markdown)
-        .then(consumed => Blueprint.marshall(consumed.compiled.markdown, extension[1]))
-        .then(marshalled => util.fs.dist(filepath, marshalled))
-        .then(resolve)
-        .catch(reject)
-    } else {
-      reject(`File destinations must contain an extension (.apib or .html)`)
-    }
-  })
+  read(markdown)
+    .then(consumed => Blueprint.marshall(consumed.compiled.markdown, extension[1]))
+    .then(marshalled => util.fs.dest(filepath, marshalled))
+    .then(resolve)
+    .catch(reject)
 }
 
 /**
@@ -113,9 +105,9 @@ export const util = {
   fs: {
     src: (filepath) => {
       return new Promise((resolve, reject) => {
-        const relPath = env.current().uri(filepath)
+        const envPath = env.current().uri(filepath)
 
-        fs.readFile(relPath, 'utf-8', (err, data) => {
+        fs.readFile(envPath, 'utf-8', (err, data) => {
           if (!err) {
             new Blueprint(data)
               .compile()
@@ -128,7 +120,7 @@ export const util = {
       })
     },
 
-    dist: (filepath, markdown) => {
+    dest: (filepath, markdown) => {
       return new Promise((resolve, reject) => {
         const relPath = env.current().uri(filepath)
 

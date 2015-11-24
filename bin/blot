@@ -94,7 +94,7 @@ function exportBlueprints(outFile, blueprints) {
 
 function info(action, msg) {
   if (config.pretty) {
-    blot.log(true).info(action.magenta + ' ' + msg.green)
+    blot.log().info(action.magenta + ' ' + msg.green)
   } else if (config.log) {
     blot.log().info(action + ': ' + msg)
   }
@@ -102,7 +102,7 @@ function info(action, msg) {
 
 function error(msg) {
   if (config.pretty || config.log) {
-    blot.log(config.pretty).error(msg)
+    blot.log().error(msg)
   }
 }
 

@@ -9,31 +9,32 @@ import PrettyStream from 'bunyan-prettystream'
 var prettyStdOut = new PrettyStream()
 prettyStdOut.pipe(process.stdout)
 
+export const core = {
+  raw:    bunyan.createLogger({name: 'blot'}),
+  pretty: bunyan.createLogger({
+    name: 'blot',
+    streams: [{
+      level: 'debug',
+      type: 'raw',
+      stream: prettyStdOut
+    }]
+  })
+}
+
 export const logger = () => {
   const enviro  = env.current()
   const enabled = enviro.logging || enviro.pretty
   const pretty  = enviro.pretty
 
   if (enabled) {
-    if (pretty) {
-      return bunyan.createLogger({
-        name: 'blot',
-        streams: [{
-          level: 'debug',
-          type: 'raw',
-          stream: prettyStdOut
-        }]
-      })
-    } else {
-      return bunyan.createLogger({name: 'blot'})
-    }
+    return pretty ? core.pretty : core.raw
   }
 
-  return nothing()
+  return nothing
 }
 
 export const nothing = () => {
   const notta = {info: _.noop, warn: _.noop, error: _.noop}
   
   return Object.assign(notta, {child: () => notta})
-}
+}();
