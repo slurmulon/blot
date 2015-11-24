@@ -14,15 +14,15 @@ var config = {
 
 function info(action, msg) {
   if (config.pretty) {
-    blot.log.info(action.magenta + ' ' + msg.green)
+    blot.log().info(action.magenta + ' ' + msg.green)
   } else if (config.log) {
-    blot.log.info('action: ' + msg)
+    blot.log().info(action + ': ' + msg)
   }
 }
 
 function error(msg) {
   if (config.pretty || config.log) {
-    blot.log.error(msg)
+    blot.log().error(msg)
   }
 }
 
@@ -37,16 +37,17 @@ function section(msg) {
 }
 
 program
-  .version('0.0.1')
-  .command('compile')
+  .version('0.0.2')
+  .command('compile [env]')
   .description('process documentation and compile it into a static format')
   .option('-i, --in-files [files]', 'Source files (*.blot or *.apib)', 'files')
   .option('-d, --in-data [markdown]', 'Read in Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
+  .option('-v, --validate', 'Determines if provided content is a valid API Blueprint')
   .option('-e, --echo', 'Prints compiled result to stdout')
   .option('-l, --log', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')
-  .action(function(cmd) {
+  .action(function(env, cmd) {
     var inFiles  = cmd.inFiles
     var inData   = cmd.inData
     var outFile  = cmd.outFile
@@ -57,6 +58,19 @@ program
     ;(function() {
       if (inFiles && inFiles !== 'files') {
         info('glob', 'start')
+
+        // TODO - if config file exists at project root, use it
+        if (blot.env.Config.isProject()) {
+          blot.env.Config
+            .readFrom()
+            .then(function() {
+              info('config', 'found default project config at index.blot.apib')
+            })
+        } else {
+          blot.env.use({name: env, logging: log})
+        }
+
+        blot.env.current().logging = true //log || pretty
 
         return blot.io.glob(inFiles)
           .then(function(blueprints) {

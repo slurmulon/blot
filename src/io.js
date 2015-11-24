@@ -1,6 +1,7 @@
 'use strict'
 
 import {Blueprint} from './apib'
+import {Config} from './env'
 
 import hazy from 'hazy'
 import protagonist from 'protagonist'
@@ -20,7 +21,7 @@ import {logger} from './log'
  * @returns {Promise}
  */
 export function src(filepath: String): Promise {
-  // log.info(`importing content from ${filepath}`)
+  log().info(`importing content from ${filepath}`)
 
   return new Promise((resolve, reject) => {
     if (filepath) {
@@ -40,14 +41,14 @@ export function src(filepath: String): Promise {
  * @returns {Promise}
  */
 export function dist(markdown, filepath: String): Promise {
-  // log.info(`exporting content to ${filepath}`)
+  log().info(`exporting content to ${filepath}`)
 
   return new Promise((resolve, reject) => {
     const extension = filepath.match(/\.([0-9a-z]+)$/i)
 
     if (extension) {
       read(markdown)
-        .then(consumed   => Blueprint.marshall(consumed.compiled.markdown, extension[1]))
+        .then(consumed => Blueprint.marshall(consumed.compiled.markdown, extension[1]))
         .then(marshalled => util.fs.dist(filepath, marshalled))
         .then(resolve)
         .catch(reject)
@@ -64,7 +65,7 @@ export function dist(markdown, filepath: String): Promise {
  * @returns {Promise}
  */
 export function glob(pattern, options): Promise {
-  // log.info(`globbing against ${pattern}`)
+  log().info(`globbing against ${pattern}`)
 
   return new Promise((resolve, reject) => {
     _glob(pattern, options, (err, files) => {
@@ -90,7 +91,7 @@ export function glob(pattern, options): Promise {
  * @returns {Promise}
  */ 
 export function read(blueprints): Promise {
-  // log.info('reading in content')
+  log().info('reading in content')
 
   return new Promise((resolve, reject) => {
     if (_.isArray(blueprints)) {
@@ -108,40 +109,16 @@ export function read(blueprints): Promise {
   })
 }
 
-export class Config { // WIP!
-
-  constructor(src: Object, dist: Object) {
-    this.src = src
-    this.dist = dist
-  }
-
-  static load(filepath: String): Promise {
-    return new Promise((resolve, reject) => {
-      if (filepath) {
-        fs.readFile(path.resolve(filepath), 'utf-8', (err, data) => {
-          if (!err) {
-            resolve(new Config(data))
-          } else {
-            reject(`Failed to read file: ${err}`)
-          }
-        })
-      } else {
-        reject(`Failed to read file, filepath required`)
-      }
-    })
-  }
-
-}
-
 export const util = {
   fs: {
     src: (filepath) => {
       return new Promise((resolve, reject) => {
+        // TODO - incorporate env config
+
         fs.readFile(path.resolve(filepath), 'utf-8', (err, data) => {
           if (!err) {
-            // log.info(`finished importing contents of ${filepath}`)
+            log().info(`finished importing contents of ${filepath}`)
 
-            //resolve(new Blueprint(data).compile())
             new Blueprint(data)
               .compile()
               .then(resolve)
@@ -155,9 +132,11 @@ export const util = {
 
     dist: (filepath, markdown) => {
       return new Promise((resolve, reject) => {
+        // TODO - incorporate env config
+
         fs.writeFile(filepath, markdown, 'utf-8', (err) => {
           if (!err) {
-            // log.info(`finished exporting content to ${filepath}`)
+            log().info(`finished exporting content to ${filepath}`)
 
             resolve(markdown)
           } else {
@@ -171,4 +150,4 @@ export const util = {
   // TODO uri
 }
 
-export const log = logger.child({module: 'io'})
+export const log = () => logger().child({module: 'io'})

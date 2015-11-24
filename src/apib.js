@@ -24,7 +24,7 @@ export class Blueprint {
   constructor(markdown: String) {
     this.markdown = markdown
 
-    const markdownFuncs = ['compile', 'fixtures', 'interpolate', 'parse', 'transclude']
+    const markdownFuncs = ['compile', 'fixtures', 'interpolate', 'parse', 'transclude', 'validate']
 
     markdownFuncs.forEach(method => {
       this[method] = () => Blueprint[method](this.markdown)
@@ -38,10 +38,11 @@ export class Blueprint {
    * @returns {Promise}
    */
   static compile(markdown: String): Promise {
-    // log.info('compiling contents')
+    log().info('compiling contents')
 
     return Blueprint
-      .transclude(markdown)
+      .validate(markdown)
+      .then(validMd => Blueprint.transclude(markdown))
       .then(embedMd => Blueprint.interpolate(embedMd))
       .then(finalMd => Blueprint.fixtures(finalMd).then(fixtures =>
         Object.assign({compiled: {fixtures, markdown: finalMd}}, this)
@@ -54,8 +55,9 @@ export class Blueprint {
    * @param {String} markdown
    * @returns {Promise}
    */
+  // TODO - add option that allows fixtures to be parsed from hazy pool
   static fixtures(markdown: String): Promise {
-    // log.info('extracting fixtures')
+    log().info('extracting fixtures')
 
     return new Promise((resolve, reject) => {
       let fixtures = []
@@ -67,7 +69,7 @@ export class Blueprint {
 
           fixtures.push(fixture)
         } catch (e) {
-          log.warn(`attempted to parse invalid JSON in API blueprint: ${jsonStr}`, e)
+          log().warn(`attempted to parse invalid JSON in API blueprint: ${jsonStr}`, e)
         }
       })
 
@@ -76,12 +78,13 @@ export class Blueprint {
   }
 
   /**
-   * Parses markdown into a usable object via protagonist
+   * Compiles API blueprint markdown data by translcuding it and then parsing it for fixtures
    *
-   * @param {String} markdown Valid API blueprint markdown
+   * @param {String} markdown
+   * @returns {Promise}
    */
   static parse(markdown: String): Promise {
-    // log.info('parsing content into protagonist object')
+    log().info('parsing content into protagonist object')
 
     return new Promise((resolve, reject) => {
       if (markdown) {
@@ -89,12 +92,37 @@ export class Blueprint {
           if (!err) {
             resolve(blueprint)
           } else {
+            log().error('invalid API blueprint', err)
+
             reject(`failed to parse file as valid API blueprint: ${err}`)
           }
         })
       } else {
         reject(`markdown data required`)
       }
+    })
+  }
+
+  /**
+   * Parses API blueprint markdown data and determines if it's valid
+   *
+   * @param {String} markdown
+   * @returns {Promise}
+   */
+  static validate(markdown: String): Promise {
+    return new Promise((resolve, reject) => {
+      Blueprint
+        .parse(markdown)
+        .then(content => {
+          log().info('content is valid API blueprint')
+
+          resolve(content)
+        })
+        .catch(err => {
+          log().error('error found in API Blueprint', err)
+
+          reject(false)
+        })
     })
   }
 
@@ -106,7 +134,7 @@ export class Blueprint {
    */
   static transclude(markdown: String): Promise {
     return new Promise((resolve, reject) => {
-      // log.info('transcluding hercule content')
+      log().info('transcluding hercule content')
 
       if (markdown) {
         hercule.transcludeString(markdown, (transMd) => {
@@ -121,6 +149,7 @@ export class Blueprint {
       }
     })
   }
+  
 
   /**
    * Interpolates markdown with relevant replacements. Uses hazy's random
@@ -130,7 +159,7 @@ export class Blueprint {
    * @returns {Promise}
    */
   static interpolate(markdown: String): Promise {
-    // log.info('interpolating random tokens')
+    log().info('interpolating random tokens')
 
     return new Promise((resolve, reject) => resolve(interpolator(markdown)))
   }
@@ -144,7 +173,7 @@ export class Blueprint {
    */
   static marshall(markdown: String, filetype: String): Promise {
     return new Promise((resolve, reject) => {
-      // log.info(`marshalling markdown to ${filetype}`)
+      log().info(`marshalling markdown to ${filetype}`)
 
       const filetypes = {
         apib: () => resolve(markdown),
@@ -159,6 +188,9 @@ export class Blueprint {
     })
   }
 
+  // TODO - juggle (obfiscates fixture data by randomizing it with hazy tokens)
+  // TODO - struct (pretty prints your API blueprint by components (like `ps auxf`))
+
 }
 
 /**
@@ -169,9 +201,10 @@ export var interpolator = hazy.lang.process
 /**
  * A janky regex for finding "JSON" objects in markdown. Need a more loveable solution
  */
-export const plainJson = /\{(.*?)\}/gm
+// export const plainJson = /\{(.*?)\}/gm
+export const plainJson = /\{([0-9a-z]+):(.*?)\}/gm
 
 /**
  * Bunyan log for the API Blueprint module
  */
-export const log = logger.child({module: 'blueprint'})
+export const log = () => logger().child({module: 'blueprint'})
