@@ -38,7 +38,7 @@ export class Blueprint {
    * @returns {Promise}
    */
   static compile(markdown: String): Promise {
-    log().info('compiling contents')
+    log().info('compiling')
 
     return Blueprint
       .validate(markdown)
@@ -84,7 +84,7 @@ export class Blueprint {
    * @returns {Promise}
    */
   static parse(markdown: String): Promise {
-    log().info('parsing content into protagonist object')
+    log().info('parsing')
 
     return new Promise((resolve, reject) => {
       if (markdown) {
@@ -110,18 +110,14 @@ export class Blueprint {
    * @returns {Promise}
    */
   static validate(markdown: String): Promise {
-    log().info('validating content')
+    log().info('validating')
 
     return new Promise((resolve, reject) => {
       Blueprint
         .parse(markdown)
-        .then(content => {
-          log().info('content is valid API blueprint')
-
-          resolve(content)
-        })
+        .then(resolve)
         .catch(err => {
-          log().error('error found in API blueprint', err)
+          log().error('invalid', err)
 
           reject(false)
         })
@@ -136,14 +132,14 @@ export class Blueprint {
    */
   static transclude(markdown: String): Promise {
     return new Promise((resolve, reject) => {
-      log().info('transcluding hercule content')
+      log().info('transcluding')
 
       if (markdown) {
         hercule.transcludeString(markdown, (transMd) => {
           if (transMd) {
             resolve(transMd)
           } else {
-            reject('failed to parse markdown for Hercule transclusions')
+            reject('failed to parse hercule transclusions')
           }
         })
       } else {
@@ -161,7 +157,7 @@ export class Blueprint {
    * @returns {Promise}
    */
   static interpolate(markdown: String): Promise {
-    log().info('interpolating random tokens')
+    log().info('interpolating')
 
     return new Promise((resolve, reject) => resolve(interpolator(markdown)))
   }
@@ -175,7 +171,7 @@ export class Blueprint {
    */
   static marshall(markdown: String, filetype: String): Promise {
     return new Promise((resolve, reject) => {
-      log().info(`marshalling markdown to ${filetype}`)
+      log().info(`marshalling to ${filetype}`)
 
       const filetypes = {
         apib: () => resolve(markdown),

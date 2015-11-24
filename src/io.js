@@ -21,7 +21,7 @@ import {logger} from './log'
  * @returns {Promise}
  */
 export function src(filepath: String): Promise {
-  log().info(`importing content from ${filepath}`)
+  log().info(`reading content from ${filepath}`)
 
   return new Promise((resolve, reject) => {
     if (filepath) {
@@ -41,7 +41,7 @@ export function src(filepath: String): Promise {
  * @returns {Promise}
  */
 export function dist(markdown, filepath: String): Promise {
-  log().info(`exporting content to ${filepath}`)
+  log().info(`writing content to ${filepath}`)
 
   return new Promise((resolve, reject) => {
     const extension = filepath.match(/\.([0-9a-z]+)$/i)
@@ -117,14 +117,12 @@ export const util = {
 
         fs.readFile(relPath, 'utf-8', (err, data) => {
           if (!err) {
-            log().info(`imported contents of ${filepath}`)
-
             new Blueprint(data)
               .compile()
               .then(resolve)
               .catch(reject)
           } else {
-            reject(`Failed to read file: ${err}`)
+            reject(`failed to read file: ${err}`)
           }
         })
       })
@@ -140,7 +138,7 @@ export const util = {
 
             resolve(markdown)
           } else {
-            reject(`An error occured while saving file: ${err}`)
+            reject(`error occured while writing file: ${err}`)
           }
         })
       })
