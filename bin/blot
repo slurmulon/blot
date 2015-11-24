@@ -37,6 +37,8 @@ function parseFiles(files) {
       blueprints.forEach(function(blueprint, i) {
         section(blueprint.compiled.markdown)
       })
+
+      return blueprints
     })
     .catch(error)
 }
@@ -58,12 +60,13 @@ function exportBlueprints(outFile, blueprints) {
 
   blueprints.forEach(function(blueprint, i) {
     // FIXME - support outFile as an array
-    var indexedOutFile = cmd.outFile + '.apib' // outFile + '.' + i + '.apib'
+    var indexedOutFile = outFile + '.apib' // outFile + '.' + i + '.apib'
 
     blot.io
       .dist(blueprint.compiled.markdown, indexedOutFile)
       .then(function(content) {
         info('export', 'compiled and exported API blueprint to ' + indexedOutFile)
+        info('export', 'end')
       })
       .catch(function(err) {
         error('failed to export ' + indexedOutFile + ': ' + err)

@@ -1,27 +1,35 @@
 'use strict'
 
+import hazy from 'hazy'
 import _ from 'lodash'
 import fs from 'fs'
 import path from 'path'
 
-const enviros  = {}
-let   selected = null 
+const enviros = {}
+let selected  = null
 
 export class Config {
 
-  constructor(name, base, docs, stubs, logging = false, pretty = false) {
-    this.name    = name  || 'local'
-    this.base    = base  || '.'
-    this.docs    = docs  || {src: this.uri('docs/src'), dest: this.uri('dist/docs'),  export: true,}
-    this.stubs   = stubs || {src: this.uri('docs/src'), dest: this.uri('dist/stubs'), export: false}
+  constructor(name, base, host, docs, stubs, logging = false, pretty = false) {
+    this.name  = name  || 'local'
+    this.host  = host  || '127.0.0.1'
+    this.base  = base  || '.'
+    this.docs  = docs  || {src: this.uri('docs/src'), dest: this.uri('dist/docs'),  export: true,}
+    this.stubs = stubs || {src: this.uri('docs/src'), dest: this.uri('dist/stubs'), export: false}
+
     this.logging = logging
     this.pretty  = pretty
 
     enviros[name] = this
+
+    // TODO - cleanup / improve
+    ;['name', 'host', 'base'].forEach(prop => {
+      hazy.fixture.register(`config.${name}.${prop}`, this[prop])
+    })
   }
 
-  uri(path: String): String {
-    return `${this.base}/${path}`
+  uri(filepath: String): String {
+    return path.resolve(`${this.base}/${filepath}`)
   }
 
   static existsAt(filepath: String): Boolean {
@@ -67,6 +75,6 @@ export function use(env) {
   }
 }
 
-export const configure = ({name, base, docs, stubs, logging, pretty}) => new Config(name, base, docs, stubs, logging, pretty)
+export const configure = ({name, base, host, docs, stubs, logging, pretty}) => new Config(name, base, host, docs, stubs, logging, pretty)
 
 export const current = () => enviros[selected] || new Config()

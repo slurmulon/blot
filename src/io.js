@@ -1,7 +1,7 @@
 'use strict'
 
 import {Blueprint} from './apib'
-import {Config} from './env'
+import * as env from './env'
 
 import hazy from 'hazy'
 import protagonist from 'protagonist'
@@ -113,11 +113,11 @@ export const util = {
   fs: {
     src: (filepath) => {
       return new Promise((resolve, reject) => {
-        // TODO - incorporate env config
+        const relPath = env.current().uri(filepath)
 
-        fs.readFile(path.resolve(filepath), 'utf-8', (err, data) => {
+        fs.readFile(relPath, 'utf-8', (err, data) => {
           if (!err) {
-            log().info(`finished importing contents of ${filepath}`)
+            log().info(`imported contents of ${filepath}`)
 
             new Blueprint(data)
               .compile()
@@ -132,11 +132,11 @@ export const util = {
 
     dist: (filepath, markdown) => {
       return new Promise((resolve, reject) => {
-        // TODO - incorporate env config
+        const relPath = env.current().uri(filepath)
 
-        fs.writeFile(filepath, markdown, 'utf-8', (err) => {
+        fs.writeFile(relPath, markdown, 'utf-8', (err) => {
           if (!err) {
-            log().info(`finished exporting content to ${filepath}`)
+            log().info(`exported content to ${filepath}`)
 
             resolve(markdown)
           } else {
