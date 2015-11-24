@@ -1,4 +1,5 @@
 FORMAT: 1A
+HOST: |+ config.local.host|
 
 # Hazy Responses API
 Some description

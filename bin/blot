@@ -5,24 +5,88 @@
 var blot = require('../../lib/blot')
 var colors = require('colors')
 var program = require('commander')
+var _ = require('lodash')
 
 var config = {
-  echo: false,
-  log: false,
-  pretty: false,
+  env    : 'local',
+  echo   : false,
+  log    : false,
+  pretty : false
 }
+
+function loadConfig() { // TODO - support env
+  if (blot.env.Config.isProject()) {
+    blot.env.Config
+      .readFrom()
+      .then(function() {
+        info('config', 'found default project config at index.blot.apib')
+      })
+  } else {
+    blot.env.use({name: config.env, logging: config.log, pretty: config.pretty})
+  }
+}
+
+function parseFiles(files) {
+  info('glob', 'start')
+
+  return blot.io
+    .glob(files)
+    .then(function(blueprints) {
+      info('glob', 'end')
+
+      blueprints.forEach(function(blueprint, i) {
+        section(blueprint.compiled.markdown)
+      })
+
+      return blueprints
+    })
+    .catch(error)
+}
+
+function parseText(data) {
+  info('read', 'start')
+
+  return blot.io.read(data)
+    .then(function(blueprint) {
+      info('read', 'end')
+
+      section(blueprint.compiled.markdown)
+    })
+    .catch(error)
+}
+
+function exportBlueprints(outFile, blueprints) {
+  info('export', 'start')
+
+  blueprints.forEach(function(blueprint, i) {
+    // FIXME - support outFile as an array
+    var indexedOutFile = outFile + '.apib' // outFile + '.' + i + '.apib'
+
+    blot.io
+      .dist(blueprint.compiled.markdown, indexedOutFile)
+      .then(function(content) {
+        info('export', 'compiled and exported API blueprint to ' + indexedOutFile)
+        info('export', 'end')
+      })
+      .catch(function(err) {
+        error('failed to export ' + indexedOutFile + ': ' + err)
+      })
+  })
+}
+
+// Logging
 
 function info(action, msg) {
   if (config.pretty) {
-    blot.log.info(action.magenta + ' ' + msg.green)
+    blot.log(true).info(action.magenta + ' ' + msg.green)
   } else if (config.log) {
-    blot.log.info('action: ' + msg)
+    blot.log().info(action + ': ' + msg)
   }
 }
 
 function error(msg) {
   if (config.pretty || config.log) {
-    blot.log.error(msg)
+    blot.log(config.pretty).error(msg)
   }
 }
 
@@ -31,69 +95,47 @@ function section(msg) {
     console.log('\n--------------------------------------------------\n'.rainbow)
     console.log(msg.cyan)
     console.log('\n--------------------------------------------------\n'.rainbow)
-  } else if (config.log || config.echo) {
+  } else if (config.log) {
+    blot.log().info(msg)
+  } else if (config.echo) {
     console.log(msg)
   }
 }
 
+// Binding
+
 program
-  .version('0.0.1')
-  .command('compile')
+  .version('0.0.2')
+  .command('compile [env]')
   .description('process documentation and compile it into a static format')
   .option('-i, --in-files [files]', 'Source files (*.blot or *.apib)', 'files')
   .option('-d, --in-data [markdown]', 'Read in Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
+  .option('-v, --validate', 'Determines if provided content is a valid API Blueprint')
   .option('-e, --echo', 'Prints compiled result to stdout')
   .option('-l, --log', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')
-  .action(function(cmd) {
+  .action(function(env, cmd) {
     var inFiles  = cmd.inFiles
     var inData   = cmd.inData
     var outFile  = cmd.outFile
-    var echo     = config.echo    = !!cmd.echo
-    var log      = config.log     = !!cmd.log // TODO - make this output raw bunyon logs
-    var pretty   = config.pretty  = !!cmd.pretty
+    var echo     = config.echo   = !!cmd.echo
+    var log      = config.log    = !!cmd.log // FIXME - make this output raw bunyon logs
+    var pretty   = config.pretty = !!cmd.pretty
 
-    ;(function() {
-      if (inFiles && inFiles !== 'files') {
-        info('glob', 'start')
+    loadConfig()
 
-        return blot.io.glob(inFiles)
-          .then(function(blueprints) {
-            info('glob', 'end')
-
-            blueprints.forEach(function(blueprint, i) {
-              section(blueprint.compiled.markdown)
-
-              // FIXME - support outFile as an array
-              if (!!outFile && outFile !== 'file') {
-                var indexedOutFile = outFile + '.' + i + '.apib'
-
-                blot.io
-                  .dist(blueprint.compiled.markdown, indexedOutFile)
-                  .then(function(content) {
-                    info('dist', 'exported compiled API blueprint to ' + indexedOutFile)
-                  })
-                  .catch(function(err) {
-                    error('failed to export ' + indexedOutFile + ': ' + err)
-                  })
-              }
-            })
-          })
-          .catch(error)
-      } else if (inData) {
-        info('read', 'start')
-        
-        return blot.io.read(inData)
-          .then(function(blueprint) {
-            info('read', 'end')
-            section(blueprint.compiled.markdown)
-          })
-          .catch(error)
-      } else {
-        error('malformed command')
-      }
-    })().then()
+    if (inFiles && inFiles !== 'files') {
+      parseFiles(inFiles).then(function(blueprints) {
+        if (!!outFile && outFile !== 'file') {
+          exportBlueprints(outFile, blueprints)
+        }
+      })
+    } else if (inData) {
+      parseText(inData)
+    } else {
+      error('malformed command')
+    }
   })
 
 program.parse(process.argv)

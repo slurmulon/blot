@@ -1,17 +1,39 @@
 'use strict'
 
+import * as env from './env'
+
+import _ from 'lodash'
 import bunyan from 'bunyan'
 import PrettyStream from 'bunyan-prettystream'
  
 var prettyStdOut = new PrettyStream()
 prettyStdOut.pipe(process.stdout)
 
-// FIXME - make this configurable through node-config, need the ability to output raw bunyon logs
-export const logger = bunyan.createLogger({
-  name: 'blot',
-  streams: [{
-    level: 'debug',
-    type: 'raw',
-    stream: prettyStdOut
-  }]
-})
+export const logger = () => {
+  const enviro  = env.current()
+  const enabled = enviro.logging || enviro.pretty
+  const pretty  = enviro.pretty
+
+  if (enabled) {
+    if (pretty) {
+      return bunyan.createLogger({
+        name: 'blot',
+        streams: [{
+          level: 'debug',
+          type: 'raw',
+          stream: prettyStdOut
+        }]
+      })
+    } else {
+      return bunyan.createLogger({name: 'blot'})
+    }
+  }
+
+  return nothing()
+}
+
+export const nothing = () => {
+  const notta = {info: _.noop, warn: _.noop, error: _.noop}
+  
+  return Object.assign(notta, {child: () => notta})
+}
