@@ -30,10 +30,10 @@ on top of Hazy and provides an abstract API blueprint parser and generator.
 ## Hazy
 
 [Hazy](https://github.com/slurmulon/hazy) is a simple specification (with an accompanying node library) for lazily
-processing dynamic test fixtures. It provides a simple syntax for interpolating random data (and more) into your fixtures.
+processing dynamic test fixtures. It provides a simple syntax for interpolating random data and pattern-matched data into your fixtures.
 It alleviates the need for developers to constantly come up with names, addresses, etc. for their enormous amount of test data.
 
-The most powerful feature of hazy is that it allows developers to dynamically embed fixtures via `JsonPath` patterns or by a simple string.
+The most powerful feature of hazy is that it allows developers to dynamically embed fixtures (or sub-fixtures) via `JsonPath` patterns or by a simple string.
 This is very useful when creating and maintaining fixtures that share identical or related pieces of data, especially as an application grows.
 
 In blot, hazy acts as a standardized bridge between your documentation and tests. It pushes your fixtures out of your code and
@@ -110,18 +110,41 @@ You may also freely leverage `JsonPath` in order to transclude fixtures by patte
   |* $..user[0]|
 ```
 
+Subsets of fixtures may also be targeted.
+The following `GET` user fixture is friends with four arbitrary users:
+
+```
+# POST /v1/auth
+### Login a user [POST]
+
++ Request (application/json)
+
+  |> auth-req.json|
+
++ Response 200 (application/json)
+
+  {"user": "|* $..user[0]|", "friends": []}
+
+# GET /v1/user/{id}
+### Fetch a user [GET]
+
++ Response 200 (application/json)
+
+  {"user": "|* $..user[0]|", "friends": "|* $..user.id[:4]|"}
+```
+
 ### Command Line
 
 The easiest way to use blot is by running it as a command.
 
 You can specify an API blueprint file to parse and export:
 
-**Native Output**
+**Standard**
 ```bash
 $ blot compile -i docs.blot.apib --echo > docs.apib
 ```
 
-**Snazzy**
+**Fancy**
 ```bash
 $ blot compile -i docs.blot.apib -o docs.apib --pretty
 ```
@@ -138,7 +161,7 @@ $ blot compile -d 'FORMAT: 1A
 {"message": "Hello, |~person:name|!", "id": "|~misc:guid|"}' -o docs.apib --pretty
 ```
 
-#### Need help?
+#### Help?
 
 ```
 blot compile --help
@@ -150,6 +173,9 @@ blot compile --help
 The node module allows you to monkey-patch special functionality and data to your fixtures.
 You can then inject your monkey-patched hazy pool by setting `blot.interpolator`, which is
 used whenever API blueprints are processed.
+
+The following example attaches a `created` property ao all fixtures. It also appends a 
+`fixture` query parameter to any fixture with a `url` property (deep):
 
 ```javascript
 #! /usr/bin/env node
@@ -183,7 +209,7 @@ blot.interpolator = hazy.lang.process
 blot.io
   .src('documentation.blot.apib')
   .then(compiled => blot.dist(compiled.content, 'dist/documentation.apib'))
-  .then(result   => console.log('[blot] done exporting!'))
+  .then(result   => blot.log('done exporting!'))
 ```
 
 ## Install
