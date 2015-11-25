@@ -67,8 +67,6 @@ export class Blueprint {
         try {
           const fixture = JSON.parse(jsonStr)
 
-          // log().info('found fixture', fixture)
-
           fixtures.push(fixture)
         } catch (e) {
           log().warn(`attempted to parse invalid JSON in API blueprint: ${jsonStr}`, e)
@@ -177,6 +175,7 @@ export class Blueprint {
       log().info(`marshalling to ${filetype}`)
 
       const filetypes = {
+        md:   () => resolve(markdown),
         apib: () => resolve(markdown),
         json: () => Blueprint.fixtures(markdown).then(resolve)
       }

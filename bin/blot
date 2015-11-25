@@ -68,24 +68,26 @@ function parseText(data) {
     .catch(error)
 }
 
-function exportBlueprints(outFile, blueprints) {
-  if (!outFile || outFile == 'file')
+function exportBlueprints(blueprints) {
+  var curEnv   = blot.env.current()
+  var autoDest = curEnv.isProject && curEnv.docs.export && curEnv.docs.dest
+
+  if (!autoDest && (!config.outFile || config.outFile == 'file'))
     return
 
   info('export', 'start')
 
-  blueprints.forEach(function(blueprint, i) {
-    // FIXME - support outFile as an array
-    var indexedOutFile = outFile + '.apib' // outFile + '.' + i + '.apib'
+  var outPath = autoDest ? curEnv.docs.dest + '/' + config.inFiles : config.outFile
 
+  blueprints.forEach(function(blueprint, i) {
     blot.io
-      .dist(blueprint.compiled.markdown, indexedOutFile)
+      .dest(blueprint.compiled.markdown, outPath)
       .then(function(content) {
-        info('export', 'compiled and exported API blueprint to ' + indexedOutFile)
+        info('export', 'compiled and exported API blueprint to ' + outPath)
         info('export', 'end')
       })
       .catch(function(err) {
-        error('failed to export ' + indexedOutFile + ': ' + err)
+        error('failed to export ' + outPath + ': ' + err)
       })
   })
 }
@@ -132,21 +134,23 @@ program
   .option('-l, --log', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')
   .action(function(env, cmd) {
-    var inFiles  = cmd.inFiles
-    var inData   = cmd.inData
-    var outFile  = cmd.outFile
-    var echo     = config.echo   = !!cmd.echo
-    var log      = config.log    = !!cmd.log // FIXME - make this output raw bunyon logs
-    var pretty   = config.pretty = !!cmd.pretty
+    var inFiles  = config.inFiles = cmd.inFiles
+    var inData   = config.inData  = cmd.inData
+    var outFile  = config.outFile = cmd.outFile
+    var echo     = config.echo    = !!cmd.echo
+    var log      = config.log     = !!cmd.log
+    var pretty   = config.pretty  = !!cmd.pretty
 
     loadConfig().then(function() {
-      if (inFiles && inFiles !== 'files') {
+      var curEnv = blot.env.current()
+
+      if ((inFiles && inFiles !== 'files') || (curEnv.isProject && curEnv.docs.src)) {
         parseFiles(inFiles).then(function(blueprints) {
-          exportBlueprints(outFile, blueprints)
+          exportBlueprints(blueprints)
         })
       } else if (inData) {
         parseText(inData).then(function(blueprints) {
-          exportBlueprints(outFile, blueprints)
+          exportBlueprints(blueprints)
         })
       } else {
         error('malformed command')

@@ -11,6 +11,7 @@ import _ from 'lodash'
 import _glob from 'glob'
 import fs from 'fs'
 import path from 'path'
+import mkpath from 'mkpath'
 
 import {logger} from './log'
 
@@ -43,8 +44,10 @@ export function src(filepath: String): Promise {
 export function dest(markdown, filepath: String): Promise {
   log().info(`writing content to ${filepath}`)
 
+  const ext = path.extname(filepath).substr(1)
+
   read(markdown)
-    .then(consumed => Blueprint.marshall(consumed.compiled.markdown, extension[1]))
+    .then(consumed => Blueprint.marshall(consumed.compiled.markdown, ext))
     .then(marshalled => util.fs.dest(filepath, marshalled))
     .then(resolve)
     .catch(reject)
@@ -123,14 +126,21 @@ export const util = {
     dest: (filepath, markdown) => {
       return new Promise((resolve, reject) => {
         const relPath = env.current().uri(filepath)
+        const relDir  = path.dirname(relPath)
 
-        fs.writeFile(relPath, markdown, 'utf-8', (err) => {
+        mkpath(relDir, (err) => {
           if (!err) {
-            log().info(`exported content to ${filepath}`)
+            fs.writeFile(relPath, markdown, 'utf-8', (err) => {
+              if (!err) {
+                log().info(`exported content to ${filepath}`)
 
-            resolve(markdown)
+                resolve(markdown)
+              } else {
+                reject(`error occured while writing file: ${err}`)
+              }
+            })
           } else {
-            reject(`error occured while writing file: ${err}`)
+            reject('error occured while scaffolding destination folders: ${err}')
           }
         })
       })

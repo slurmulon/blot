@@ -16,8 +16,10 @@ export class Config {
     this.name  = name  || 'local'
     this.host  = host  || '127.0.0.1'
     this.base  = base  || '.'
-    this.docs  = docs  || {src: this.uri('src/docs'), dest: this.uri('dest/docs'),  export: false}
-    this.stubs = stubs || {src: this.uri('src/docs'), dest: this.uri('dest/stubs'), export: false}
+    this.docs  = docs  || {src: '', dest: '', export: false}
+    this.stubs = stubs || {src: '', dest: '', export: false}
+    // this.docs  = docs  || {src: this.uri('src/docs'), dest: this.uri('dest/docs'),  export: false}
+    // this.stubs = stubs || {src: this.uri('src/docs'), dest: this.uri('dest/stubs'), export: false}
 
     this.logging = logging
     this.pretty  = pretty
@@ -33,8 +35,12 @@ export class Config {
     return path.resolve(`${this.base}/${filepath}`)
   }
 
-  rootUri(): String {
+  get rootUri(): String {
     return Config.rootUri(this.name)
+  }
+
+  get isProject(): Boolean {
+    return Config.existsAt(this.rootUri)
   }
 
   static rootUri(name: String): String {
