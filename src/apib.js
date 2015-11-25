@@ -67,6 +67,8 @@ export class Blueprint {
         try {
           const fixture = JSON.parse(jsonStr)
 
+          log().info('found fixture', fixture)
+
           fixtures.push(fixture)
         } catch (e) {
           log().warn(`attempted to parse invalid JSON in API blueprint: ${jsonStr}`, e)
@@ -200,7 +202,7 @@ export var interpolator = hazy.lang.process
  * My janky regex for finding "JSON" objects in markdown. Need a more loveable solution, has obvious
  * issues with validating nested structures (regex isn't suited for this)
  */
-export const plainJson = /{["|']?([0-9a-z]+)['|"]?[ ]+:[ ]+(.*?)\}/gm
+export const plainJson = /\{(.*?)\}/gm
 
 /**
  * Bunyan log for the API Blueprint module
