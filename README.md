@@ -7,7 +7,7 @@
 API Blueprint + Hercule + Hazy = Magical documentation, fixtures, and tests
 
 * Unifies documentation and fixtures
-* Reference and embed documentation / test fixtures by patterns or name
+* Reference and embed data (markdown, fixtures, sub-fixtures, etc.) by patterns or name
 * Increases readability and dramatically eases maintenance of documentation, fixtures and tests
 
 ## Summary
@@ -66,8 +66,8 @@ The `~` keyword tells hazy to replace the token with categorized random data:
 ```
 
 Alternatively, you can be even more lazy, which is encouraged for increased normalization. The following example
-shows how you can reference and embed large fixtures that live on the filesystem using the `>` operator, or even
-alongside hercule by using `:[]`:
+shows how you can reference and embed large fixtures that live on the filesystem using the `>` operator. It can
+be used alongside hercule by using `:[]`:
 
 ```
 # POST /v1/auth

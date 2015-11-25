@@ -1,6 +1,20 @@
 {
-  "name": "local_test",
-  "host": "http://madhax.io",
+  "name": "example",
+  "host": "http://example.blot.apps.madhax.io",
+  "base": ".",
+  "docs": {
+    "src": "src/docs",
+    "dest": "dist/docs",
+    "export": true
+  },
+  "stubs": {
+    "src": "src/fixtures",
+    "dest": "dist/fixtures",
+    "export": false
+  },
+  "meta": {
+    "src": "src/"
+  },
   "logging": false,
   "pretty": true
 }
