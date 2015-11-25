@@ -24,7 +24,7 @@ export class Blueprint {
   constructor(markdown: String) {
     this.markdown = markdown
 
-    const markdownFuncs = ['compile', 'fixtures', 'interpolate', 'parse', 'transclude', 'validate']
+    const markdownFuncs = ['compile', 'fixtures', 'groups', 'interpolate', 'parse', 'transclude', 'validate']
 
     markdownFuncs.forEach(method => {
       this[method] = () => Blueprint[method](this.markdown)
@@ -41,10 +41,10 @@ export class Blueprint {
     log().info('compiling')
 
     return Blueprint
-      .validate(markdown)
-      .then(validMd => Blueprint.transclude(markdown))
-      .then(embedMd => Blueprint.interpolate(embedMd))
-      .then(finalMd => Blueprint.fixtures(finalMd).then(fixtures =>
+      .transclude(markdown)
+      .then(embedMd  => Blueprint.interpolate(embedMd))
+      .then(staticMd => Blueprint.validate(intopMd))
+      .then(finalMd  => Blueprint.fixtures(finalMd).then(fixtures =>
         Object.assign({compiled: {fixtures, markdown: finalMd}}, this)
       ))
   }
@@ -115,11 +115,13 @@ export class Blueprint {
     return new Promise((resolve, reject) => {
       Blueprint
         .parse(markdown)
-        .then(resolve)
+        .then(obj => {
+          resolve(markdown)
+        })
         .catch(err => {
           log().error('invalid', err)
 
-          reject(false)
+          reject(markdown)
         })
     })
   }
@@ -147,7 +149,6 @@ export class Blueprint {
       }
     })
   }
-  
 
   /**
    * Interpolates markdown with relevant replacements. Uses hazy's random
@@ -199,7 +200,7 @@ export var interpolator = hazy.lang.process
  * My janky regex for finding "JSON" objects in markdown. Need a more loveable solution, has obvious
  * issues with validating nested structures (regex isn't suited for this)
  */
-export const plainJson = /{["|']?([0-9a-z]+)['|"]?:[ ]?(.*?)\}/gm
+export const plainJson = /{["|']?([0-9a-z]+)['|"]?[ ]+:[ ]+(.*?)\}/gm
 
 /**
  * Bunyan log for the API Blueprint module

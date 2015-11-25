@@ -16,8 +16,8 @@ export class Config {
     this.name  = name  || 'local'
     this.host  = host  || '127.0.0.1'
     this.base  = base  || '.'
-    this.docs  = docs  || {src: this.uri('src/docs'), dest: this.uri('dist/docs'),  export: true }
-    this.stubs = stubs || {src: this.uri('src/docs'), dest: this.uri('dist/stubs'), export: false}
+    this.docs  = docs  || {src: this.uri('src/docs'), dest: this.uri('dest/docs'),  export: false}
+    this.stubs = stubs || {src: this.uri('src/docs'), dest: this.uri('dest/stubs'), export: false}
 
     this.logging = logging
     this.pretty  = pretty
@@ -61,9 +61,9 @@ export class Config {
 
   static src(filepath: String): Promise {
     return new Promise((resolve, reject) => {
-      const relPath = path.resolve(filepath || Config.rootUri())
+      const envPath = path.resolve(filepath || Config.rootUri())
 
-      return fs.readFile(relPath, 'utf-8', (err, data) => {
+      return fs.readFile(envPath, 'utf-8', (err, data) => {
         if (!err) {
           resolve(
             new Config(JSON.parse(data))
