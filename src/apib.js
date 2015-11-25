@@ -67,7 +67,7 @@ export class Blueprint {
         try {
           const fixture = JSON.parse(jsonStr)
 
-          log().info('found fixture', fixture)
+          // log().info('found fixture', fixture)
 
           fixtures.push(fixture)
         } catch (e) {

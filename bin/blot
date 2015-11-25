@@ -31,7 +31,7 @@ function loadConfig() {
 
             return blot.env.use(envConfig)
           })
-        )
+      )
     }
 
     // otherwise use default values
@@ -152,7 +152,7 @@ program
         error('malformed command')
       }
     })
-
   })
+  // TODO - query command
 
 program.parse(process.argv)
