@@ -29,6 +29,19 @@ function loadConfig(env) {
   })
 }
 
+function loadInput() {
+  var curEnv = blot.env.current()
+  var loadFs = curEnv.isProject && curEnv.docs.src
+
+  if ((config.inFiles && config.inFiles !== 'files') || loadFs) {
+    parseFiles(config.inFiles).then(exportBlueprints)
+  } else if (config.inData) {
+    parseText(config.inData).then(exportBlueprints)
+  } else {
+    error('malformed command')
+  }
+}
+
 function parseFiles(files) {
   info('glob', 'start')
 
@@ -58,7 +71,7 @@ function parseText(data) {
     .catch(error)
 }
 
-function maybeExportBlueprints(blueprints) {
+function exportBlueprints(blueprints) {
   var curEnv   = blot.env.current()
   var autoDest = curEnv.isProject && curEnv.docs.export && curEnv.docs.dest
 
@@ -117,6 +130,7 @@ program
   .option('-d, --in-data [markdown]', 'Read in plain Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
   .option('-v, --validate', 'Determines if provided content is a valid API Blueprint')
+  .option('-c, --config', 'Specify a specific configuration to load, Useful for working with environments.')
   .option('-e, --echo', 'Prints compiled result to stdout')
   .option('-l, --log', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')
@@ -129,24 +143,14 @@ program
   .action(function(env, flags) {
     var cmd = flags.parent
 
-    var inFiles = config.inFiles = cmd.inFiles // FIXME - map io properly to env.Config
-    var inData  = config.inData  = cmd.inData
-    var outFile = config.outFile = cmd.outFile
-    var echo    = config.echo    = cmd.echo
-    var log     = config.logging = cmd.log
-    var pretty  = config.pretty  = cmd.pretty
+    config.inFiles = cmd.inFiles // FIXME - map io properly to env.Config
+    config.inData  = cmd.inData
+    config.outFile = cmd.outFile
+    config.echo    = cmd.echo
+    config.logging = cmd.log
+    config.pretty  = cmd.pretty
 
-    loadConfig(env).then(function() {
-      var curEnv = blot.env.current()
-
-      if ((inFiles && inFiles !== 'files') || (curEnv.isProject && curEnv.docs.src)) {
-        parseFiles(inFiles).then(maybeExportBlueprints)
-      } else if (inData) {
-        parseText(inData).then(maybeExportBlueprints)
-      } else {
-        error('malformed command')
-      }
-    })
+    loadConfig(env).then(loadInput)
   })
 
 program
