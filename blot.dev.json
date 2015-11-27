@@ -5,7 +5,7 @@
   "docs": {
     "src": "src/docs",
     "dest": "dist/docs",
-    "export": false
+    "export": true
   },
   "fixtures": {
     "src": "src/fixtures",
@@ -22,7 +22,7 @@
     },
     "elements": {
       "main": ".ng-view",
-      "remove": ["script", "link", "form"],
+      "strip": ["script", "link", "form"],
       "unwrap": ["html", "body"],
       "comments": false
     },

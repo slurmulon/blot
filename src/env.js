@@ -33,7 +33,7 @@ export class Config {
     this.host     = host     || '127.0.0.1'
     this.docs     = docs     || {src: '', dest: '', export: false}
     this.fixtures = fixtures || {src: '', dest: '', export: false}
-    this.view     = view     || {dest: '', export: false, theme: {}, elems: {}}
+    this.view     = view     || {dest: '', export: false, theme: {}, elements: {}, attrs: {}}
 
     this.echo     = echo
     this.logging  = logging
@@ -168,6 +168,17 @@ export function use(env) {
   return env
 }
 
+/**
+ * Destructured alias for instantiating environment / project Configs
+ *
+ * @param {Object} arguments configuration object
+ * @returns {Config}
+ */
 export const configure = ({name, base, host, docs, fixtures, view, echo, logging, pretty}) => new Config(name, base, host, docs, fixtures, view, echo, logging, pretty)
 
+/**
+ * Provides the currently selected environment in blot
+ *
+ * @returns {Config|Object}
+ */
 export const current = () => enviros[selected] || {}

@@ -18,31 +18,35 @@ export class Document {
     this.html = html
   }
 
-  get config() {
+  get config(): Object {
     return Document.config()
   }
 
-  get query() {
+  get query(): Object {
     return Document.query(this.html)
   }
 
-  get main() {
+  get main(): String {
     return Document.main(this.html)
   }
 
-  get removed() {
-    return Document.scrub(this.html)
+  get stripped(): String {
+    return Document.stripped(this.html)
   }
 
-  get filtered() {
+  get filtered(): String {
     return Document.filtered(this.html)
   }
 
-  static config() {
+  dest(filepath?: String, html?: String): Promise {
+    return Docuemnt.dest(filepath || this.config.dest, html || this.html)
+  }
+
+  static config(): Object {
     return env.current().view
   }
 
-  static query(html: String) {
+  static query(html: String): Object {
     return cheerio.load(html)
   }
 
@@ -61,8 +65,8 @@ export class Document {
     return selector
   }
 
-  static remove(html: String): String {
-    return Document.select(html, 'scrub').remove()
+  static stripped(html: String): String {
+    return Document.select(html, 'strip').remove()
   }
 
   // TODO - add this to cheerio, do PR
@@ -70,11 +74,11 @@ export class Document {
   //   return Document.selector(html, 'unwrap').unwrap()
   // }
 
-  static filter(html: String): String {
-    const mainElems  = Document.main(html)
-    const finalElems = Document.remove(mainHtml)
+  static filtered(html: String): String {
+    const mainDom  = Document.main(html)
+    const finaldom = Document.stripped(mainDom)
 
-    return finalElems.html()
+    return finalDom.html()
   }
 
   static dest(filepath: String, html: String): Promise {
@@ -90,30 +94,36 @@ export class Document {
     })
   }
 
+  static fromBlueprints(blueprints: Array): Promise {
+    return Promise.all(blueprints.map(bp => Document.fromBlueprint(bp)))
+  }
+
   static fromBlueprint(blueprint: Blueprint): Promise {
     return new Promise((resolve, reject) => {
       log('aglio').info('creating html from API blueprint')
 
-      if (blueprint instanceof Blueprint) {
-        const locals  = {blot: env, fixtures: blueprint.fixtures()}
-        const options = _.merge({locals}, Document.config().view.options)
+      if (blueprint instanceof Blueprint && blueprint.compiled) {
+        const locals  = {blot: env.current().name, fixtures: blueprint.compiled.fixtures}
+        const options = _.merge({locals}, Document.config().options)
 
-        aglio.render(blueprint.compiled.markdown, options, (err, html, warnings) => {
-          if (warnings)
-            log('aglio').warn(`${warnings}`)
+        // aglio.render(blueprint.compiled.markdown, options, (err, html, warnings) => {
+        aglio.render(blueprint.compiled.markdown, {}, (err, html, warnings) => {
+          // if (warnings) {
+          //   log('aglio').warn(`aglio warned: ${warnings}`)
+          // }
 
           if (!err) {
             log('aglio').info('parsed as html')
 
-            resolve(new Document(html).filtered)
+            resolve(new Document(html))
           } else {
-            log('aglio').error(`${err}`)
+            log('aglio').error(`aglio errored: ${err}`)
 
             reject(err)
           }
         })
       } else {
-        reject('must provide a valid API blueprint')
+        reject('compiled API blueprint required')
       }
     })
   }
