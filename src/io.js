@@ -26,7 +26,10 @@ export function src(filepath: String): Promise {
 
   return new Promise((resolve, reject) => {
     if (filepath) {
-      util.fs.src(filepath).then(resolve)
+      util.fs
+        .src(filepath, (data) => new Blueprint(data).compile())
+        .then(resolve)
+        .catch(reject)
     } else {
       reject(`Failed to read file, filepath required`)
     }  
@@ -41,16 +44,18 @@ export function src(filepath: String): Promise {
  * @param {String} filepath
  * @returns {Promise}
  */
-export function dest(markdown, filepath: String): Promise {
-  log().info(`writing content to ${filepath}`)
+export function dest(blueprint, filepath: String): Promise {
+  return new Promise((resolve, reject) => {
+    log().info(`writing content to ${filepath}`)
 
-  const ext = path.extname(filepath).substr(1)
+    const ext = path.extname(filepath).substr(1)
 
-  read(markdown)
-    .then(consumed => Blueprint.marshall(consumed.compiled.markdown, ext))
-    .then(marshalled => util.fs.dest(filepath, marshalled))
-    .then(resolve)
-    .catch(reject)
+    read(blueprint)
+      .then(consumed => Blueprint.marshall(consumed.compiled.markdown, ext))
+      .then(marshalled => util.fs.dest(filepath, marshalled))
+      .then(resolve)
+      .catch(reject)
+  })
 }
 
 /**
@@ -89,33 +94,37 @@ export function read(blueprints): Promise {
   log().info('reading in content')
 
   return new Promise((resolve, reject) => {
-    if (_.isArray(blueprints)) {
+    if (blueprints instanceof Blueprint) {
+      resolve(blueprints)
+    } else if (_.isString(blueprints)) {
+      resolve(new Blueprint(blueprints).compile())
+    } else if (_.isArray(blueprints)) {
       Promise
         .all(
           blueprints.map(bp => new Blueprint(bp).compile())
         )
         .then(resolve)
         .catch(reject)
-    } else if (_.isString(blueprints)) {
-      resolve(new Blueprint(blueprints).compile())
-    } else {
-      reject('Documents must be represented as a String or Array, got ' + typeof blueprints)
+      reject('documents must be represented as a String or Array, got ' + typeof blueprints)
     }
   })
 }
 
 export const util = {
   fs: {
-    src: (filepath) => {
+    src: (filepath, andThen) => {
       return new Promise((resolve, reject) => {
         const envPath = env.current().uri(filepath)
 
         fs.readFile(envPath, 'utf-8', (err, data) => {
           if (!err) {
-            new Blueprint(data)
-              .compile()
-              .then(resolve)
-              .catch(reject)
+            if (andThen instanceof Function) {
+              andThen(data)
+                .then(resolve)
+                .catch(reject)
+            } else {
+              resolve(data)
+            }
           } else {
             reject(`failed to read file: ${err}`)
           }
@@ -123,18 +132,18 @@ export const util = {
       })
     },
 
-    dest: (filepath, markdown) => {
+    dest: (filepath, data) => {
       return new Promise((resolve, reject) => {
         const relPath = env.current().uri(filepath)
         const relDir  = path.dirname(relPath)
 
         mkpath(relDir, (err) => {
           if (!err) {
-            fs.writeFile(relPath, markdown, 'utf-8', (err) => {
+            fs.writeFile(relPath, data, 'utf-8', (err) => {
               if (!err) {
                 log().info(`exported content to ${filepath}`)
 
-                resolve(markdown)
+                resolve(data)
               } else {
                 reject(`error occured while writing file: ${err}`)
               }

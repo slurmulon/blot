@@ -7,35 +7,24 @@ var colors = require('colors')
 var program = require('commander')
 var _ = require('lodash')
 
-var config = {
-  env    : 'local',
-  echo   : false,
-  log    : false,
-  pretty : false
-}
+var config = {}
 
-function loadConfig() {
+// FIXME - allow cli to override env config
+function loadConfig(env) {
   return new Promise(function(resolve) {
-    // use project config
-    if (blot.env.Config.isProject()) {
+    // use environment project config
+    if (blot.env.Config.isProject(env)) {
       resolve(
         blot.env.Config
-          .src()
-          .then(function() {
-            return blot.env.Config.parse()
-          })
+          .loadProject(env, config)
           .then(function(envConfig) {
-            // TODO - create a mapper or just be more consistent
-            config.log    = envConfig.logging
-            config.pretty = envConfig.pretty
+            info('env:name', envConfig.name)
+            info('env:host', envConfig.host)
 
-            return blot.env.use(envConfig)
+            blot.env.use(envConfig)
           })
       )
     }
-
-    // otherwise use default values
-    resolve(blot.env.use({name: config.env, logging: config.log, pretty: config.pretty}))
   })
 }
 
@@ -47,7 +36,7 @@ function parseFiles(files) {
     .then(function(blueprints) {
       info('glob', 'end')
 
-      blueprints.forEach(function(blueprint, i) {
+      blueprints.forEach(function(blueprint) {
         section(blueprint.compiled.markdown)
       })
 
@@ -68,7 +57,7 @@ function parseText(data) {
     .catch(error)
 }
 
-function exportBlueprints(blueprints) {
+function maybeExportBlueprints(blueprints) {
   var curEnv   = blot.env.current()
   var autoDest = curEnv.isProject && curEnv.docs.export && curEnv.docs.dest
 
@@ -81,9 +70,8 @@ function exportBlueprints(blueprints) {
 
   blueprints.forEach(function(blueprint, i) {
     blot.io
-      .dest(blueprint.compiled.markdown, outPath)
+      .dest(blueprint, outPath)
       .then(function(content) {
-        info('export', 'compiled and exported API blueprint to ' + outPath)
         info('export', 'end')
       })
       .catch(function(err) {
@@ -134,29 +122,26 @@ program
   .option('-l, --log', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')
   .action(function(env, cmd) {
-    var inFiles  = config.inFiles = cmd.inFiles
+    var inFiles  = config.inFiles = cmd.inFiles // FIXME - map io properly to env.Config 
     var inData   = config.inData  = cmd.inData
     var outFile  = config.outFile = cmd.outFile
     var echo     = config.echo    = !!cmd.echo
-    var log      = config.log     = !!cmd.log
+    var log      = config.logging = !!cmd.log
     var pretty   = config.pretty  = !!cmd.pretty
 
-    loadConfig().then(function() {
+    loadConfig(env).then(function() {
       var curEnv = blot.env.current()
 
       if ((inFiles && inFiles !== 'files') || (curEnv.isProject && curEnv.docs.src)) {
-        parseFiles(inFiles).then(function(blueprints) {
-          exportBlueprints(blueprints)
-        })
+        parseFiles(inFiles).then(maybeExportBlueprints)
       } else if (inData) {
-        parseText(inData).then(function(blueprints) {
-          exportBlueprints(blueprints)
-        })
+        parseText(inData).then(maybeExportBlueprints)
       } else {
         error('malformed command')
       }
     })
   })
+  
   // TODO - query command
 
 program.parse(process.argv)

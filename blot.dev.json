@@ -1,0 +1,35 @@
+{
+  "name": "dev",
+  "host": "http://example.blot.apps.madhax.io",
+  "base": ".",
+  "docs": {
+    "src": "src/docs",
+    "dest": "dist/docs",
+    "export": false
+  },
+  "fixtures": {
+    "src": "src/fixtures",
+    "dest": "dist/fixtures",
+    "export": false
+  },
+  "view": {
+    "dest": "dist",
+    "export": true,
+    "theme": {
+      "themeVariables": "",
+      "themeFullWidth": true,
+      "themeTemplate": "slate"
+    },
+    "elems": {
+      "main": ".ng-view",
+      "scrub": ["script", "link", "form"],
+      "comments": false
+    },
+    "attrs": {}
+  },
+  "meta": {
+    "src": "src/meta"
+  },
+  "logging": false,
+  "pretty": false
+}

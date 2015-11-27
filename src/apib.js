@@ -45,7 +45,7 @@ export class Blueprint {
       .then(embedMd  => Blueprint.interpolate(embedMd))
       .then(staticMd => Blueprint.validate(staticMd))
       .then(finalMd  => Blueprint.fixtures(finalMd).then(fixtures =>
-        Object.assign({compiled: {fixtures, markdown: finalMd}}, this)
+        Object.assign(new Blueprint(markdown), {compiled: {fixtures, markdown: finalMd}})
       ))
   }
 

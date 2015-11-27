@@ -12,20 +12,21 @@ let selected = null
 
 export class Config {
 
-  constructor(name, base, host, docs, stubs, logging = false, pretty = false) {
-    this.name  = name  || 'local'
-    this.host  = host  || '127.0.0.1'
-    this.base  = base  || '.'
-    this.docs  = docs  || {src: '', dest: '', export: false}
-    this.stubs = stubs || {src: '', dest: '', export: false}
-    // this.docs  = docs  || {src: this.uri('src/docs'), dest: this.uri('dest/docs'),  export: false}
-    // this.stubs = stubs || {src: this.uri('src/docs'), dest: this.uri('dest/stubs'), export: false}
+  constructor(name, base, host, docs, fixtures, view, echo = false, logging = false, pretty = false) {
+    this.name     = name     || 'root'
+    this.host     = host     || '127.0.0.1'
+    this.base     = base     || '.'
+    this.docs     = docs     || {src: '', dest: '', export: false}
+    this.fixtures = fixtures || {src: '', dest: '', export: false}
+    this.view     = view     || {dest: '', export: false, theme: {}, elems: {}}
 
+    this.echo    = echo
     this.logging = logging
     this.pretty  = pretty
 
     enviros[name] = this
 
+    // TODO - consider setting other fun stuff here as well
     ;['name', 'host', 'base'].forEach(prop => {
       hazy.fixture.register(`blot.config.${prop}`, this[prop])
     })
@@ -43,12 +44,12 @@ export class Config {
     return Config.existsAt(this.rootUri)
   }
 
-  static rootUri(name: String): String {
-    return name ? `./blot.${name}.json` : `./blot.json`
+  static rootUri(env: String): String {
+    return (env && env !== 'root') ? `./blot.${env}.json` : `./blot.json`
   }
 
-  static isProject(): Boolean {
-    return Config.existsAt(Config.rootUri())
+  static isProject(env?: String): Boolean {
+    return Config.existsAt(Config.rootUri(env))
   }
 
   static existsAt(filepath: String): Boolean {
@@ -61,10 +62,6 @@ export class Config {
     }
   }
 
-  static parse(filepath: String): Object {
-    return fsConfig.default(filepath || Config.rootUri())
-  }
-
   static src(filepath: String): Promise {
     return new Promise((resolve, reject) => {
       const envPath = path.resolve(filepath || Config.rootUri())
@@ -72,12 +69,33 @@ export class Config {
       return fs.readFile(envPath, 'utf-8', (err, data) => {
         if (!err) {
           resolve(
-            new Config(JSON.parse(data))
+            configure(JSON.parse(data))
           )
         } else {
           reject(`Failed to read in blot environment configuration from ${path}`)
         }
       })
+    })
+  }
+
+  static loadProject(env: String, options: Object): Promise {
+    return new Promise((resolve, reject) => {
+      Config
+        .src(Config.rootUri(env))
+        .then(data => {
+          // override project config with provided options when necessary
+          if (!_.isEmpty(options)) {
+            if (data) {
+              data = _.merge(data, options)
+            } else {
+              data = options
+            }
+          }
+
+          use(env)
+          resolve(data)
+        })
+        .catch(reject)
     })
   }
 
@@ -92,13 +110,13 @@ export function use(env) {
     }
   } else if (_.isObject(env)) {
     const conf = configure(env)
-    
+
     selected = conf.name
   }
 
   return env
 }
 
-export const configure = ({name, base, host, docs, stubs, logging, pretty}) => new Config(name, base, host, docs, stubs, logging, pretty)
+export const configure = ({name, base, host, docs, fixtures, view, echo, logging, pretty}) => new Config(name, base, host, docs, fixtures, view, echo, logging, pretty)
 
-export const current = () => enviros[selected] || new Config()
+export const current = () => enviros[selected] || {}

@@ -1,5 +1,4 @@
 {
-  "name": "dev",
   "host": "http://example.blot.apps.madhax.io",
   "base": ".",
   "docs": {
@@ -13,8 +12,8 @@
     "export": false
   },
   "meta": {
-    "src": "src/"
+    "src": "src/meta"
   },
   "logging": false,
-  "pretty": true
+  "pretty": false
 }
