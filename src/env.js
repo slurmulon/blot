@@ -10,19 +10,33 @@ import path from 'path'
 let enviros  = {}
 let selected = null
 
+/**
+ * Project environment configuration.
+ * Binds certain data to fixture pool
+ * so it can be accessed in documentation.
+ */
 export class Config {
 
+  /**
+   * @param {String} name key-friendly name of the environment
+   * @param {String} base base path for all other paths in blot
+   * @param {String} host API host (for use in docs)
+   * @param {String} docs I/O configuration for docs
+   * @param {String} fixtures I/O configuration for fixtures
+   * @param {String} logging whether or not to print standardized logs
+   * @param {String} pretty whether ot not to print pretty logs
+   */
   constructor(name, base, host, docs, fixtures, view, echo = false, logging = false, pretty = false) {
     this.name     = name     || 'root'
-    this.host     = host     || '127.0.0.1'
     this.base     = base     || '.'
+    this.host     = host     || '127.0.0.1'
     this.docs     = docs     || {src: '', dest: '', export: false}
     this.fixtures = fixtures || {src: '', dest: '', export: false}
     this.view     = view     || {dest: '', export: false, theme: {}, elems: {}}
 
-    this.echo    = echo
-    this.logging = logging
-    this.pretty  = pretty
+    this.echo     = echo
+    this.logging  = logging
+    this.pretty   = pretty
 
     enviros[name] = this
 
@@ -32,26 +46,61 @@ export class Config {
     })
   }
 
+  /**
+   * Adjusts provided filepath to be project/environment-specific
+   *
+   * @param {String} filepath
+   * @returns {String} filepath adjusted to project base path
+   */
   uri(filepath: String): String {
     return path.resolve(`${this.base}/${filepath}`)
   }
 
+  /**
+   * Provides the expected root file URI for project config
+   *
+   * @param {String} filepath
+   * @returns {String} filepath adjusted to project base path
+   */
   get rootUri(): String {
     return Config.rootUri(this.name)
   }
 
+  /**
+   * Determines if a blot project file configuration exists
+   *
+   * @returns {Boolean}
+   */
   get isProject(): Boolean {
     return Config.existsAt(this.rootUri)
   }
 
+  /**
+   * Determines the expected root file URI for project environment config
+   *
+   * @param {String} env environment name
+   * @returns {String} filepath adjusted to project environment config
+   */
   static rootUri(env: String): String {
     return (env && env !== 'root') ? `./blot.${env}.json` : `./blot.json`
   }
 
+  /**
+   * Determines if a blot project file configuration exists for enviro
+   *
+   * @returns {Boolean}
+   */
   static isProject(env?: String): Boolean {
     return Config.existsAt(Config.rootUri(env))
   }
 
+  /**
+   * Determines if a file exists at the provided path
+   * TODO - move to io module
+   *
+   * @param {String} filepath
+   * @returns {Boolean}
+   */
   static existsAt(filepath: String): Boolean {
     try {
       fs.accessSync(path.resolve(filepath), fs.R_OK)
@@ -62,6 +111,12 @@ export class Config {
     }
   }
 
+  /**
+   * Loads a blot project configuration file and parses it
+   *
+   * @param {String} filepath
+   * @returns {Promise}
+   */
   static src(filepath: String): Promise {
     return new Promise((resolve, reject) => {
       const envPath = path.resolve(filepath || Config.rootUri())
@@ -78,6 +133,14 @@ export class Config {
     })
   }
 
+  /**
+   * Loads a blot project configuration file, parses it and then
+   * establishes it as the selected environment
+   *
+   * @param {String} env environment name
+   * @param {String} project configuration overrides (typically from CLI)
+   * @returns {Promise}
+   */
   static loadProject(env: String, options: Object): Promise {
     return new Promise((resolve, reject) => {
       Config
@@ -101,6 +164,12 @@ export class Config {
 
 }
 
+/**
+ * Establishes a project environment as the default
+ *
+ * @param {String|Object} env
+ * @returns {Promise}
+ */
 export function use(env) {
   if (_.isString(env)) {
     if (env in enviros) {
@@ -109,9 +178,7 @@ export function use(env) {
       // WARN - enviro not defined
     }
   } else if (_.isObject(env)) {
-    const conf = configure(env)
-
-    selected = conf.name
+    selected = configure(env).name
   }
 
   return env

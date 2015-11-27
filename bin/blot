@@ -147,6 +147,15 @@ program
       }
     })
   })
+
+program
+  .command('render [env]')
+  .description('process documentation and render it as HTML')
+  .action(function(env, flags) {
+    var cmd = flags.parent
+
+    // TODO
+  })
   
   // TODO - query command
 

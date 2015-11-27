@@ -41,7 +41,6 @@ export class Document {
   static scrub(html: String): String {
     const config = Document.config().elems.scrub
 
-    // TODO - also check elems.comments config
     if (_.isArray(config) && !_.isEmpty(config)) {
       return Document.query(html)(config.join(' '))
     }
@@ -55,22 +54,23 @@ export class Document {
 
   static fromBlueprint(blueprint: Blueprint): Promise {
     return new Promise((resolve, reject) => {
-      log().info('creating html from blueprint')
+      log('aglio').info('creating html from API blueprint')
 
       if (blueprint instanceof Blueprint) {
-        // aglio configuraton (options) and template variables (locals)
-        const locals  = {locals: {blot: env, fixtures: blueprint.fixtures()}}
-        const options = _.merge(locals, Document.config().view.theme)
+        const locals  = {blot: env, fixtures: blueprint.fixtures()}
+        const options = _.merge({locals}, Document.config().view.theme)
 
         aglio.render(blueprint.compiled.markdown, options, (err, html, warnings) => {
           if (warnings)
             log('aglio').warn(`${warnings}`)
 
           if (!err) {
-            log('aglio').info('created html')
+            log('aglio').info('parsed as html')
+
             resolve(new Document(html))
           } else {
             log('aglio').error(`${err}`)
+
             reject(err)
           }
         })
