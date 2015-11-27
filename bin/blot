@@ -9,8 +9,17 @@ var _ = require('lodash')
 
 var config = {}
 
-function loadConfig(env) {
+// Parse CLI
+
+function loadConfig(env, cmd) {
   return new Promise(function(resolve) {
+    config.inFiles = cmd.inFiles // FIXME - map io properly to env.Config
+    config.inData  = cmd.inData
+    config.outFile = cmd.outFile
+    config.echo    = cmd.echo
+    config.logging = cmd.log
+    config.pretty  = cmd.pretty
+
     // use environment project config
     if (blot.env.Config.isProject(env)) {
       resolve(
@@ -27,19 +36,6 @@ function loadConfig(env) {
       resolve(false)
     }
   })
-}
-
-function loadInput() {
-  var curEnv = blot.env.current()
-  var loadFs = curEnv.isProject && curEnv.docs.src
-
-  if ((config.inFiles && config.inFiles !== 'files') || loadFs) {
-    parseFiles(config.inFiles).then(exportBlueprints)
-  } else if (config.inData) {
-    parseText(config.inData).then(exportBlueprints)
-  } else {
-    error('malformed command')
-  }
 }
 
 function parseFiles(files) {
@@ -69,6 +65,33 @@ function parseText(data) {
       section(blueprint.compiled.markdown)
     })
     .catch(error)
+}
+
+function compileInputs() {
+  return new Promise(function(resolve, reject) {
+    var curEnv = blot.env.current()
+    var loadFs = curEnv.isProject && curEnv.docs.src
+
+    if ((config.inFiles && config.inFiles !== 'files') || loadFs) {
+      parseFiles(config.inFiles)
+        .then(resolve)
+        .catch(reject)
+    } else if (config.inData) {
+      parseText(config.inData)
+        .then(resolve)
+        .catch(reject)
+    } else {
+      error('malformed command')
+      reject()
+    }
+  })
+}
+
+function renderInputs() {
+  var curEnv = bot.env.current()
+
+  // FIXME - will always export, decouple
+  //compileInputs().then() 
 }
 
 function exportBlueprints(blueprints) {
@@ -140,26 +163,22 @@ program
 program
   .command('compile [env]')
   .description('process documentation and compile it into a static format')
-  .action(function(env, flags) {
-    var cmd = flags.parent
-
-    config.inFiles = cmd.inFiles // FIXME - map io properly to env.Config
-    config.inData  = cmd.inData
-    config.outFile = cmd.outFile
-    config.echo    = cmd.echo
-    config.logging = cmd.log
-    config.pretty  = cmd.pretty
-
-    loadConfig(env).then(loadInput)
+  .action(function(env, cmd) {
+    loadConfig(env, cmd.parent)
+      .then(compileInputs)
+      .then(exportBlueprints)
   })
+
+// Render
 
 program
   .command('render [env]')
-  .description('process documentation and render it as HTML')
-  .action(function(env, flags) {
-    var cmd = flags.parent
-
-    // TODO
+  .description('process documentationl compile it, and render it as HTML')
+  .action(function(env, cmd) {
+    loadConfig(env, flags.parent)
+      .then(compileInputs)
+      .then(renderInputs)
+      // .then(exportHtml)
   })
   
   // TODO - query command
