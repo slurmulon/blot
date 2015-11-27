@@ -4,11 +4,11 @@
 
 ## tl;dr
 
-API Blueprint + Transclusion + Fixture Querying = Ultra-DRY Docs
+API Blueprint + Transclusion + Queries = Ultra-DRY Docs
 
 * Build tool for normalized API Blueprints
 * Unifies documentation and fixtures via transclusion and queries
-* Increases readability and eases maintenance of documentation, fixtures and tests
+* Eases the maintenance of documentation, fixtures and tests
 
 ## Features
 
@@ -16,7 +16,7 @@ API Blueprint + Transclusion + Fixture Querying = Ultra-DRY Docs
 * Generate random data anywhere using a non-invasive syntax
 * Reference, query and embed data using the same non-invasive syntax
 * Extract and export JSON fixtures from API Blueprints
-* Export API Blueprints as HTML (web-component friendly)
+* Export API Blueprints as HTML (web-component friendly, choose what you want)
 * Multi-environment project configurations
 * Flexible CLI with verbose logging
 
