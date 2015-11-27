@@ -153,7 +153,24 @@ export const util = {
           }
         })
       })
-    }
+    },
+
+    /**
+     * Determines if a file exists at the provided path
+     * TODO - move to io module
+     *
+     * @param {String} filepath
+     * @returns {Boolean}
+     */
+    existsAt: (filepath: String) => {
+      try {
+        fs.accessSync(path.resolve(filepath), fs.R_OK)
+
+        return true
+      } catch (e) {
+        return false
+      }
+    },
   }
 
   // TODO uri

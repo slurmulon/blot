@@ -6,6 +6,7 @@ import hazy from 'hazy'
 import _ from 'lodash'
 import fs from 'fs'
 import path from 'path'
+import {util} from './io'
 
 let enviros  = {}
 let selected = null
@@ -72,7 +73,7 @@ export class Config {
    * @returns {Boolean}
    */
   get isProject(): Boolean {
-    return Config.existsAt(this.rootUri)
+    return util.fs.existsAt(this.rootUri)
   }
 
   /**
@@ -91,24 +92,7 @@ export class Config {
    * @returns {Boolean}
    */
   static isProject(env?: String): Boolean {
-    return Config.existsAt(Config.rootUri(env))
-  }
-
-  /**
-   * Determines if a file exists at the provided path
-   * TODO - move to io module
-   *
-   * @param {String} filepath
-   * @returns {Boolean}
-   */
-  static existsAt(filepath: String): Boolean {
-    try {
-      fs.accessSync(path.resolve(filepath), fs.R_OK)
-
-      return true
-    } catch (e) {
-      return false
-    }
+    return util.fs.existsAt(Config.rootUri(env))
   }
 
   /**
@@ -146,7 +130,7 @@ export class Config {
       Config
         .src(Config.rootUri(env))
         .then(data => {
-          // override project config with provided options when necessary
+          // override project config with options (typically CLI) when necessary
           if (!_.isEmpty(options)) {
             if (data) {
               data = _.merge(data, options)

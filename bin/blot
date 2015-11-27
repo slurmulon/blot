@@ -9,7 +9,6 @@ var _ = require('lodash')
 
 var config = {}
 
-// FIXME - allow cli to override env config
 function loadConfig(env) {
   return new Promise(function(resolve) {
     // use environment project config
@@ -24,6 +23,8 @@ function loadConfig(env) {
             blot.env.use(envConfig)
           })
       )
+    } else {
+      resolve(false)
     }
   })
 }
