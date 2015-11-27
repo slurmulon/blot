@@ -1,14 +1,24 @@
 # blot
 
-> Dynamic API Blueprints unified with lazy fixtures
+> The Ultra-DRY documentation build tool
 
 ## tl;dr
 
-API Blueprint + Hercule + Hazy = Magical documentation, fixtures, and tests
+API Blueprint + Transclusion + Fixture Querying = Ultra-DRY Docs
 
-* Unifies documentation and fixtures
-* Reference and embed data (markdown, fixtures, sub-fixtures, etc.) by patterns or name
-* Increases readability and dramatically eases maintenance of documentation, fixtures and tests
+* Build tool for normalized API Blueprints
+* Unifies documentation and fixtures via transclusion and queries
+* Increases readability and eases maintenance of documentation, fixtures and tests
+
+## Features
+
+* Dynamically build API Blueprints from normalized files (.md, .mson, .json, etc)
+* Generate random data anywhere using a non-invasive syntax
+* Reference, query and embed data using the same non-invasive syntax
+* Extract and export JSON fixtures from API Blueprints
+* Export API Blueprints as HTML (web-component friendly)
+* Multi-environment project configurations
+* Flexible CLI with verbose logging
 
 ## Summary
 
@@ -22,7 +32,7 @@ documented requests and responses for programmatic (in-code) use in your integra
 My philosophy is that you should strive for a canonical source of fixtures in which all of your tests and documentation inherit from.
 [Hercule](https://github.com/jamesramsay/hercule), which blot also integrates, helps promote normalization by allowing
 data to be transcluded in markdown documents. blot also supports this through hazy, and either syntax may be used as they will
-both be processed.
+both be processed. The reason that hazy is also used is because it provides additional interfaces for generating random data and querying JSON fixtures.
 
 blot minimizes duplication and introduces unification between documentation, fixtures, and API test suites. It sits
 on top of Hazy and provides an abstract API blueprint parser and generator.
@@ -79,14 +89,14 @@ be used alongside hercule by using `:[]`:
 
 + Response 200 (application/json)
 
-  :[](auth-req.json)
+  :[](auth-user-res.json)
 
 # GET /v1/user/{id}
 ### Fetch a user [GET]
 
 + Response 200 (application/json)
 
-  |> authed-user-res.json|
+  :[](auth-user-res.json)
 ```
 
 You may also freely leverage `JsonPath` in order to transclude fixtures by patterns:
@@ -225,7 +235,7 @@ You can now use blot as either an npm module in your own projects or as an execu
 
 ## TODO
 
- - [ ] `--config` CLI flag
+ - [X] `--env` CLI flag
  - [ ] Support [fury.js](https://github.com/apiaryio/fury.js)
  - [ ] Static fixture export
  - [ ] Support `beforeCompile` and `afterCompile` configuration files (root of project)
