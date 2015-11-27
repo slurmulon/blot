@@ -1,12 +1,9 @@
 'use strict'
 
-import * as _io from './io'
-import * as _env from './env'
-import * as _apib from './apib'
-
+import * as io from './io'
+import * as env from './env'
+import * as apib from './apib'
+import * as html from './html'
 import {logger} from './log'
 
-export const io = _io
-export const env = _env
-export const apib = _apib
-export const log = logger
+export {io, env, apib, html, logger as log}
