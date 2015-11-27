@@ -14,8 +14,8 @@ import {logger} from './log'
 // https://www.npmjs.com/package/html-parser#using-callbacks
 export class Document {
 
-  constructor(data: String) {
-    this.data = data
+  constructor(html: String) {
+    this.html = html
   }
 
   get config() {
@@ -23,33 +23,33 @@ export class Document {
   }
 
   get query() {
-    return Document.query(this.data)
+    return Document.query(this.html)
   }
 
   static config() {
     return env.current().view
   }
 
-  static query(data: String) {
-    return cheerio.load(data)
+  static query(html: String) {
+    return cheerio.load(html)
   }
 
-  static main(data: String): String {
-    return Document.query(data)(Document.config().elems.main || '*') 
+  static main(html: String): String {
+    return Document.query(html)(Document.config().elems.main || '*')
   }
 
-  static scrub(data: String): String {
+  static scrub(html: String): String {
     const config = Document.config().elems.scrub
 
     // TODO - also check elems.comments config
     if (_.isArray(config) && !_.isEmpty(config)) {
-      return Document.query(data)(config.join(' '))
+      return Document.query(html)(config.join(' '))
     }
 
-    return data
+    return html
   }
 
-  static dest(data: String) {
+  static dest(html: String) {
     // TODO
   }
 
@@ -60,25 +60,22 @@ export class Document {
       if (blueprint instanceof Blueprint) {
         // aglio configuraton (options) and template variables (locals)
         const locals  = {locals: {blot: env, fixtures: blueprint.fixtures()}}
-        const options = Object.assign(locals, Document.config().view.theme)
+        const options = _.merge(locals, Document.config().view.theme)
 
         aglio.render(blueprint.compiled.markdown, options, (err, html, warnings) => {
-          if (warnings) {
+          if (warnings)
             log('aglio').warn(`${warnings}`)
-          }
 
           if (!err) {
             log('aglio').info('created html')
-
             resolve(new Document(html))
           } else {
             log('aglio').error(`${err}`)
-
             reject(err)
           }
         })
       } else {
-        reject('must provide valid API blueprint')
+        reject('must provide a valid API blueprint')
       }
     })
   }

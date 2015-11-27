@@ -30,6 +30,6 @@
   "meta": {
     "src": "src/meta"
   },
-  "logging": false,
+  "logging": true,
   "pretty": false
 }

@@ -108,12 +108,10 @@ function section(msg) {
   }
 }
 
-// Binding
+// Command Bindings
 
 program
   .version('0.0.2')
-  .command('compile [env]')
-  .description('process documentation and compile it into a static format')
   .option('-i, --in-files [files]', 'Source files (*.blot or *.apib)', 'files')
   .option('-d, --in-data [markdown]', 'Read in plain Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
@@ -121,13 +119,21 @@ program
   .option('-e, --echo', 'Prints compiled result to stdout')
   .option('-l, --log', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')
-  .action(function(env, cmd) {
-    var inFiles  = config.inFiles = cmd.inFiles // FIXME - map io properly to env.Config 
-    var inData   = config.inData  = cmd.inData
-    var outFile  = config.outFile = cmd.outFile
-    var echo     = config.echo    = !!cmd.echo
-    var log      = config.logging = !!cmd.log
-    var pretty   = config.pretty  = !!cmd.pretty
+
+// Compile
+
+program
+  .command('compile [env]')
+  .description('process documentation and compile it into a static format')
+  .action(function(env, flags) {
+    var cmd = flags.parent
+
+    var inFiles = config.inFiles = cmd.inFiles // FIXME - map io properly to env.Config
+    var inData  = config.inData  = cmd.inData
+    var outFile = config.outFile = cmd.outFile
+    var echo    = config.echo    = cmd.echo
+    var log     = config.logging = cmd.log
+    var pretty  = config.pretty  = cmd.pretty
 
     loadConfig(env).then(function() {
       var curEnv = blot.env.current()
