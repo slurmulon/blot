@@ -5,7 +5,7 @@
   "docs": {
     "src": "src/docs",
     "dest": "dist/docs",
-    "export": false
+    "export": true
   },
   "fixtures": {
     "src": "src/fixtures",
