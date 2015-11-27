@@ -204,6 +204,6 @@ export var interpolator = hazy.lang.process
 export const plainJson = /\{(.*?)\}/gm
 
 /**
- * Bunyan log for the API Blueprint module
+ * Module-level bunyan logger
  */
 export const log = () => logger().child({module: 'blueprint'})

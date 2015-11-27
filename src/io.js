@@ -105,13 +105,28 @@ export function read(blueprints): Promise {
         )
         .then(resolve)
         .catch(reject)
+    } else {
       reject('documents must be represented as a String or Array, got ' + typeof blueprints)
     }
   })
 }
 
+/**
+ * Writes UTF-8 data to the provided path
+ *
+ * @param {String} filepath
+ * @param {Object} data
+ * @returns {Boolean}
+ */
 export const util = {
   fs: {
+    /**
+     * Reads in UTF-8 data from the provided path
+     *
+     * @param {String} filepath
+     * @param {Object} data
+     * @returns {Boolean}
+     */
     src: (filepath, andThen) => {
       return new Promise((resolve, reject) => {
         const envPath = env.current().uri(filepath)
@@ -132,6 +147,13 @@ export const util = {
       })
     },
 
+    /**
+     * Writes UTF-8 data to the provided path
+     *
+     * @param {String} filepath
+     * @param {Object} data
+     * @returns {Boolean}
+     */
     dest: (filepath, data) => {
       return new Promise((resolve, reject) => {
         const relPath = env.current().uri(filepath)
@@ -157,7 +179,6 @@ export const util = {
 
     /**
      * Determines if a file exists at the provided path
-     * TODO - move to io module
      *
      * @param {String} filepath
      * @returns {Boolean}
@@ -176,4 +197,7 @@ export const util = {
   // TODO uri
 }
 
+/**
+ * Module-level bunyan logger
+ */
 export const log = () => logger().child({module: 'io'})
