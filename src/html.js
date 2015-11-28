@@ -26,16 +26,16 @@ export class Document {
     return Document.query(this.html)
   }
 
-  get main(): String {
-    return Document.main(this.html)
+  get container(): String {
+    return Document.container(this.html)
   }
 
   get stripped(): String {
     return Document.stripped(this.html)
   }
 
-  get filtered(): String {
-    return Document.filtered(this.html)
+  get processed(): String {
+    return Document.process(this.html)
   }
 
   dest(filepath?: String, html?: String): Promise {
@@ -61,7 +61,7 @@ export class Document {
   }
 
   static container(html: String): Object {
-    log().info('extracting main container element')
+    log('$').info('extracting main container element')
 
     const selector = Document.elementConfig('container')
     const query    = Document.query(html)(selector)
@@ -69,8 +69,8 @@ export class Document {
     return query
   }
 
-  static stripped(html: String): Object {
-    log().info('stripping configured elements')
+  static strip(html: String): Object {
+    log('$').info('stripping configured elements')
 
     const selector = Document.elementConfig('strip')
     const query    = Document.query(html)
@@ -81,16 +81,18 @@ export class Document {
     return query
   }
 
-  static filtered(html: String): Object { // TODO - change to 'process'
-    log().info('applying HTML filters')
+  static process(html: String): Object { // TODO - change to 'process'
+    log('$').info('processing HTML elements')
 
     const containerDom = Document.container(html)
-    const bakedDom = Document.stripped(containerDom.html())
+    const bakedDom     = Document.strip(containerDom.html())
 
     return bakedDom
   }
 
   static dest(filepath: String, html: String): Promise {
+    log('$').info('writing out HTML')
+
     return new Promise((resolve, reject) => {
       if (filepath) {
         io.util.fs
@@ -108,9 +110,9 @@ export class Document {
   }
 
   static fromBlueprint(blueprint: Blueprint): Promise {
-    return new Promise((resolve, reject) => {
-      log('aglio').info('creating html from API blueprint')
+    log('aglio').info('creating html from API blueprint')
 
+    return new Promise((resolve, reject) => {
       if (blueprint instanceof Blueprint && blueprint.compiled) {
         const locals  = {blot: env.current().name, fixtures: blueprint.compiled.fixtures}
         const options = _.merge({locals}, Document.config().options)

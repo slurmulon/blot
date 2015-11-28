@@ -100,7 +100,7 @@ function renderBlueprints(blueprints) {
       .fromBlueprints(blueprints)
       .then(function(docs) {
         return Promise.all(_.map(docs, function(doc) {
-          return doc.filtered.html()
+          return doc.processed.html()
         }))
       })
       .then(function(docs) {
