@@ -87,7 +87,7 @@ function compileInputs() {
         .catch(reject)
     } else {
       error('malformed command')
-      reject(false)
+      reject(config)
     }
   })
 }
@@ -112,7 +112,7 @@ function renderBlueprints(blueprints) {
 
         docs.forEach(section)
 
-        resolve(blueprints)
+        resolve(docs)
       })
       .catch(function(error) {
         error('failed to render API blueprint as HTML: ' + error)
@@ -122,15 +122,15 @@ function renderBlueprints(blueprints) {
 }
 
 function exportBlueprints(blueprints) {
-  var curEnv   = blot.env.current().docs
+  var curEnv   = blot.env.current()
   var validOut = !config.outFile || config.outFile == 'file'
-  var doExport = curEnv.isProject && curEnv.export && curEnv.dest
-  var outPath  = doExport ? curEnv.docs.dest + '/' + config.inFiles : config.outFile
+  var doExport = curEnv.isProject && curEnv.docs.export && curEnv.docs.dest
+  var outPath  = doExport ? curEnv.docs.dest + '/' + config.inFiles : config.outFile // TODO - cleanup, slop
 
   if (!doExport && validOut)
     return
 
-  info('export', 'start')
+  info('export.apib', 'start')
 
   blueprints.forEach(function(blueprint) {
     blot.io
@@ -144,16 +144,18 @@ function exportBlueprints(blueprints) {
   })
 }
 
-function exportHtml(htmlDoc) {
-  var curEnv   = blot.env.current().view
-  var doExport = curEnv.isProject && curEnv.export && curEnv.dest
+function exportHtml(html) {
+  var curEnv   = blot.env.current()
+  var doExport = curEnv.isProject && curEnv.view.export && curEnv.view.dest
 
   if (!doExport) return
 
-  htmlDoc
+  info('export:html', 'start')
+
+  new blot.html.Document(html)
     .dest()
-    .then(function(htmlFinal) {
-      section(htmlFinal)
+    .then(function() {
+      info('export:html', 'end')
     })
     .catch(function(err) {
       error('failed to export ' + outPath + ': ' + err)
