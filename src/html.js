@@ -12,40 +12,95 @@ import _ from 'lodash'
 
 import {logger} from './log'
 
+/**
+ * Represents a collection of HTML DOM elements.
+ * Contains functionality for working with API Blueprints
+ * and their view representations.
+ */
 export class Document {
 
+  /**
+   * @param {String} html encoded HTML string
+   */
   constructor(html: String) {
     this.html = html
   }
 
+  /**
+   * Provides project configuration options for HTML views
+   *
+   * @returns {Object}
+   */
   get config(): Object {
     return Document.config()
   }
 
+  /**
+   * Returns a jQuery-like version of internal HTML
+   *
+   * @returns {$}
+   */
   get query(): Object {
     return Document.query(this.html)
   }
 
-  get container(): String {
+  /**
+   * Returns the container object of a template
+   * if one is configured in environment/project
+   *
+   * @returns {$}
+   */
+  get container(): Object {
     return Document.container(this.html)
   }
 
-  get stripped(): String {
+  /**
+   * Strips out elements from HTML based on
+   * environment/project configuration
+   *
+   * @returns {$}
+   */
+  get stripped(): Object {
     return Document.stripped(this.html)
   }
 
-  get processed(): String {
+  /**
+   * Processes all element configuration filters against HTML
+   * and returns the resulting document
+   *
+   * @returns {$}
+   */
+  get processed(): Object {
     return Document.process(this.html)
   }
 
+  /**
+   * Writes out compiled HTML to a filepath (UTF-8)
+   *
+   * @param {?String} filepath
+   * @param {?String} html
+   * @returns {Promise}
+   */
   dest(filepath?: String, html?: String): Promise {
     return Document.dest(filepath || this.config.dest, html || this.html)
   }
 
+  /**
+   * Provides environment configuration options for HTML views
+   *
+   * @returns {Object}
+   */
   static config(): Object {
     return env.current().view
   }
 
+  /**
+   * Determines element selector from environment/project configuration key
+   *
+   * @param {?String} configKey top-level key of "views.element" in config
+   * @param {?String} html
+   * @returns {Promise}
+   */
   static elementConfig(configKey: String): Object {
     const config = Document.config().elements[configKey]
 
@@ -56,10 +111,23 @@ export class Document {
     return config
   }
 
+  /**
+   * Returns a jQuery-like version of internal HTML
+   *
+   * @param {String} html
+   * @returns {$}
+   */
   static query(html: String): Object {
     return cheerio.load(html)
   }
 
+  /**
+   * Returns the container object of a template
+   * if one is configured in environment/project
+   *
+   * @param {String} html
+   * @returns {$}
+   */
   static container(html: String): Object {
     log('$').info('extracting main container element')
 
@@ -69,6 +137,13 @@ export class Document {
     return query
   }
 
+  /**
+   * Strips out elements from HTML based on
+   * environment/project configuration
+   *
+   * @param {String} html
+   * @returns {$}
+   */
   static strip(html: String): Object {
     log('$').info('stripping configured elements')
 
@@ -81,7 +156,14 @@ export class Document {
     return query
   }
 
-  static process(html: String): Object { // TODO - change to 'process'
+  /**
+   * Processes all element configuration filters against HTML
+   * and returns the resulting document
+   *
+   * @param {String} html
+   * @returns {$}
+   */
+  static process(html: String): Object {
     log('$').info('processing HTML elements')
 
     const containerDom = Document.container(html)
@@ -90,6 +172,13 @@ export class Document {
     return bakedDom
   }
 
+  /**
+   * Writes out compiled HTML to a filepath (UTF-8)
+   *
+   * @param {String} filepath
+   * @param {String} html
+   * @returns {Promise}
+   */
   static dest(filepath: String, html: String): Promise {
     log('$').info('writing out HTML')
 
@@ -105,10 +194,23 @@ export class Document {
     })
   }
 
+  /**
+   * Converts a collection of compiled Blueprints
+   * into HTML via Aglio
+   *
+   * @param {Array<Blueprint>} blueprints
+   * @returns {Promise}
+   */
   static fromBlueprints(blueprints: Array): Promise {
     return Promise.all(blueprints.map(bp => Document.fromBlueprint(bp)))
   }
 
+  /**
+   * Converts a compiled Blueprint into HTML via Aglio
+   *
+   * @param {Blueprint} blueprint
+   * @returns {Promise}
+   */
   static fromBlueprint(blueprint: Blueprint): Promise {
     log('aglio').info('creating html from API blueprint')
 
@@ -140,4 +242,7 @@ export class Document {
 
 }
 
+/**
+ * Module-level bunyan logger
+ */
 export const log = (sub) => logger().child({module: sub ? `html.${sub}` : 'html'})
