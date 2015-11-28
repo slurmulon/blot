@@ -201,7 +201,9 @@ export class Document {
    * @returns {Promise}
    */
   static fromBlueprints(blueprints: Array): Promise {
-    return Promise.all(blueprints.map(bp => Document.fromBlueprint(bp)))
+    return Promise.all(
+      blueprints.map(bp => Document.fromBlueprint(bp))
+    )
   }
 
   /**

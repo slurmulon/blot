@@ -74,7 +74,7 @@ function parseText(data) {
 function compileInputs() {
   return new Promise(function(resolve, reject) {
     var curEnv  = blot.env.current()
-    var validFs = config.inFiles && config.inFiles !== 'files'
+    var validFs = config.inFiles   && config.inFiles !== 'files'
     var loadFs  = curEnv.isProject && curEnv.docs.src
 
     if (validFs || loadFs) {
@@ -150,8 +150,8 @@ function exportHtml(htmlDoc) {
 
   if (!doExport) return
 
-  // htmlDoc.dest(null, htmlDoc)
-  htmlDoc.dest()
+  htmlDoc
+    .dest()
     .then(function(htmlFinal) {
       section(htmlFinal)
     })
@@ -209,8 +209,6 @@ program
   .option('-l, --log', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')
 
-// Compile
-
 program
   .command('compile [env]')
   .description('process documentation and compiles it into a static format')
@@ -219,8 +217,6 @@ program
       .then(compileInputs)
       .then(exportBlueprints)
   })
-
-// Render
 
 program
   .command('render [env]')
