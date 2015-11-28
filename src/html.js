@@ -7,7 +7,6 @@ import * as io from './io'
 import hazy from 'hazy'
 import cheerio from 'cheerio'
 import aglio from 'aglio'
-
 import _ from 'lodash'
 
 import {logger} from './log'
@@ -97,7 +96,7 @@ export class Document {
   /**
    * Determines element selector from environment/project configuration key
    *
-   * @param {?String} configKey top-level key of "views.element" in config
+   * @param {?String} configKey top-level key of "views.element" in config file
    * @param {?String} html
    * @returns {Promise}
    */
@@ -212,7 +211,7 @@ export class Document {
    * @returns {Promise}
    */
   static fromBlueprint(blueprint: Blueprint): Promise {
-    log('aglio').info('creating html from API blueprint')
+    log('aglio').info('creating HTML from API blueprint')
 
     return new Promise((resolve, reject) => {
       if (blueprint instanceof Blueprint && blueprint.compiled) {
@@ -225,7 +224,7 @@ export class Document {
           }
 
           if (!err) {
-            log('aglio').info('parsed as html')
+            log('aglio').info('parsed HTML')
 
             resolve(new Document(html))
           } else {
