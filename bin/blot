@@ -7,35 +7,36 @@ var colors = require('colors')
 var program = require('commander')
 var _ = require('lodash')
 
-var config = {
-  env    : 'local',
-  echo   : false,
-  log    : false,
-  pretty : false
-}
+var config = {}
 
-function loadConfig() {
+// CLI Actions and Commands
+
+function loadConfig(env, cmd) {
   return new Promise(function(resolve) {
-    // use project config
-    if (blot.env.Config.isProject()) {
+    info('env:load', env)
+
+    config.inFiles = cmd.inFiles // FIXME - map io properly to env.Config
+    config.inData  = cmd.inData
+    config.outFile = cmd.outFile
+    config.echo    = cmd.echo
+    config.logging = cmd.log
+    config.pretty  = cmd.pretty
+
+    // use environment project config
+    if (blot.env.Config.isProject(env)) {
       resolve(
         blot.env.Config
-          .src()
-          .then(function() {
-            return blot.env.Config.parse()
-          })
+          .loadProject(env, config)
           .then(function(envConfig) {
-            // TODO - create a mapper or just be more consistent
-            config.log    = envConfig.logging
-            config.pretty = envConfig.pretty
+            info('env:name', envConfig.name)
+            info('env:host', envConfig.host)
 
-            return blot.env.use(envConfig)
+            blot.env.use(envConfig)
           })
       )
+    } else {
+      resolve(false)
     }
-
-    // otherwise use default values
-    resolve(blot.env.use({name: config.env, logging: config.log, pretty: config.pretty}))
   })
 }
 
@@ -47,7 +48,7 @@ function parseFiles(files) {
     .then(function(blueprints) {
       info('glob', 'end')
 
-      blueprints.forEach(function(blueprint, i) {
+      blueprints.forEach(function(blueprint) {
         section(blueprint.compiled.markdown)
       })
 
@@ -64,32 +65,99 @@ function parseText(data) {
       info('read', 'end')
 
       section(blueprint.compiled.markdown)
+
+      return blueprint
     })
     .catch(error)
 }
 
-function exportBlueprints(blueprints) {
-  var curEnv   = blot.env.current()
-  var autoDest = curEnv.isProject && curEnv.docs.export && curEnv.docs.dest
+function compileInputs() {
+  return new Promise(function(resolve, reject) {
+    var curEnv  = blot.env.current()
+    var validFs = config.inFiles   && config.inFiles !== 'files'
+    var loadFs  = curEnv.isProject && curEnv.docs.src
 
-  if (!autoDest && (!config.outFile || config.outFile == 'file'))
+    if (validFs || loadFs) {
+      parseFiles(config.inFiles)
+        .then(resolve)
+        .catch(reject)
+    } else if (config.inData) {
+      parseText(config.inData)
+        .then(resolve)
+        .catch(reject)
+    } else {
+      error('malformed command')
+      reject(false)
+    }
+  })
+}
+
+function renderBlueprints(blueprints) {
+  info('render', 'start')
+
+  return new Promise(function(resolve, reject) {
+    blot.html.Document
+      .fromBlueprints(blueprints)
+      .then(function(docs) {
+        return Promise.all(_.map(docs, function(doc) {
+          return doc.processed.html()
+        }))
+      })
+      .then(function(docs) {
+        info('render', 'end')
+
+        if (_.isEmpty(docs) || _.isNull(docs[0])) {
+          warn('render', 'no resulting HTML, check `elements` configuration')
+        }
+
+        docs.forEach(section)
+
+        resolve(blueprints)
+      })
+      .catch(function(error) {
+        error('failed to render API blueprint as HTML: ' + error)
+        reject(error)
+      })
+  })
+}
+
+function exportBlueprints(blueprints) {
+  var curEnv   = blot.env.current().docs
+  var validOut = !config.outFile || config.outFile == 'file'
+  var doExport = curEnv.isProject && curEnv.export && curEnv.dest
+  var outPath  = doExport ? curEnv.docs.dest + '/' + config.inFiles : config.outFile
+
+  if (!doExport && validOut)
     return
 
   info('export', 'start')
 
-  var outPath = autoDest ? curEnv.docs.dest + '/' + config.inFiles : config.outFile
-
-  blueprints.forEach(function(blueprint, i) {
+  blueprints.forEach(function(blueprint) {
     blot.io
-      .dest(blueprint.compiled.markdown, outPath)
+      .dest(blueprint, outPath)
       .then(function(content) {
-        info('export', 'compiled and exported API blueprint to ' + outPath)
         info('export', 'end')
       })
       .catch(function(err) {
         error('failed to export ' + outPath + ': ' + err)
       })
   })
+}
+
+function exportHtml(htmlDoc) {
+  var curEnv   = blot.env.current().view
+  var doExport = curEnv.isProject && curEnv.export && curEnv.dest
+
+  if (!doExport) return
+
+  htmlDoc
+    .dest()
+    .then(function(htmlFinal) {
+      section(htmlFinal)
+    })
+    .catch(function(err) {
+      error('failed to export ' + outPath + ': ' + err)
+    })
 }
 
 // Logging
@@ -99,6 +167,14 @@ function info(action, msg) {
     blot.log().info(action.magenta + ' ' + msg.green)
   } else if (config.log) {
     blot.log().info(action + ': ' + msg)
+  }
+}
+
+function warn(action, msg) {
+  if (config.pretty) {
+    blot.log().warn(action.yellow + ' ' + msg.green)
+  } else if (config.log) {
+    blot.log().warn(action + ': ' + msg)
   }
 }
 
@@ -120,43 +196,38 @@ function section(msg) {
   }
 }
 
-// Binding
+// Command Bindings
 
 program
-  .version('0.0.2')
-  .command('compile [env]')
-  .description('process documentation and compile it into a static format')
+  .version('0.0.3')
   .option('-i, --in-files [files]', 'Source files (*.blot or *.apib)', 'files')
   .option('-d, --in-data [markdown]', 'Read in plain Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
   .option('-v, --validate', 'Determines if provided content is a valid API Blueprint')
+  .option('-c, --config', 'Specify a specific configuration to load, Useful for working with environments.')
   .option('-e, --echo', 'Prints compiled result to stdout')
   .option('-l, --log', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')
+
+program
+  .command('compile [env]')
+  .description('process documentation and compiles it into a static format')
   .action(function(env, cmd) {
-    var inFiles  = config.inFiles = cmd.inFiles
-    var inData   = config.inData  = cmd.inData
-    var outFile  = config.outFile = cmd.outFile
-    var echo     = config.echo    = !!cmd.echo
-    var log      = config.log     = !!cmd.log
-    var pretty   = config.pretty  = !!cmd.pretty
-
-    loadConfig().then(function() {
-      var curEnv = blot.env.current()
-
-      if ((inFiles && inFiles !== 'files') || (curEnv.isProject && curEnv.docs.src)) {
-        parseFiles(inFiles).then(function(blueprints) {
-          exportBlueprints(blueprints)
-        })
-      } else if (inData) {
-        parseText(inData).then(function(blueprints) {
-          exportBlueprints(blueprints)
-        })
-      } else {
-        error('malformed command')
-      }
-    })
+    loadConfig(env, cmd.parent)
+      .then(compileInputs)
+      .then(exportBlueprints)
   })
-  // TODO - query command
+
+program
+  .command('render [env]')
+  .description('processes, compiles, and then renders documentation as HTML')
+  .action(function(env, cmd) {
+    loadConfig(env, cmd.parent)
+      .then(compileInputs)
+      .then(renderBlueprints)
+      .then(exportHtml)
+  })
+  
+// TODO - query command
 
 program.parse(process.argv)

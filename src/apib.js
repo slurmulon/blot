@@ -44,8 +44,8 @@ export class Blueprint {
       .transclude(markdown)
       .then(embedMd  => Blueprint.interpolate(embedMd))
       .then(staticMd => Blueprint.validate(staticMd))
-      .then(finalMd  => Blueprint.fixtures(finalMd).then(fixtures =>
-        Object.assign({compiled: {fixtures, markdown: finalMd}}, this)
+      .then(finalMd  => Blueprint.fixtures(finalMd).then(fixtures => 
+        Object.assign(new Blueprint(markdown), {compiled: {fixtures, markdown: finalMd}})
       ))
   }
 
@@ -204,6 +204,6 @@ export var interpolator = hazy.lang.process
 export const plainJson = /\{(.*?)\}/gm
 
 /**
- * Bunyan log for the API Blueprint module
+ * Module-level bunyan logger
  */
 export const log = () => logger().child({module: 'blueprint'})

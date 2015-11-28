@@ -1,4 +1,5 @@
 {
+  "name": "dev",
   "host": "http://example.blot.apps.madhax.io",
   "base": ".",
   "docs": {
@@ -6,10 +7,24 @@
     "dest": "dist/docs",
     "export": true
   },
-  "stubs": {
+  "fixtures": {
     "src": "src/fixtures",
     "dest": "dist/fixtures",
     "export": false
+  },
+  "view": {
+    "dest": "dist/api.blot.html",
+    "export": true,
+    "options": {
+      "themeFullWidth": true,
+      "themeVariables": "slate"
+    },
+    "elements": {
+      "container": "body",
+      "scripts": false,
+      "comments": false
+    },
+    "attrs": {}
   },
   "meta": {
     "src": "src/meta"
