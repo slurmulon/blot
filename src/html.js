@@ -50,7 +50,7 @@ export class Document {
     const config = Document.config().elements[configKey]
 
     if (_.isArray(config) && !_.isEmpty(config)) {
-      return config.join(' ').trim()
+      return config.length > 1 ? config.join(', ').trim() : config[0]
     }
 
     return config
