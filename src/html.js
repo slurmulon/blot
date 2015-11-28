@@ -39,7 +39,7 @@ export class Document {
   }
 
   dest(filepath?: String, html?: String): Promise {
-    return Docuemnt.dest(filepath || this.config.dest, html || this.html)
+    return Document.dest(filepath || this.config.dest, html || this.html)
   }
 
   static config(): Object {
@@ -50,23 +50,36 @@ export class Document {
     return cheerio.load(html)
   }
 
-  static main(html: String): String {
-    return Document.query(html)(Document.config().elements.main || '*')
-  }
-
-  static select(html: String, configKey: String): String {
+  static select(html: String, configKey: String): Object {
     const config   = Document.config().elements[configKey]
     const selector = Document.query(html)
 
     if (_.isArray(config) && !_.isEmpty(config)) {
-      return selector(config.join(', '))
+      return selector(config.join(' ').trim())//.get() // ', '
+    } else if (_.isString(config)) {
+      return selector(config)
     }
 
-    return selector
+    return selector//.get()
   }
 
-  static stripped(html: String): String {
-    return Document.select(html, 'strip').remove()
+  static container(html: String): Object {
+    log().info('extracting main container element')
+
+    // TODO - incorporate Booleans elements.scripts, elements.comments
+    const elem  = Document.config().elements.container
+    const query = Document.select(html, 'container')
+
+    return query
+    // return query.get()
+  }
+
+  // FIXME - has issues, filtering all elems
+  static stripped(html: String): Object {
+    log().info('stripping configured elements')
+
+    return Document.query(html)
+    // return Document.select(html, 'strip').not()
   }
 
   // TODO - add this to cheerio, do PR
@@ -74,11 +87,13 @@ export class Document {
   //   return Document.selector(html, 'unwrap').unwrap()
   // }
 
-  static filtered(html: String): String {
-    const mainDom  = Document.main(html)
-    const finaldom = Document.stripped(mainDom)
+  static filtered(html: String): Object { // TODO - change to 'process'
+    log().info('applying HTML filters')
 
-    return finalDom.html()
+    const containerDom = Document.container(html)
+    const finalDom = Document.stripped(containerDom)
+
+    return containerDom //finalDom 
   }
 
   static dest(filepath: String, html: String): Promise {
@@ -106,11 +121,10 @@ export class Document {
         const locals  = {blot: env.current().name, fixtures: blueprint.compiled.fixtures}
         const options = _.merge({locals}, Document.config().options)
 
-        // aglio.render(blueprint.compiled.markdown, options, (err, html, warnings) => {
-        aglio.render(blueprint.compiled.markdown, {}, (err, html, warnings) => {
-          // if (warnings) {
-          //   log('aglio').warn(`aglio warned: ${warnings}`)
-          // }
+        aglio.render(blueprint.compiled.markdown, options, (err, html, warnings) => {
+          if (!_.isEmpty(warnings)) {
+            log('aglio').warn(`aglio warned: ${warnings}`)
+          }
 
           if (!err) {
             log('aglio').info('parsed as html')

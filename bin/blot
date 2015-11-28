@@ -73,10 +73,11 @@ function parseText(data) {
 
 function compileInputs() {
   return new Promise(function(resolve, reject) {
-    var curEnv = blot.env.current()
-    var loadFs = curEnv.isProject && curEnv.docs.src
+    var curEnv  = blot.env.current()
+    var validFs = config.inFiles && config.inFiles !== 'files'
+    var loadFs  = curEnv.isProject && curEnv.docs.src
 
-    if ((config.inFiles && config.inFiles !== 'files') || loadFs) {
+    if (validFs || loadFs) {
       parseFiles(config.inFiles)
         .then(resolve)
         .catch(reject)
@@ -95,16 +96,21 @@ function renderBlueprints(blueprints) {
   info('render', 'start')
 
   return new Promise(function(resolve, reject) {
-    // TODO - incorporate project config
-
     blot.html.Document
       .fromBlueprints(blueprints)
       .then(function(docs) {
+        return Promise.all(_.map(docs, function(doc) {
+          return doc.filtered.html()
+        }))
+      })
+      .then(function(docs) {
         info('render', 'end')
 
-        docs.forEach(function(doc) {
-          section(doc.html)
-        })
+        if (_.isEmpty(docs) || _.isNull(docs[0])) {
+          warn('render', 'no resulting HTML, check `elements` configuration')
+        }
+
+        docs.forEach(section)
 
         resolve(blueprints)
       })
@@ -117,10 +123,11 @@ function renderBlueprints(blueprints) {
 
 function exportBlueprints(blueprints) {
   var curEnv   = blot.env.current().docs
+  var validOut = !config.outFile || config.outFile == 'file'
   var doExport = curEnv.isProject && curEnv.export && curEnv.dest
   var outPath  = doExport ? curEnv.docs.dest + '/' + config.inFiles : config.outFile
 
-  if (!doExport && (!config.outFile || config.outFile == 'file'))
+  if (!doExport && validOut)
     return
 
   info('export', 'start')
@@ -143,7 +150,8 @@ function exportHtml(htmlDoc) {
 
   if (!doExport) return
 
-  htmlDoc.dest(null, htmlDoc.filtered)
+  // htmlDoc.dest(null, htmlDoc)
+  htmlDoc.dest()
     .then(function(htmlFinal) {
       section(htmlFinal)
     })
@@ -159,6 +167,14 @@ function info(action, msg) {
     blot.log().info(action.magenta + ' ' + msg.green)
   } else if (config.log) {
     blot.log().info(action + ': ' + msg)
+  }
+}
+
+function warn(action, msg) {
+  if (config.pretty) {
+    blot.log().warn(action.yellow + ' ' + msg.green)
+  } else if (config.log) {
+    blot.log().warn(action + ': ' + msg)
   }
 }
 
@@ -183,7 +199,7 @@ function section(msg) {
 // Command Bindings
 
 program
-  .version('0.0.2')
+  .version('0.0.3')
   .option('-i, --in-files [files]', 'Source files (*.blot or *.apib)', 'files')
   .option('-d, --in-data [markdown]', 'Read in plain Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')

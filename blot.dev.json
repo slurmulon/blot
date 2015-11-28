@@ -16,14 +16,13 @@
     "dest": "dist/api.blot.html",
     "export": true,
     "options": {
-      "themeVariables": "",
       "themeFullWidth": true,
-      "themeTemplate": "slate"
+      "themeVariables": "slate"
     },
     "elements": {
-      "main": ".ng-view",
-      "strip": ["script", "link", "form"],
+      "container": "body",
       "unwrap": ["html", "body"],
+      "scripts": false,
       "comments": false
     },
     "attrs": {}
