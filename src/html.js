@@ -97,8 +97,7 @@ export class Document {
    * Determines element selector from environment/project configuration key
    *
    * @param {?String} configKey top-level key of "views.element" in config file
-   * @param {?String} html
-   * @returns {Promise}
+   * @returns {Object}
    */
   static elementConfig(configKey: String): Object {
     const config = Document.config().elements[configKey]
@@ -202,7 +201,7 @@ export class Document {
    */
   static fromBlueprints(blueprints: Array): Promise {
     return Promise.all(
-      blueprints.map(bp => Document.fromBlueprint(bp))
+      blueprints.map(Document.fromBlueprint)
     )
   }
 

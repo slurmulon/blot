@@ -24,7 +24,7 @@ API Blueprint + Transclusion + Queries = Ultra-DRY Docs
 
 [API Blueprint](https://github.com/apiaryio/api-blueprint) is an open-source specification for programmatically
 documenting your APIs in pure Markdown. The specification is highly flexible and is focused on human readability.
-API Blueprints also machine readable, they naturally support tooling. They can be used to generate mock servers,
+API Blueprints are also machine readable, they naturally support tooling. They can be used to generate mock servers,
 automate integration testing, allow exportation of requests to tools such as Postman or cURL, and _much much_ more.
 
 A limitation of API blueprints is that they are static, and there are few (if any) plugins for parsing
