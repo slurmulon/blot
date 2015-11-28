@@ -1,7 +1,7 @@
 {
   "name": "blot",
-  "version": "0.0.2",
-  "description": "The DRY API Blueprint build tool",
+  "version": "0.0.3",
+  "description": "The Ultra-DRY documentation build tool",
   "main": "src/blot.js",
   "scripts": {
     "lint": "eslint src/blot.js",
