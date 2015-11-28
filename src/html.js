@@ -46,54 +46,48 @@ export class Document {
     return env.current().view
   }
 
-  static query(html: String): Object {
-    return cheerio.load(html)
-  }
-
-  static select(html: String, configKey: String): Object {
-    const config   = Document.config().elements[configKey]
-    const selector = Document.query(html)
+  static elementConfig(configKey: String): Object {
+    const config = Document.config().elements[configKey]
 
     if (_.isArray(config) && !_.isEmpty(config)) {
-      return selector(config.join(' ').trim())//.get() // ', '
-    } else if (_.isString(config)) {
-      return selector(config)
+      return config.join(' ').trim()
     }
 
-    return selector//.get()
+    return config
+  }
+
+  static query(html: String): Object {
+    return cheerio.load(html)
   }
 
   static container(html: String): Object {
     log().info('extracting main container element')
 
-    // TODO - incorporate Booleans elements.scripts, elements.comments
-    const elem  = Document.config().elements.container
-    const query = Document.select(html, 'container')
+    const selector = Document.elementConfig('container')
+    const query    = Document.query(html)(selector)
 
     return query
-    // return query.get()
   }
 
-  // FIXME - has issues, filtering all elems
   static stripped(html: String): Object {
     log().info('stripping configured elements')
 
-    return Document.query(html)
-    // return Document.select(html, 'strip').not()
-  }
+    const selector = Document.elementConfig('strip')
+    const query    = Document.query(html)
 
-  // TODO - add this to cheerio, do PR
-  // static unwrap(html: String): String {
-  //   return Document.selector(html, 'unwrap').unwrap()
-  // }
+    if (selector)
+      query(selector).remove()
+
+    return query
+  }
 
   static filtered(html: String): Object { // TODO - change to 'process'
     log().info('applying HTML filters')
 
     const containerDom = Document.container(html)
-    const finalDom = Document.stripped(containerDom)
+    const bakedDom = Document.stripped(containerDom.html())
 
-    return containerDom //finalDom 
+    return bakedDom
   }
 
   static dest(filepath: String, html: String): Promise {

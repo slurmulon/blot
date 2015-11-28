@@ -21,6 +21,7 @@
     },
     "elements": {
       "container": "body",
+      "strip": ["link"],
       "unwrap": ["html", "body"],
       "scripts": false,
       "comments": false
