@@ -1,5 +1,5 @@
 FORMAT: 1A
-HOST: |+ blot.config.host|
+HOST: |* blot.config.host|
 
 # Hazy Responses API
 Some description
@@ -13,9 +13,11 @@ Create users with random information
 
     + Body
 
-        { "username": "|~web:email|", "password": "|~basic:string|" }
+        { "username": "|~ web.email|", "password": "|~ basic.string|" }
 
 + Response 200 (application/json)
+
+    |> console.log('logging directly from hazy.md :)')|
 
     + Body
 

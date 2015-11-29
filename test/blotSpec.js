@@ -24,8 +24,8 @@ describe('Blueprint', () => {
     blueprintStubs.basic = new blot.apib.Blueprint('# Basic Stub')
     blueprintStubs.json  = new blot.apib.Blueprint(`
       # Retrieve User Id [GET]
-      ## Request {"name": "|~person:name|"}
-      ## Response {"id": "|~misc:guid|"}')`
+      ## Request {"name": "|~person.name|"}
+      ## Response {"id": "|~misc.guid|"}')`
     )
   })
 

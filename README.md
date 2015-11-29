@@ -61,7 +61,7 @@ The `~` keyword tells hazy to replace the token with categorized random data:
 # POST /v1/auth
 + Request (application/json)
 
-  { "username": "|~web:email|", "password": "|~text:word|" }
+  { "username": "|~web.email|", "password": "|~text:word|" }
 
 + Response 200 (application/json)
 
@@ -72,7 +72,7 @@ The `~` keyword tells hazy to replace the token with categorized random data:
 
 + Response authentication (application/json)
 
-  { "username": "|~web:email|", "first": "|~person:first|", "last": "|~person:last|", "address": "|~geo:address|" }
+  { "username": "|~web.email|", "first": "|~person:first|", "last": "|~person:last|", "address": "|~geo:address|" }
 ```
 
 Alternatively, you can be even more lazy, which is encouraged for increased normalization. The following example
@@ -211,7 +211,7 @@ hazy.matcher.config({
 })
 
 // globs and loads fixtures from filesystem into hazy's pool
-hazy.fixture.load('**/fixtures/*.json', null, (key) => key.replace('.json'))
+hazy.fixture.glob('**/fixtures/*.json', null, (key) => key.replace('.json'))
 
 // use the newly configured hazy object (and, by association, its fixture pool) when parsing API blueprints
 blot.interpolator = hazy.lang.process
@@ -236,6 +236,7 @@ You can now use blot as either an npm module in your own projects or as an execu
 ## TODO
 
  - [X] `--env` CLI flag
+ - [X] Static fixture export
+ - [ ] i18n module
  - [ ] Support [fury.js](https://github.com/apiaryio/fury.js)
- - [ ] Static fixture export
  - [ ] Support `beforeCompile` and `afterCompile` configuration files (root of project)
