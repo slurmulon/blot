@@ -61,23 +61,23 @@ The `~` keyword tells hazy to replace the token with categorized random data:
 # POST /v1/auth
 + Request (application/json)
 
-  { "username": "|~web.email|", "password": "|~text:word|" }
+  { "username": "|~web.email|", "password": "|~text.word|" }
 
 + Response 200 (application/json)
 
-  { "token": "|~misc:guid|", "refresh_token": "|~misc:guid|", "expires": "|~time:date|" }
+  { "token": "|~misc.guid|", "refresh_token": "|~misc.guid|", "expires": "|~time.date|" }
 
 # GET /v1/user/{id}
 ### Fetch a user [GET]
 
 + Response authentication (application/json)
 
-  { "username": "|~web.email|", "first": "|~person:first|", "last": "|~person:last|", "address": "|~geo:address|" }
+  { "username": "|~web.email|", "first": "|~person.first|", "last": "|~person.last|", "address": "|~geo.address|" }
 ```
 
 Alternatively, you can be even more lazy, which is encouraged for increased normalization. The following example
-shows how you can reference and embed large fixtures that live on the filesystem using the `>` operator. It can
-be used alongside hercule by using `:[]`:
+shows how you can reference and embed large fixtures that live on the filesystem using the `@` operator. It can
+be used alongside hercule's tranclusion operator `:[]`:
 
 ```
 # POST /v1/auth
@@ -85,7 +85,7 @@ be used alongside hercule by using `:[]`:
 
 + Request (application/json)
 
-  |> auth-req.json|
+  |@ auth-req.json|
 
 + Response 200 (application/json)
 
@@ -99,7 +99,14 @@ be used alongside hercule by using `:[]`:
   :[](auth-user-res.json)
 ```
 
-You may also freely leverage `JsonPath` in order to transclude fixtures by patterns:
+You may also freely leverage `JsonPath` in order to transclude fixtures by patterns
+with the `$` operator:
+
+> **Note**
+>
+> The `$` operator will be prefixed to your pattern before being matched.
+> Another way to look at is the text between the `|` bars will be interpreted
+> as a literal JsonPath.
 
 ```
 # POST /v1/auth
@@ -111,14 +118,14 @@ You may also freely leverage `JsonPath` in order to transclude fixtures by patte
 
 + Response 200 (application/json)
 
-  |* $..user[0]|
+  |$..user[0]|
 
 # GET /v1/user/{id}
 ### Fetch a user [GET]
 
 + Response 200 (application/json)
 
-  |* $..user[0]|
+  |$..user[0]|
 ```
 
 Subsets of fixtures may also be targeted.
@@ -134,14 +141,14 @@ The following `GET` user fixture is friends with four arbitrary users:
 
 + Response 200 (application/json)
 
-  {"user": "|* $..user[0]|", "friends": []}
+  {"user": "|$..user[0]|", "friends": []}
 
 # GET /v1/user/{id}
 ### Fetch a user [GET]
 
 + Response 200 (application/json)
 
-  {"user": "|* $..user[0]|", "friends": "|* $..user.id[:4]|"}
+  {"user": "|$..user[0]|", "friends": "|$..user.id[:4]|"}
 ```
 
 ### Command Line
@@ -169,7 +176,7 @@ $ blot compile -d 'FORMAT: 1A
 # GET /message
 + Response 200 (text/json)
 
-{"message": "Hello, |~person:name|!", "id": "|~misc:guid|"}' -o docs.apib --pretty
+{"message": "Hello, |~person.name|!", "id": "|~misc.guid|"}' -o docs.apib --pretty
 ```
 
 #### Help?
@@ -219,8 +226,8 @@ blot.interpolator = hazy.lang.process
 // load api blueprint, process fixtures against configured hazy pool, then export as a static API blueprint file
 blot.io
   .src('documentation.blot.apib')
-  .then(compiled => blot.dist(compiled.content, 'dist/documentation.apib'))
-  .then(result   => blot.log('done exporting!'))
+  .then(blueprint => blot.dest(blueprint.compiled.markdown, 'dist/documentation.apib'))
+  .then(result    => blot.log('done exporting!'))
 ```
 
 ## Install
