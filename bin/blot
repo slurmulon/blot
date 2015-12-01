@@ -33,6 +33,9 @@ function loadConfig(env, cmd) {
             info('env:name', envConfig.name)
             info('env:host', envConfig.host)
 
+            // ensure cli config matches environment config after processing
+            _.merge(config, envConfig)
+
             blot.env.use(envConfig)
           })
       )
