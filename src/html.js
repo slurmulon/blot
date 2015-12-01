@@ -99,7 +99,7 @@ export class Document {
    * @param {?String} configKey top-level key of "views.element" in config file
    * @returns {Object}
    */
-  static elementConfig(configKey: String): Object {
+  static elementConfig(configKey: String) {
     const config = Document.config().elements[configKey]
 
     if (_.isArray(config) && !_.isEmpty(config)) {
@@ -130,9 +130,14 @@ export class Document {
     log('$').info('extracting main container element')
 
     const selector = Document.elementConfig('container')
-    const query    = Document.query(html)(selector)
 
-    return query
+    if (html && selector) {
+      return Document.query(html)(selector)
+    } else if (html && !selector) {
+      return Document.query(html)
+    } else {
+      return Document.query()
+    }
   }
 
   /**
@@ -145,13 +150,51 @@ export class Document {
   static strip(html: String): Object {
     log('$').info('stripping configured elements')
 
-    const selector = Document.elementConfig('strip')
-    const query    = Document.query(html)
+    if (html) {
+      const selector = Document.elementConfig('strip')
+      const query    = Document.query(html)
 
-    if (selector)
-      query(selector).remove()
+      if (selector)
+        query(selector).remove()
 
-    return query
+      return query
+    } else {
+      return Document.query()
+    }
+  }
+
+  static replace(html: String): String {
+    log('$').info('replacing configured elements')
+
+    if (html) {
+      const replace = Document.config().replace
+      let result = html
+
+      if (_.isArray(replace)) {
+        replace.forEach(conf => {
+          const pattern  = new RegExp(conf.regex[0], 'gi')
+          const template = conf.regex[1]
+
+          if (pattern && template) {
+            const splits  = result.split(pattern)
+            const matches = splits.filter((s,i) => i % 2 === 1)
+
+            let cursor = 0
+            const replaced = result.replace(pattern, (match) =>
+              hazy.lang.evaluate(template, {'$match': matches[cursor++]})
+            )
+
+            result = replaced
+          } else {
+            log('$').warn('malformed element replacement configuration', conf)
+          }
+        })
+      }
+
+      return result //Document.query(result) // FIXME - cheerio is escaping only replacements, wut?
+    }
+
+    return html // Document.query(html)
   }
 
   /**
@@ -165,7 +208,8 @@ export class Document {
     log('$').info('processing HTML elements')
 
     const containerDom = Document.container(html)
-    const bakedDom     = Document.strip(containerDom.html())
+    const strippedDom  = Document.strip(containerDom.html())
+    const bakedDom     = Document.replace(strippedDom.html())
 
     return bakedDom
   }

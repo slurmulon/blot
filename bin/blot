@@ -22,6 +22,8 @@ function loadConfig(env, cmd) {
     config.logging = cmd.log
     config.pretty  = cmd.pretty
 
+    // TODO - if no env is provided, search for all of them and parse individually
+
     // use environment project config
     if (blot.env.Config.isProject(env)) {
       resolve(
@@ -100,7 +102,7 @@ function renderBlueprints(blueprints) {
       .fromBlueprints(blueprints)
       .then(function(docs) {
         return Promise.all(_.map(docs, function(doc) {
-          return doc.processed.html()
+          return doc.processed //.html()
         }))
       })
       .then(function(docs) {

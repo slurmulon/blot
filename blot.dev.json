@@ -20,14 +20,17 @@
       "themeVariables": "slate"
     },
     "elements": {
-      "container": "body",
+      "container": "html",
       "scripts": false,
       "comments": false
     },
-    "attrs": {}
-  },
-  "meta": {
-    "src": "src/meta"
+    "attrs": {},
+    "replace": [
+      {
+        "desc": "replaces anchor hrefs with Angular-friendly value",
+        "regex": ["href=\"#([^'\"]+)['\"]", "ng-click=\"scrollTo('|=$match|')\""]
+      }
+    ]
   },
   "logging": true,
   "pretty": false
