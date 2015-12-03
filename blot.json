@@ -1,5 +1,4 @@
 {
-  "name": "dev",
   "host": "http://example.blot.apps.madhax.io",
   "base": ".",
   "docs": {
