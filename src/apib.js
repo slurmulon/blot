@@ -61,7 +61,7 @@ export class Blueprint {
 
     return new Promise((resolve, reject) => {
       let fixtures = []
-      const jsonStrMatches = (markdown.match instanceof Function) ? markdown.match(plainJson) : []
+      const jsonStrMatches = (markdown.match instanceof Function) ? markdown.match(jsonLike) : []
 
       jsonStrMatches && jsonStrMatches.forEach(jsonStr => {
         try {
@@ -201,7 +201,7 @@ export var interpolator = hazy.lang.process
  * My janky regex for finding "JSON" objects in markdown. Need a more loveable solution, has obvious
  * issues with validating nested structures (regex isn't suited for this)
  */
-export const plainJson = /\{(.*?)\}/gm
+export const jsonLike = /\{(.*?)\}/gm
 
 /**
  * Module-level bunyan logger
