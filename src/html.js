@@ -126,7 +126,7 @@ export class Document {
    * @param {String} html
    * @returns {$}
    */
-  static container(html: String): Object {
+  static container(html: String): Object {  
     log('$').info('extracting main container element')
 
     const selector = Document.elementConfig('container')
@@ -141,7 +141,32 @@ export class Document {
   }
 
   /**
-   * Strips out elements from HTML based on
+   * Plucks out and reduces elements from HTML based on
+   * environment/project configuration
+   *
+   * @param {String} html
+   * @returns {$}
+   */
+  static pluck(html: String): Object {
+    log('$').info('plucking configured elements')
+    
+    const selector = Document.elementConfig('pluck')
+    const query    = Document.query
+
+    if (html && selector) {
+      return query(
+        selector
+          .split(',')
+          .map($ => query(html)($).map((i, elem) => query(elem).html()).get())
+          .reduce((a,b) => a + b)
+      )
+    } else {
+      return query(html)
+    }
+  }
+
+  /**
+   * Strips out (removes) elements from HTML based on
    * environment/project configuration
    *
    * @param {String} html
@@ -163,6 +188,16 @@ export class Document {
     }
   }
 
+  /**
+   * Performs templated regex replacements on HTML based on
+   * environment/project configuration.
+   *
+   * Matches may be dynamically referenced in templates
+   * by referencing the interpolation token |=$match|
+   *
+   * @param {String} html
+   * @returns {String} resulting HTML
+   */
   static replace(html: String): String {
     log('$').info('replacing configured elements')
 
@@ -172,19 +207,13 @@ export class Document {
 
       if (_.isArray(replace)) {
         replace.forEach(conf => {
-          const pattern  = new RegExp(conf.regex[0], 'gi')
-          const template = conf.regex[1]
+          const pattern  = new RegExp(conf.match, 'gi')
+          const template = conf.template
 
           if (pattern && template) {
-            const splits  = result.split(pattern)
-            const matches = splits.filter((s,i) => i % 2 === 1)
-
-            let cursor = 0
-            const replaced = result.replace(pattern, (match) =>
-              hazy.lang.evaluate(template, {'$match': matches[cursor++]})
+            result = result.replace(pattern, ($match, ...$sub) =>
+              hazy.lang.evaluate(template, {$match, $sub})
             )
-
-            result = replaced
           } else {
             log('$').warn('malformed element replacement configuration', conf)
           }
@@ -199,19 +228,20 @@ export class Document {
 
   /**
    * Processes all element configuration filters against HTML
-   * and returns the resulting document
+   * and returns the resulting HTML string
    *
    * @param {String} html
-   * @returns {$}
+   * @returns {String}
    */
   static process(html: String): Object {
     log('$').info('processing HTML elements')
 
     const containerDom = Document.container(html)
-    const strippedDom  = Document.strip(containerDom.html())
-    const bakedDom     = Document.replace(strippedDom.html())
+    const pluckedDom   = Document.pluck(containerDom.html())
+    const strippedDom  = Document.strip(pluckedDom.html())
+    const bakedHtml    = Document.replace(strippedDom.html())
 
-    return bakedDom
+    return bakedHtml
   }
 
   /**
