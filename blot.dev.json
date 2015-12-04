@@ -2,9 +2,9 @@
   "name": "dev",
   "host": "http://example.blot.apps.madhax.io",
   "base": ".",
-  "blueprints": {
+  "docs": {
     "src": "test/fixtures/apiblueprint/hazy.md",
-    "dest": "dist/docs/index.apib",
+    "dest": "dist/docs/test/fixtures/apiblueprint/hazy.apib",
     "export": true
   },
   "fixtures": {

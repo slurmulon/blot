@@ -134,7 +134,7 @@ function exportBlueprints(blueprints) {
   var curEnv   = blot.env.current()
   var validOut = !config.outFile || config.outFile == 'file'
   var doExport = curEnv.isProject && curEnv.docs.export && curEnv.docs.dest
-  var outPath  = doExport ? curEnv.docs.dest + '/' + config.inFiles : config.outFile // TODO - cleanup, slop
+  var outPath  = doExport ? curEnv.docs.dest : config.outFile // TODO - cleanup, slop
 
   if (!doExport && validOut)
     return
