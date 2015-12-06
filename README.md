@@ -1,6 +1,6 @@
 # blot
 
-> The Ultra-DRY documentation build tool
+> The DRY documentation build tool
 
 ## tl;dr
 
@@ -244,6 +244,7 @@ You can now use blot as either an npm module in your own projects or as an execu
 
  - [X] `--env` CLI flag
  - [X] Static fixture export
+ - [ ] Inheritable project config
  - [ ] i18n module
  - [ ] Support [fury.js](https://github.com/apiaryio/fury.js)
  - [ ] Support `beforeCompile` and `afterCompile` configuration files (root of project)

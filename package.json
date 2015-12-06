@@ -1,7 +1,7 @@
 {
   "name": "blot",
   "version": "0.0.3",
-  "description": "The Ultra-DRY documentation build tool",
+  "description": "DRY documentation builder",
   "main": "src/blot.js",
   "scripts": {
     "lint": "eslint src/blot.js",
@@ -18,19 +18,7 @@
     "type": "git",
     "url": "git://github.com/slurmulon/blot.git"
   },
-  "keywords": [
-    "api",
-    "blueprint",
-    "markdown",
-    "docs",
-    "documentation",
-    "fixture",
-    "stub",
-    "build",
-    "hercule",
-    "hazy",
-    "blot"
-  ],
+  "keywords": [],
   "author": "MadHax",
   "license": "MIT",
   "bugs": {
