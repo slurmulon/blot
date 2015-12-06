@@ -4,15 +4,16 @@
   "description": "DRY documentation builder",
   "main": "src/blot.js",
   "scripts": {
+    "build": "babel src --out-dir lib && babel bin/blot --out-dir exec",
     "lint": "eslint src/blot.js",
     "start": "babel-node src/blot.js",
-    "build": "babel src --out-dir lib && babel bin/blot --out-dir exec",
     "test": "mocha --reporter nyan --compilers js:babel/register test",
-    "prepublish": "npm run build",
-    "auto-start": "nodemon --exec \"npm run lint && npm start\" --ignore public/js"
+    "auto-start": "nodemon --exec \"npm run lint && npm start\" --ignore public/js",
+    "postinstall": "npm run build",
+    "prepublish": "npm run build"
   },
   "bin": {
-    "blot": "./exec/bin/blot.js"
+    "blot": "exec/bin/blot.js"
   },
   "repository": {
     "type": "git",
