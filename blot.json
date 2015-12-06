@@ -2,8 +2,8 @@
   "host": "http://example.blot.apps.madhax.io",
   "base": ".",
   "docs": {
-    "src": "src/docs",
-    "dest": "dist/docs",
+    "src": "test/fixtures/apiblueprint/hazy.md",
+    "dest": "dist/docs/test/fixtures/apiblueprint/hazy.apib",
     "export": true
   },
   "fixtures": {
@@ -19,11 +19,16 @@
       "themeVariables": "slate"
     },
     "elements": {
-      "container": "body",
-      "scripts": false,
-      "comments": false
+      "pluck": ["link", "style", "body > *"]
     },
-    "attrs": {}
+    "attrs": {},
+    "replace": [
+      {
+        "desc": "replaces positional anchor hrefs with Angular-friendly values",
+        "match": "href=\"#([^'\"]+)['\"]", 
+        "template": "ng-click=\"scrollTo('|=$sub[0]|')\""
+      }
+    ]
   },
   "logging": false,
   "pretty": false

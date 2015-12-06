@@ -2,9 +2,8 @@
   "host": "http://example.blot.apps.madhax.io",
   "base": ".",
   "docs": {
-    "src": "src/docs",
-    "dest": "dist/docs",
-    "root": "index.md",
+    "src": "index.md",
+    "dest": "dist/index.md",
     "export": true
   },
   "fixtures": {
@@ -18,11 +17,6 @@
     "options": {
       "themeFullWidth": true,
       "themeVariables": "streak"
-    },
-    "elements": {
-      "pluck": "body",
-      "scripts": false,
-      "comments": false
     },
     "attrs": {},
     "replace": [
