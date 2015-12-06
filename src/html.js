@@ -231,7 +231,7 @@ export class Document {
    * @param {String} html
    * @returns {String}
    */
-  static process(html: String): Object {
+  static process(html: String): String {
     log('$').info('processing HTML elements')
 
     if (Document.config().elements) {
