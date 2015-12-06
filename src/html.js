@@ -133,11 +133,9 @@ export class Document {
 
     if (html && selector) {
       return Document.query(html)(selector)
-    } else if (html && !selector) {
-      return Document.query(html)
-    } else {
-      return Document.query()
     }
+
+    return Document.query(html)
   }
 
   /**
@@ -184,7 +182,7 @@ export class Document {
 
       return query
     } else {
-      return Document.query()
+      return Document.query(html)
     }
   }
 
@@ -236,12 +234,16 @@ export class Document {
   static process(html: String): Object {
     log('$').info('processing HTML elements')
 
-    const containerDom = Document.container(html)
-    const pluckedDom   = Document.pluck(containerDom.html())
-    const strippedDom  = Document.strip(pluckedDom.html())
-    const bakedHtml    = Document.replace(strippedDom.html())
+    if (Document.config().elements) {
+      const containerDom = Document.container(html)
+      const pluckedDom   = Document.pluck(containerDom.html())
+      const strippedDom  = Document.strip(pluckedDom.html())
+      const bakedHtml    = Document.replace(strippedDom.html())
 
-    return bakedHtml
+      return bakedHtml
+    }
+
+    return html
   }
 
   /**
