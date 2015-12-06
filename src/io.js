@@ -129,9 +129,9 @@ export const util = {
      */
     src: (filepath, andThen) => {
       return new Promise((resolve, reject) => {
-        const envPath = env.current().uri(filepath)
+        // const envPath = env.current().uri(filepath)
 
-        fs.readFile(envPath, 'utf-8', (err, data) => {
+        fs.readFile(filepath, 'utf-8', (err, data) => {
           if (!err) {
             if (andThen instanceof Function) {
               andThen(data)
@@ -156,12 +156,12 @@ export const util = {
      */
     dest: (filepath, data) => {
       return new Promise((resolve, reject) => {
-        const relPath = env.current().uri(filepath)
-        const relDir  = path.dirname(relPath)
+        // const relPath = env.current().uri(filepath)
+        const relDir  = path.dirname(filepath)
 
         mkpath(relDir, (err) => {
           if (!err) {
-            fs.writeFile(relPath, data, 'utf-8', (err) => {
+            fs.writeFile(filepath, data, 'utf-8', (err) => {
               if (!err) {
                 log().info(`exported content to ${filepath}`)
 

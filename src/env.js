@@ -27,7 +27,7 @@ export class Config {
    * @param {String} logging whether or not to print standardized logs
    * @param {String} pretty whether ot not to print pretty logs
    */
-  constructor(name, base, host, docs, fixtures, view, echo = false, logging = false, pretty = false) {
+  constructor(name, base, host, docs, fixtures, view, echo = false, logging = false, pretty = false, source = null) {
     this.name     = name     || 'root'
     this.base     = base     || '.'
     this.host     = host     || '127.0.0.1'
@@ -38,6 +38,8 @@ export class Config {
     this.echo     = echo
     this.logging  = logging
     this.pretty   = pretty
+
+    this.source = source
 
     enviros[name] = this
 
@@ -64,7 +66,7 @@ export class Config {
    * @returns {String} filepath adjusted to project base path
    */
   get rootUri(): String {
-    return Config.rootUri(this.name)
+    return this.source || Config.rootUri(this.name)
   }
 
   /**
@@ -83,7 +85,8 @@ export class Config {
    * @returns {String} filepath adjusted to project environment config
    */
   static rootUri(env: String): String {
-    return (env && env !== 'root') ? `./blot.${env}.json` : `./blot.json`
+    // return (env && env !== 'root') ? `./blot.${env}.json` : `./blot.json`
+    return (env && env !== 'root') ? env : `./blot.json`
   }
 
   /**
@@ -102,13 +105,16 @@ export class Config {
    * @returns {Promise}
    */
   static src(filepath: String): Promise {
+    console.log('DERRRRRRP', filepath, path.dirname(filepath))
     return new Promise((resolve, reject) => {
       const envPath = path.resolve(filepath || Config.rootUri())
 
       return fs.readFile(envPath, 'utf-8', (err, data) => {
         if (!err) {
+          const paths = {source: path.basename(filepath), base: path.dirname(filepath)}
+
           resolve(
-            configure(JSON.parse(data))
+            configure(JSON.parse(_.merge(data, paths)))
           )
         } else {
           reject(`Failed to read in blot environment configuration from ${path}`)
@@ -130,6 +136,10 @@ export class Config {
       Config
         .src(Config.rootUri(env))
         .then(data => {
+          process.chdir(path.dirname(env))
+
+          console.log('ZOMG FOUND DATA', data)
+
           // override project config with options (typically CLI) when necessary
           if (!_.isEmpty(options)) {
             if (data) {
@@ -174,7 +184,7 @@ export function use(env) {
  * @param {Object} arguments configuration object
  * @returns {Config}
  */
-export const configure = ({name, base, host, docs, fixtures, view, echo, logging, pretty}) => new Config(name, base, host, docs, fixtures, view, echo, logging, pretty)
+export const configure = ({name, base, host, docs, fixtures, view, echo, logging, pretty, source}) => new Config(name, base, host, docs, fixtures, view, echo, logging, pretty, source)
 
 /**
  * Provides the currently selected environment in blot

@@ -4,6 +4,7 @@
 
 var blot = require('../../lib/blot')
 var colors = require('colors')
+var path = require('path')
 var program = require('commander')
 var _ = require('lodash')
 
@@ -24,32 +25,46 @@ function loadConfig(env, cmd) {
 
     // TODO - if no env is provided, search for all of them and parse individually
 
-    // use environment project config
-    if (blot.env.Config.isProject(env)) {
-      resolve(
-        blot.env.Config
-          .loadProject(env, config)
-          .then(function(envConfig) {
-            info('env:name', envConfig.name)
-            info('env:host', envConfig.host)
-
-            // ensure cli config matches environment config after processing
-            _.merge(config, envConfig)
-
-            // map CLI flags with names different from env config... FIXME
-            config.inFiles  = envConfig.docs.src
-            config.outFiles = envConfig.docs.dest
-
-            blot.env.use(envConfig)
-          })
-      )
+    if (cmd.configFile) {
+      blot.env.Config
+        .src(cmd.configFile)
+        .then(function(envConfig) {
+          console.log('MAPPIN BRO')
+          mapConfigs(config, envConfig)
+        })
+        .then(resolve)
+        .catch(error)
+    } else if (blot.env.Config.isProject(env)) {
+      // use environment project config
+      blot.env.Config
+        .loadProject(env, config)
+        .then(function(envConfig) {
+          mapConfigs(config, envConfig)
+        })
+        .then(resolve)
+        .catch(error)
     } else {
       resolve(false)
     }
   })
 }
 
+function mapConfigs(cliConfig, envConfig) {
+  info('env:name', envConfig.name)
+  info('env:host', envConfig.host)
+
+  // ensure cli config matches environment config after processing
+  _.merge(cliConfig, envConfig)
+
+  // map CLI flags with names different from env config... FIXME
+  cliConfig.inFiles  = envConfig.uri(envConfig.docs.src)
+  cliConfig.outFiles = envConfig.uri(envConfig.docs.dest)
+
+  blot.env.use(envConfig)
+}
+
 function parseFiles(files) {
+  console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', files)
   info('glob', 'start')
 
   return blot.io
@@ -81,12 +96,16 @@ function parseText(data) {
 }
 
 function compileInputs() {
+console.log('SLKDFJSDLKFJSLKDJFLKSDJFLKDSJ')
   return new Promise(function(resolve, reject) {
     var curEnv  = blot.env.current()
     var validFs = config.inFiles   && config.inFiles !== 'files'
     var loadFs  = curEnv.isProject && curEnv.docs.src
 
+    console.log('wat', config.inFiles, validFs, loadFs)
+
     if (validFs || loadFs) {
+      console.log('NOPE', config.inFiles)
       parseFiles(config.inFiles)
         .then(resolve)
         .catch(reject)
@@ -210,12 +229,12 @@ function section(msg) {
 // Command Bindings
 
 program
-  .version('0.0.3')
+  .version('0.0.6')
   .option('-i, --in-files [files]', 'Source documentation files (*.blot or *.apib)', 'files')
   .option('-d, --in-data [markdown]', 'Read in plain Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
   .option('-v, --validate', 'Determines if provided content is a valid API Blueprint')
-  .option('-c, --config', 'Specify a specific configuration to load, Useful for working with environments.')
+  .option('-c, --config-file [file]', 'Specify a specific configuration file to load, Useful for working with environments or avoiding cwd issues.')
   .option('-e, --echo', 'Prints compiled result to stdout')
   .option('-l, --log', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')
