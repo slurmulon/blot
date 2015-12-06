@@ -14,7 +14,7 @@
     "prepublish": "npm run build"
   },
   "bin": {
-    "blot": "exec/bin/blot.js"
+    "blot": "./exec/bin/blot.js"
   },
   "repository": {
     "type": "git",
