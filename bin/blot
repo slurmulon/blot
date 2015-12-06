@@ -13,7 +13,7 @@ var config = {}
 // CLI Actions and Commands
 
 function loadConfig(env, cmd) {
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
     info('env:load', env)
 
     config.inFiles = cmd.inFiles // FIXME - map io properly to env.Config
@@ -25,46 +25,38 @@ function loadConfig(env, cmd) {
 
     // TODO - if no env is provided, search for all of them and parse individually
 
-    if (cmd.configFile) {
-      blot.env.Config
-        .src(cmd.configFile)
-        .then(function(envConfig) {
-          console.log('MAPPIN BRO')
-          mapConfigs(config, envConfig)
-        })
-        .then(resolve)
-        .catch(error)
-    } else if (blot.env.Config.isProject(env)) {
+    if (blot.env.Config.isProject(env)) {
       // use environment project config
       blot.env.Config
-        .loadProject(env, config)
+        .loadProject(env, config, false)
         .then(function(envConfig) {
-          mapConfigs(config, envConfig)
+          mapConfigs(envConfig)
+
+          resolve(envConfig)
         })
-        .then(resolve)
-        .catch(error)
+        .catch(reject)
     } else {
+      warn('env', 'no project environment defined')
       resolve(false)
     }
   })
 }
 
-function mapConfigs(cliConfig, envConfig) {
+function mapConfigs(envConfig) {
   info('env:name', envConfig.name)
   info('env:host', envConfig.host)
 
   // ensure cli config matches environment config after processing
-  _.merge(cliConfig, envConfig)
+  _.merge(config, envConfig)
 
   // map CLI flags with names different from env config... FIXME
-  cliConfig.inFiles  = envConfig.uri(envConfig.docs.src)
-  cliConfig.outFiles = envConfig.uri(envConfig.docs.dest)
+  config.inFiles  = envConfig.docs.src
+  config.outFiles = envConfig.docs.dest
 
-  blot.env.use(envConfig)
+  blot.env.use(envConfig, true)
 }
 
 function parseFiles(files) {
-  console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', files)
   info('glob', 'start')
 
   return blot.io
@@ -96,16 +88,12 @@ function parseText(data) {
 }
 
 function compileInputs() {
-console.log('SLKDFJSDLKFJSLKDJFLKSDJFLKDSJ')
   return new Promise(function(resolve, reject) {
     var curEnv  = blot.env.current()
     var validFs = config.inFiles   && config.inFiles !== 'files'
     var loadFs  = curEnv.isProject && curEnv.docs.src
 
-    console.log('wat', config.inFiles, validFs, loadFs)
-
     if (validFs || loadFs) {
-      console.log('NOPE', config.inFiles)
       parseFiles(config.inFiles)
         .then(resolve)
         .catch(reject)
@@ -234,7 +222,6 @@ program
   .option('-d, --in-data [markdown]', 'Read in plain Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
   .option('-v, --validate', 'Determines if provided content is a valid API Blueprint')
-  .option('-c, --config-file [file]', 'Specify a specific configuration file to load, Useful for working with environments or avoiding cwd issues.')
   .option('-e, --echo', 'Prints compiled result to stdout')
   .option('-l, --log', 'Enables logging of blot events')
   .option('-p, --pretty', 'Formats results into visually pleasing output')

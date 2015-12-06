@@ -13,7 +13,7 @@ Create users with random information
 
     + Body
 
-        { "username": "|~ web.email|", "password": "|~ basic.string|" }
+        :[](user.json)
 
 + Response 200 (application/json)
 

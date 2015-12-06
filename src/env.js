@@ -27,7 +27,8 @@ export class Config {
    * @param {String} logging whether or not to print standardized logs
    * @param {String} pretty whether ot not to print pretty logs
    */
-  constructor(name, base, host, docs, fixtures, view, echo = false, logging = false, pretty = false, source = null) {
+  constructor(name, source, base, host, docs, fixtures, view, echo = false, logging = false, pretty = false) {
+    this.source   = source
     this.name     = name     || 'root'
     this.base     = base     || '.'
     this.host     = host     || '127.0.0.1'
@@ -39,9 +40,8 @@ export class Config {
     this.logging  = logging
     this.pretty   = pretty
 
-    this.source = source
 
-    enviros[name] = this
+    enviros[source || name] = this
 
     // TODO - consider setting other fun stuff here as well
     ;['name', 'host', 'base'].forEach(prop => {
@@ -70,12 +70,13 @@ export class Config {
   }
 
   /**
-   * Determines if a blot project file configuration exists
+   * Determines whether a blot project file configuration exists
+   * or a filepath source has been defined.
    *
    * @returns {Boolean}
    */
   get isProject(): Boolean {
-    return util.fs.existsAt(this.rootUri)
+    return this.source || util.fs.existsAt(this.rootUri)
   }
 
   /**
@@ -105,16 +106,13 @@ export class Config {
    * @returns {Promise}
    */
   static src(filepath: String): Promise {
-    console.log('DERRRRRRP', filepath, path.dirname(filepath))
     return new Promise((resolve, reject) => {
       const envPath = path.resolve(filepath || Config.rootUri())
 
       return fs.readFile(envPath, 'utf-8', (err, data) => {
         if (!err) {
-          const paths = {source: path.basename(filepath), base: path.dirname(filepath)}
-
           resolve(
-            configure(JSON.parse(_.merge(data, paths)))
+            configure(_.merge(JSON.parse(data), {source: filepath}))
           )
         } else {
           reject(`Failed to read in blot environment configuration from ${path}`)
@@ -127,30 +125,26 @@ export class Config {
    * Loads a blot project configuration file, parses it and then
    * establishes it as the selected environment
    *
-   * @param {String} env environment name
+   * @param {String} envPath environment filepath
    * @param {String} project configuration overrides (typically from CLI)
    * @returns {Promise}
    */
-  static loadProject(env: String, options: Object): Promise {
+  static loadProject(envPath: String, options: Object, chdir: Boolean = false): Promise {
     return new Promise((resolve, reject) => {
       Config
-        .src(Config.rootUri(env))
-        .then(data => {
-          process.chdir(path.dirname(env))
-
-          console.log('ZOMG FOUND DATA', data)
-
+        .src(Config.rootUri(envPath))
+        .then(project => {
           // override project config with options (typically CLI) when necessary
           if (!_.isEmpty(options)) {
-            if (data) {
-              data = _.merge(data, options)
+            if (project) {
+              project = _.merge(project, options)
             } else {
-              data = options
+              project = options
             }
           }
 
-          use(env)
-          resolve(data)
+          use(project, chdir)
+          resolve(project)
         })
         .catch(reject)
     })
@@ -161,21 +155,19 @@ export class Config {
 /**
  * Establishes a project environment as the default
  *
- * @param {String|Object} env
+ * @param {Config} env
  * @returns {Promise}
  */
-export function use(env) {
-  if (_.isString(env)) {
-    if (env in enviros) {
-      selected = env
-    } else {
-      // WARN - enviro not defined
+export function use(project: Config, chdir: Boolean = false) {
+  if (project instanceof Config) {
+    selected = project.source || project.name
+
+    if (project.source && chdir) {
+      process.chdir(path.dirname(project.source))
     }
-  } else if (_.isObject(env)) {
-    selected = configure(env).name
   }
 
-  return env
+  return project
 }
 
 /**
@@ -184,7 +176,7 @@ export function use(env) {
  * @param {Object} arguments configuration object
  * @returns {Config}
  */
-export const configure = ({name, base, host, docs, fixtures, view, echo, logging, pretty, source}) => new Config(name, base, host, docs, fixtures, view, echo, logging, pretty, source)
+export const configure = ({name, source, base, host, docs, fixtures, view, echo, logging, pretty}) => new Config(name, source, base, host, docs, fixtures, view, echo, logging, pretty)
 
 /**
  * Provides the currently selected environment in blot
