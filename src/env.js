@@ -20,6 +20,7 @@ export class Config {
 
   /**
    * @param {String} name key-friendly name of the environment
+   * @param {String} source path of original configuration project file
    * @param {String} base base path for all other paths in blot
    * @param {String} host API host (for use in docs)
    * @param {String} docs I/O configuration for docs
@@ -40,13 +41,7 @@ export class Config {
     this.logging  = logging
     this.pretty   = pretty
 
-
     enviros[source || name] = this
-
-    // TODO - consider setting other fun stuff here as well
-    ;['name', 'host', 'base'].forEach(prop => {
-      hazy.fixture.register(`blot.config.${prop}`, this[prop])
-    })
   }
 
   /**
@@ -153,14 +148,20 @@ export class Config {
 }
 
 /**
- * Establishes a project environment as the default
+ * Bootstraps and establishes a project environment as the default
  *
- * @param {Config} env
+ * @param {Config|Object} env
  * @returns {Promise}
  */
 export function use(project: Config, chdir: Boolean = false) {
-  if (project instanceof Config) {
+  if (project instanceof Config || _.isPlainObject(config)) {
     selected = project.source || project.name
+    enviros[selected] = project
+
+    // register certain config objects with hazy for easy access
+    ;['name', 'host', 'base', 'docs', 'fixtures'].forEach(prop => {
+      hazy.fixture.register(`blot.config.${prop}`, project[prop])
+    })
 
     if (project.source && chdir) {
       process.chdir(path.dirname(project.source))

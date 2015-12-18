@@ -13,24 +13,24 @@ var config = {}
 // CLI Actions and Commands
 
 function loadConfig(env, cmd) {
+  // override precedence (starting w/ base):
+  // project -> flags -> object literal (--config)
   return new Promise(function(resolve, reject) {
     info('env:load', env)
 
-    config.inFiles = cmd.inFiles // FIXME - map io properly to env.Config
-    config.inData  = cmd.inData
-    config.outFile = cmd.outFile
-    config.echo    = cmd.echo
-    config.logging = cmd.log
-    config.pretty  = cmd.pretty
+    _.merge(config, cmd)
 
-    // TODO - if no env is provided, search for all of them and parse individually
+    mapJsonConfig(cmd.config)
 
     if (blot.env.Config.isProject(env)) {
       // use environment project config
       blot.env.Config
         .loadProject(env, config, false)
         .then(function(envConfig) {
-          mapConfigs(envConfig)
+          info('env:name', envConfig.name)
+          info('env:host', envConfig.host)
+
+          mapEnvConfig(envConfig)
 
           resolve(envConfig)
         })
@@ -42,11 +42,17 @@ function loadConfig(env, cmd) {
   })
 }
 
-function mapConfigs(envConfig) {
-  info('env:name', envConfig.name)
-  info('env:host', envConfig.host)
+function mapJsonConfig(configObj) {
+  // ensure JSON configuration object (when provided) overrides CLI flags
+  try {
+    _.merge(config, JSON.parse(configObj))
+  } catch (e) {
+    error('config override must be valid JSON: ' + e)
+  }
+}
 
-  // ensure cli config matches environment config after processing
+function mapEnvConfig(envConfig) {
+  // ensure run config matches environment config after processing
   _.merge(config, envConfig)
 
   // map CLI flags with names different from env config... FIXME
@@ -217,10 +223,11 @@ function section(msg) {
 // Command Bindings
 
 program
-  .version('0.0.6')
+  .version('0.0.8')
   .option('-i, --in-files [files]', 'Source documentation files (*.blot or *.apib)', 'files')
-  .option('-d, --in-data [markdown]', 'Read in plain Markdown (UTF-8)', 'markdown')
+  .option('-d, --in-data [md]', 'Read in plain Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')
+  .option('-c, --config [obj]', 'Provide a JSON-formatted project configuration override object')
   .option('-v, --validate', 'Determines if provided content is a valid API Blueprint')
   .option('-e, --echo', 'Prints compiled result to stdout')
   .option('-l, --log', 'Enables logging of blot events')

@@ -1,5 +1,7 @@
 'use strict'
 
+import * as env from './env'
+
 import hazy from 'hazy'
 import protagonist from 'protagonist'
 import hercule from 'hercule'
@@ -160,7 +162,11 @@ export class Blueprint {
   static interpolate(markdown: String): Promise {
     log().info('interpolating')
 
-    return new Promise((resolve, reject) => resolve(interpolator(markdown)))
+    const locals = {config: env.current()} // FIXME - not accessible in hazy for some reason
+
+    return new Promise((resolve, reject) => resolve(
+      interpolator(markdown, locals)
+    ))
   }
 
   /**
