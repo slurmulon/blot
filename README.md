@@ -6,7 +6,7 @@
 
 API Blueprint + Transclusion + Queries = Ultra-DRY Docs
 
-* Build tool for normalized API Blueprints
+* Build tool for normalized API Blueprints and fixtures
 * Unifies documentation and fixtures via transclusion and queries
 * Eases the maintenance of documentation, fixtures and tests
 
@@ -16,7 +16,7 @@ API Blueprint + Transclusion + Queries = Ultra-DRY Docs
 * Generate random data anywhere using a non-invasive syntax
 * Reference, query and embed data using the same non-invasive syntax
 * Extract and export JSON fixtures from API Blueprints
-* Export API Blueprints as HTML (web-component friendly, choose what you want)
+* Export API Blueprints as HTML (web-component friendly, choose what you want by querying)
 * Multi-environment project configurations
 * Flexible CLI with verbose logging
 
@@ -227,7 +227,7 @@ blot.interpolator = hazy.lang.process
 blot.io
   .src('documentation.blot.apib')
   .then(blueprint => blot.dest(blueprint.compiled.markdown, 'dist/documentation.apib'))
-  .then(result    => blot.log('done exporting!'))
+  .then(result    => blot.log.info('done exporting!'))
 ```
 
 ## Install
