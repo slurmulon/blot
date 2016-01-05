@@ -1,6 +1,6 @@
 {
   "name": "blot",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "DRY documentation builder",
   "main": "src/blot.js",
   "scripts": {
