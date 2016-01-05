@@ -4,7 +4,7 @@
   "description": "DRY documentation builder",
   "main": "src/blot.js",
   "scripts": {
-    "build": "./node_modules/.bin/babel src --out-dir lib && ./node_modules/.bin/babel bin/blot --out-dir exec",
+    "build": "node ./node_modules/.bin/babel src --out-dir lib && ./node_modules/.bin/babel bin/blot --out-dir exec",
     "lint": "eslint src/blot.js",
     "start": "./node_modules/.bin/babel-node src/blot.js",
     "pretest": "npm run build",
