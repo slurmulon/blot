@@ -10,8 +10,7 @@
     "pretest": "npm run build",
     "test": "./node_modules/.bin/mocha --reporter nyan --compilers js:babel/register test",
     "auto-start": "nodemon --exec \"npm run lint && npm start\" --ignore public/js",
-    "preinstall": "npm install --ignore-scripts",
-    "postinstall": "npm run build",
+    "preinstall": "npm install --ignore-scripts && npm run build",
     "prepublish": "npm run build"
   },
   "bin": {
@@ -43,7 +42,7 @@
     "commander": "^2.9.0",
     "config.json": "0.0.4",
     "glob": "^5.0.10",
-    "hazy": "^0.1.6",
+    "hazy": "^0.1.7",
     "hercule": "^1.2.1",
     "jsonpath": "^0.1.4",
     "lodash": "~3.9.3",
