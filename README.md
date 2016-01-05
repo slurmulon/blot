@@ -198,7 +198,6 @@ The following example attaches a `created` property to all fixtures. It also app
 ```javascript
 #! /usr/bin/env node
 
-import gulp from 'gulp'
 import hazy from 'hazy'
 import blot from 'blot'
 import moment from 'moment'
