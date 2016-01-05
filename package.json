@@ -10,7 +10,8 @@
     "pretest": "npm run build",
     "test": "./node_modules/.bin/mocha --reporter nyan --compilers js:babel/register test",
     "auto-start": "nodemon --exec \"npm run lint && npm start\" --ignore public/js",
-    "preinstall": "npm install --ignore-scripts && npm run build",
+    "preinstall": "npm install babel",
+    "postinstall": "npm run build",
     "prepublish": "npm run build"
   },
   "bin": {
