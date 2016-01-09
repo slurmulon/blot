@@ -16,7 +16,6 @@ Create users with random information
         :[](user.json)
 
 + Response 200 (application/json)
-
     |> console.log('logging directly from hazy.md :)')|
 
     + Body

@@ -4,246 +4,324 @@
 
 ## tl;dr
 
-API Blueprint + Transclusion + Queries = Ultra-DRY Docs
+  API Blueprint + Transclusion + Queries = Ultra-DRY Docs
 
-* Build tool for normalized API Blueprints and fixtures
-* Unifies documentation and fixtures via transclusion and queries
-* Eases the maintenance of documentation, fixtures and tests
+  * Build tool for normalized API Blueprints and fixtures
+  * Unifies documentation and fixture files via transclusion and queries
+  * Eases the maintenance of documentation, fixtures and tests
 
 ## Features
 
-* Dynamically build API Blueprints from normalized files (.md, .mson, .json, etc)
-* Generate random data anywhere using a non-invasive syntax
-* Reference, query and embed data using the same non-invasive syntax
-* Extract and export JSON fixtures from API Blueprints
-* Export API Blueprints as HTML (web-component friendly, choose what you want by querying)
-* Multi-environment project configurations
-* Flexible CLI with verbose logging
+  * Dynamically build API Blueprints from normalized files (.md, .mson, .json, etc)
+  * Reference, query and embed data using a JSON-friendly syntax
+  * Generate random data anywhere using the same syntax
+  * Extract and export JSON fixtures from API Blueprints
+  * Export API Blueprints as HTML (web-component friendly, choose what you want by querying)
+  * Multi-environment project configurations with build-specific overrides
+  * Supports both standardized (`bunyan`) and pretty logs for sane debugging
 
 ## Summary
 
-[API Blueprint](https://github.com/apiaryio/api-blueprint) is an open-source specification for programmatically
-documenting your APIs in pure Markdown. The specification is highly flexible and is focused on human readability.
-API Blueprints are also machine readable, so they naturally support tooling. They can be used to generate mock servers,
-automate integration testing, allow exportation of requests to tools such as Postman or cURL, and _much much_ more.
+  blot minimizes duplication and introduces unification between documentation, fixtures, and API test suites. It sits
+  on top of hazy and provides an abstract API Blueprint parser and generator.
 
-A limitation of API blueprints is that they are static, and there are few (if any) plugins for parsing
-documented requests and responses for programmatic (in-code) use in your integration and unit tests.
-My philosophy is that you should strive for a canonical source of fixtures in which all of your tests and documentation inherit from.
-[Hercule](https://github.com/jamesramsay/hercule), which blot also integrates, helps promote normalization by allowing
-data to be transcluded in markdown documents. blot also supports this through hazy, and either syntax may be used as they will
-both be processed. The reason that hazy is also used is because it provides additional interfaces for generating random data and querying JSON fixtures.
+  [API Blueprint](https://github.com/apiaryio/api-blueprint) is an open-source specification for programmatically
+  documenting Restful APIs in pure Markdown. The specification is highly flexible and is focused on human readability.
+  API Blueprints are also machine readable, so they naturally support tooling. They can be used to generate mock servers,
+  automate integration testing, allow exportation of requests to tools such as Postman or cURL, and _much much_ more.
 
-blot minimizes duplication and introduces unification between documentation, fixtures, and API test suites. It sits
-on top of Hazy and provides an abstract API blueprint parser and generator.
+  A limitation of API blueprints is that they are static, and there are few (if any) tools for parsing
+  documented requests and responses for programmatic (in-code) use in your integration and unit tests.
+  My philosophy is that you should strive for a canonical source of fixtures in which all of your tests and documentation inherit from.
+  [Hercule](https://github.com/jamesramsay/hercule), which blot also integrates, promotes normalization by allowing
+  data to be transcluded in markdown documents. blot also supports this through hazy, and either syntax may be used as they will
+  both be processed. The reason that hazy is also used is because it provides additional interfaces for querying JSON fixtures and generating random data.
 
-## Hazy
+  ## Fixtures
 
-[Hazy](https://github.com/slurmulon/hazy) is a simple specification (with an accompanying node library) for lazily
-processing dynamic test fixtures. It provides a simple syntax for interpolating random data and pattern-matched data into your fixtures.
-It alleviates the need for developers to constantly come up with names, addresses, etc. for their enormous amount of test data.
+  [hazy](https://github.com/slurmulon/hazy) is a node library for lazily processing dynamic fixture data.
+  It provides a simple syntax for interpolating pattern-matched and/or random data into your fixtures.
+  It alleviates the need for developers to constantly come up with names, addresses, etc. for their enormous amount of test data.
 
-The most powerful feature of hazy is that it allows developers to dynamically embed fixtures (or sub-fixtures) via `JsonPath` patterns or by a simple string.
-This is very useful when creating and maintaining fixtures that share identical or related pieces of data, especially as an application grows.
+  The most powerful feature of hazy is that it allows developers to dynamically embed fixtures (or sub-fixtures) via `JsonPath` patterns or by a simple string.
+  This is very useful when creating and maintaining fixtures that share identical or related pieces of data, keeping your fixture data DRY as an application grows.
 
-In blot, hazy acts as a standardized bridge between your documentation and tests. It pushes your fixtures out of your code and
-into a datastore such as your file system or a database, inherently canonical sources of data. Your API Blueprints and tests can
-then be dynamically generated by processing the fixtures via the blot API.
+  In blot, hazy acts as a standardized bridge between your documentation and tests. It pushes your fixtures out of your code and
+  into a datastore such as your file system or a database, inherently canonical sources of data. Your API Blueprints and tests can
+  then be dynamically generated by processing the fixtures via the blot API.
 
 ## Examples
 
-The following is an API blueprint decorated with some basic hazy tokens.
-The `~` keyword tells hazy to replace the token with categorized random data:
+  The following is an API blueprint decorated with some basic hazy tokens.
+  The `~` keyword tells hazy to replace the token with categorized random data:
 
-```
-### Login a user [POST]
+    ### Login a user [POST]
 
-# POST /v1/auth
-+ Request (application/json)
+    # POST /v1/auth
+    + Request (application/json)
 
-  { "username": "|~web.email|", "password": "|~text.word|" }
+      { "username": "|~web.email|", "password": "|~text.word|" }
 
-+ Response 200 (application/json)
+    + Response 200 (application/json)
 
-  { "token": "|~misc.guid|", "refresh_token": "|~misc.guid|", "expires": "|~time.date|" }
+      { "token": "|~misc.guid|", "refresh_token": "|~misc.guid|", "expires": "|~time.date|" }
 
-# GET /v1/user/{id}
-### Fetch a user [GET]
+    # GET /v1/user/{id}
+    ### Fetch a user [GET]
 
-+ Response authentication (application/json)
+    + Response authentication (application/json)
 
-  { "username": "|~web.email|", "first": "|~person.first|", "last": "|~person.last|", "address": "|~geo.address|" }
-```
+      { "username": "|~web.email|", "first": "|~person.first|", "last": "|~person.last|", "address": "|~geo.address|" }
 
-Alternatively, you can be even more lazy, which is encouraged for increased normalization. The following example
-shows how you can reference and embed large fixtures that live on the filesystem using the `@` operator. It can
-be used alongside hercule's tranclusion operator `:[]`:
+  Alternatively, you can be even more lazy, which is encouraged for increased normalization. The following example
+  shows how you can reference and embed fixtures that live on the filesystem using the `@` operator.
 
-```
-# POST /v1/auth
-### Login a user [POST]
+    # POST /v1/auth
+    ### Login a user [POST]
 
-+ Request (application/json)
+    + Request (application/json)
 
-  |@ auth-req.json|
+      |@ auth-req.json|
 
-+ Response 200 (application/json)
+    + Response 200 (application/json)
 
-  :[](auth-user-res.json)
+      |@ auth-user-res.json|
 
-# GET /v1/user/{id}
-### Fetch a user [GET]
+    # GET /v1/user/{id}
+    ### Fetch a user [GET]
 
-+ Response 200 (application/json)
+    + Response 200 (application/json)
 
-  :[](auth-user-res.json)
-```
+      |@ auth-user-res.json|
 
-You may also freely leverage `JsonPath` in order to transclude fixtures by patterns
-with the `$` operator:
+  It can also be used alongside hercule's tranclusion operator `:[]`. One advantage is being able to reference URLs:
 
-> **Note**
->
-> The `$` operator will be prefixed to your pattern before being matched.
-> Another way to look at is the text between the `|` bars will be interpreted
-> as a literal JsonPath.
+    # POST /v1/auth
+    ### Login a user [POST]
 
-```
-# POST /v1/auth
-### Login a user [POST]
+    + Attributes
 
-+ Request (application/json)
+      |@ auth-req.mson|
 
-  :[](auth-req.json)
+    + Request (application/json)
 
-+ Response 200 (application/json)
+      :[](http://localhost:8000/data/reqs/auth-user-req.json)
 
-  |$..user[0]|
+    + Response 200 (application/json)
 
-# GET /v1/user/{id}
-### Fetch a user [GET]
+      :[](http://localhost:8000/data/reqs/auth-user-post-res.json)
 
-+ Response 200 (application/json)
+    # GET /v1/user/{id}
+    ### Fetch a user [GET]
 
-  |$..user[0]|
-```
+    + Response 200 (application/json)
 
-Subsets of fixtures may also be targeted.
-The following `GET` user fixture is friends with four arbitrary users:
+      :[](http://localhost:8000/data/reqs/auth-user-get-res.json)
 
-```
-# POST /v1/auth
-### Login a user [POST]
+  You may also freely leverage `JsonPath` in order to transclude fixtures by patterns
+  with the `$` operator:
 
-+ Request (application/json)
+  > **Note**
+  >
+  > The `$` operator will be prefixed to your pattern before being matched.
+  > Another way to look at is the text between the `|` bars will be interpreted
+  > as a literal JsonPath.
 
-  |> auth-req.json|
+    # POST /v1/auth
+    ### Login a user [POST]
 
-+ Response 200 (application/json)
+    + Request (application/json)
 
-  {"user": "|$..user[0]|", "friends": []}
+      |@ auth-req.json|
 
-# GET /v1/user/{id}
-### Fetch a user [GET]
+    + Response 200 (application/json)
 
-+ Response 200 (application/json)
+      |$..user[0]|
 
-  {"user": "|$..user[0]|", "friends": "|$..user.id[:4]|"}
-```
+    # GET /v1/user/{id}
+    ### Fetch a user [GET]
 
-### Command Line
+    + Response 200 (application/json)
 
-The easiest way to use blot is by running it as a command.
+      |$..user[0]|
 
-You can specify an API blueprint file to parse and export:
+  > Note
+  >
+  > When using `$`, ensure that your fixtures have either been previously loaded using the `@` operator,
+  > or by manually injecting your fixtures with `hazy.fixture.register` before parsing your API Blueprint(s)
 
-**Standard**
-```bash
-$ blot compile -i docs.blot.apib --echo > docs.apib
-```
+  Subsets of fixtures may also be targeted.
+  The following `GET` user fixture is friends with four arbitrary users (selected from tail of list):
 
-**Fancy**
-```bash
-$ blot compile -i docs.blot.apib -o docs.apib --pretty
-```
+    # POST /v1/auth
+    ### Login a user [POST]
 
-You may also pass in the raw data:
+    + Request (application/json)
 
-```bash
-$ blot compile -d 'FORMAT: 1A
-# The Simplest API
+      |@ auth-req.json|
 
-# GET /message
-+ Response 200 (text/json)
+    + Response 200 (application/json)
 
-{"message": "Hello, |~person.name|!", "id": "|~misc.guid|"}' -o docs.apib --pretty
-```
+      {"user": "|$..user[0]|", "friends": []}
 
-#### Help?
+    # GET /v1/user/{id}
+    ### Fetch a user [GET]
 
-```
-blot compile --help
-```
-(thorough documentation coming soon!)
+    + Response 200 (application/json)
 
-### Node
+      {"user": "|$..user[0]|", "friends": "|$..user.id[:4]|"}
 
-The node module allows you to monkey-patch special functionality and data to your fixtures.
-You can then inject your monkey-patched hazy pool by setting `blot.interpolator`, which is
-used whenever API blueprints are processed.
+  ### Command Line
 
-The following example attaches a `created` property to all fixtures. It also appends a 
-`fixture` query parameter to any fixture with a `url` property (deep):
+  The easiest way to use blot is by running it as a command.
 
-```javascript
-#! /usr/bin/env node
+  You can specify an API blueprint file to parse and export:
 
-import hazy from 'hazy'
-import blot from 'blot'
-import moment from 'moment'
+  **Standard-ized**
 
-// ensure all fixtures have a created date
-hazy.matcher.config({
-  path   : '$',
-  handle : (fixture) => {
-    return Object.assign({created: moment()}, fixture)
-  }
-})
+    $ blot compile -i docs.blot.apib --echo > docs.apib
 
-// ensure any fixture urls are appended with a '&fixture' query param
-hazy.matcher.config({
-  path   : '$..url',
-  handle : (url) => `${url}&fixture=true`
-})
+  **Pretty**
 
-// globs and loads fixtures from filesystem into hazy's pool
-hazy.fixture.glob('**/fixtures/*.json', null, (key) => key.replace('.json'))
+    $ blot compile -i docs.blot.apib -o docs.apib --pretty
 
-// use the newly configured hazy object (and, by association, its fixture pool) when parsing API blueprints
-blot.interpolator = hazy.lang.process
+  You may also pass in the raw data:
 
-// load api blueprint, process fixtures against configured hazy pool, then export as a static API blueprint file
-blot.io
-  .src('documentation.blot.apib')
-  .then(blueprint => blot.dest(blueprint.compiled.markdown, 'dist/documentation.apib'))
-  .then(result    => blot.log.info('done exporting!'))
-```
+    $ blot compile -d 'FORMAT: 1A
+    # The Simplest API
+
+    # GET /message
+    + Response 200 (text/json)
+
+    {"message": "Hello, |~person.name|!", "id": "|~misc.guid|"}' -o docs.apib --pretty
+
+  ### Project
+
+  If you require a lot of flags, or your command just starts to unwieldy and difficult to read, then
+  a project configuration file can spare you from eye strain:
+
+    {
+      "host": "http://example.blot.apps.madhax.io",
+      "base": ".",
+      "docs": {
+        "src": "test/fixtures/apiblueprint/hazy.md",
+        "dest": "dist/docs/test/fixtures/apiblueprint/hazy.apib",
+        "export": true
+      },
+      "fixtures": {
+        "src": "src/fixtures",
+        "dest": "dist/fixtures",
+        "export": false
+      },
+      "view": {
+        "dest": "dist/api.blot.html",
+        "export": true,
+        "options": {
+          "themeFullWidth": true,
+          "themeVariables": "slate"
+        },
+        "elements": {
+          "pluck": ["link", "style", "body > *"]
+        },
+        "attrs": {},
+        "replace": [
+          {
+            "desc": "replaces positional anchor hrefs with Angular-friendly values",
+            "match": "href=\"#([^'\"]+)['\"]", 
+            "template": "ng-click=\"scrollTo('|=$sub[0]|')\""
+          }
+        ]
+      },
+      "logging": false,
+      "pretty": false
+    }
+
+  To build your documentation with a project file, simply provide the path of the configuration
+  as the first argument after your command:
+
+    $ blot [command] /path/to/blot.config.json
+
+  > **Note**
+  > 
+  > When a project file is used, blot implicitly sets the configuration file's containing folder 
+  > as it's current working directory.
+
+  An example project can be found in `blot/exaxmple/render/blot.json` and can be built with the
+  following command (`--pretty` is of course optional):
+
+    $ cd /path/to/blot
+    $ blot render example/render/blot.json --pretty
+
+  ### Help?
+
+    $ blot --help
+  
+  (thorough documentation coming soon!)
+
+  ### Node
+
+  The node module allows you to monkey-patch special functionality and data to your fixtures.
+  You can then inject your monkey-patched hazy pool by setting `blot.interpolator`, which is
+  used whenever API blueprints are processed.
+
+  The following example attaches a `created` property to all fixtures. It also appends a 
+  `fixture` query parameter to any fixture with a `url` property (deep):
+
+    #! /usr/bin/env node
+
+    import hazy from 'hazy'
+    import blot from 'blot'
+    import moment from 'moment'
+
+    // ensure all fixtures have a created date
+    hazy.matcher.config({
+      path   : '$',
+      handle : (fixture) => {
+        return Object.assign({created: moment()}, fixture)
+      }
+    })
+
+    // ensure any fixture urls are appended with a '&fixture' query param
+    hazy.matcher.config({
+      path   : '$..url',
+      handle : (url) => `${url}&fixture=true`
+    })
+
+    // globs and loads data from filesystem into hazy's fixture pool
+    hazy.fixture.glob('**/fixtures/*.json')
+
+    // use the newly configured hazy object (and, by association, its fixture pool) when parsing API blueprints
+    blot.interpolator = hazy.lang.process
+
+    // load api blueprint, process fixtures against configured hazy pool, then export as a static API blueprint file
+    blot.io
+      .src('documentation.blot.apib')
+      .then(blueprint => blot.dest(blueprint.compiled.markdown, 'dist/documentation.apib'))
+      .then(result    => blot.log.info('done exporting!'))
 
 ## Install
 
-```
-$ git clone git@github.com:slurmulon/blot.git
-$ cd blot
-$ npm link
-```
+  Basic usage?
 
-You can now use blot as either an npm module in your own projects or as an executable command.
+    $ npm install blot
+
+  Contributing?
+
+    $ git clone git@github.com:slurmulon/blot.git
+    $ cd blot
+    $ npm link
+
+  For local installations, you can run a binary of `blot` via `node /path/to/your/project/node_modules/.bin/blot`.
+
+  Global installation is only recommended for developer convenience. Local installation should always be used
+  in projects and modules to prevent a variety of problems (dependency on machine config, version differences, cache, etc.)
 
 ## TODO
 
  - [X] `--env` CLI flag
  - [X] Static fixture export
- - [ ] Inheritable project config
- - [ ] i18n module
+ - [ ] Current working directory flag
+ - [ ] Inheritable project config (more DRY)
+ - [ ] i18n module based on `gettext`
  - [ ] Support [fury.js](https://github.com/apiaryio/fury.js)
  - [ ] Support `beforeCompile` and `afterCompile` configuration files (root of project)
