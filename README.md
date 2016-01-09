@@ -37,7 +37,7 @@
   data to be transcluded in markdown documents. blot also supports this through hazy, and either syntax may be used as they will
   both be processed. The reason that hazy is also used is because it provides additional interfaces for querying JSON fixtures and generating random data.
 
-  ## Fixtures
+## Fixtures
 
   [hazy](https://github.com/slurmulon/hazy) is a node library for lazily processing dynamic fixture data.
   It provides a simple syntax for interpolating pattern-matched and/or random data into your fixtures.
