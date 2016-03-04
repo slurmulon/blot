@@ -18,7 +18,8 @@ function loadConfig(env, cmd) {
   return new Promise(function(resolve, reject) {
     info('env:load', env)
 
-    _.merge(config, cmd)
+    // _.merge(config, cmd)
+    Object.assign(config, cmd)
 
     mapJsonConfig(cmd.config)
 
@@ -45,7 +46,8 @@ function loadConfig(env, cmd) {
 function mapJsonConfig(configObj) {
   // ensure JSON configuration object (when provided) overrides CLI flags
   try {
-    _.merge(config, JSON.parse(configObj))
+    // _.merge(config, JSON.parse(configObj))
+    Object.assign(config, JSON.parse(configObj))
   } catch (e) {
     error('config override must be valid JSON: ' + e)
   }
@@ -53,7 +55,8 @@ function mapJsonConfig(configObj) {
 
 function mapEnvConfig(envConfig) {
   // ensure run config matches environment config after processing
-  _.merge(config, envConfig)
+  // _.merge(config, envConfig)
+  Object.assign(config, envConfig)
 
   // map CLI flags with names different from env config... FIXME
   config.inFiles  = envConfig.docs.src
@@ -65,7 +68,7 @@ function mapEnvConfig(envConfig) {
 function parseFiles(files) {
   info('glob', 'start')
 
-  return blot.io
+  return blot.apib
     .glob(files)
     .then(function(blueprints) {
       info('glob', 'end')
@@ -82,7 +85,7 @@ function parseFiles(files) {
 function parseText(data) {
   info('read', 'start')
 
-  return blot.io.read(data)
+  return blot.apib.read(data)
     .then(function(blueprint) {
       info('read', 'end')
 
@@ -155,7 +158,7 @@ function exportBlueprints(blueprints) {
   info('export.apib', 'start')
 
   blueprints.forEach(function(blueprint) {
-    blot.io
+    blot.apib
       .dest(blueprint, outPath)
       .then(function(content) {
         info('export', 'end')

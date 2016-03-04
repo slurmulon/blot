@@ -81,7 +81,6 @@ export class Config {
    * @returns {String} filepath adjusted to project environment config
    */
   static rootUri(env: String): String {
-    // return (env && env !== 'root') ? `./blot.${env}.json` : `./blot.json`
     return (env && env !== 'root') ? env : `./blot.json`
   }
 
@@ -107,7 +106,9 @@ export class Config {
       return fs.readFile(envPath, 'utf-8', (err, data) => {
         if (!err) {
           resolve(
-            configure(_.merge(JSON.parse(data), {source: filepath}))
+            configure(
+              Object.assign(JSON.parse(data), {source: filepath})
+            )
           )
         } else {
           reject(`Failed to read in blot environment configuration from ${path}`)
@@ -130,9 +131,9 @@ export class Config {
         .src(Config.rootUri(envPath))
         .then(project => {
           // override project config with options (typically CLI) when necessary
-          if (!_.isEmpty(options)) {
+          if (options)  {
             if (project) {
-              project = _.merge(project, options)
+              Object.assign(project, options)
             } else {
               project = options
             }
@@ -158,10 +159,12 @@ export function use(project: Config, chdir: Boolean = false) {
     selected = project.source || project.name
     enviros[selected] = project
 
+    const usefuls = ['name', 'host', 'base', 'docs', 'fixtures'] 
+
     // register certain config objects with hazy for easy access
-    ;['name', 'host', 'base', 'docs', 'fixtures'].forEach(prop => {
+    usefuls.forEach(prop =>
       hazy.fixture.register(`blot.config.${prop}`, project[prop])
-    })
+    )
 
     if (project.source && chdir) {
       process.chdir(path.dirname(project.source))
