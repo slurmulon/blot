@@ -7,7 +7,7 @@
   API Blueprint + Transclusion + Queries = Ultra-DRY Docs
 
   * Build tool for normalized API Blueprints and fixtures
-  * Unifies documentation and fixture files via transclusion and queries
+  * Unifies documentation and common fixtures via transclusion and queries
   * Eases the maintenance of documentation, fixtures and tests
 
 ## Features
@@ -290,14 +290,11 @@
     // globs and loads data from filesystem into hazy's fixture pool
     hazy.fixture.glob('**/fixtures/*.json')
 
-    // use the newly configured hazy object (and, by association, its fixture pool) when parsing API blueprints
-    blot.interpolator = hazy.lang.process
-
     // load api blueprint, process fixtures against configured hazy pool, then export as a static API blueprint file
     blot.io
       .src('documentation.blot.apib')
       .then(blueprint => blot.dest(blueprint.compiled.markdown, 'dist/documentation.apib'))
-      .then(result    => blot.log.info('done exporting!'))
+      .then(result    => blot.log().info('done exporting!'))
 
 ## Install
 
