@@ -7,7 +7,6 @@ import hazy from 'hazy'
 import protagonist from 'protagonist'
 import hercule from 'hercule'
 
-import _ from 'lodash'
 import _glob from 'glob'
 import fs from 'fs'
 import path from 'path'

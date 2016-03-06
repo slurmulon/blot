@@ -2,7 +2,6 @@
 
 import * as env from './env'
 
-import _ from 'lodash'
 import bunyan from 'bunyan'
 import PrettyStream from 'bunyan-prettystream'
  
@@ -34,7 +33,8 @@ export const logger = () => {
 }
 
 export const nothing = () => {
-  const notta = {info: _.noop, warn: _.noop, error: _.noop}
+  const noop  = _ => _
+  const notta = {info: noop, warn: noop, error: noop}
   
   return Object.assign(notta, {child: () => notta})
 }();

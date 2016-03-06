@@ -3,10 +3,11 @@
 import * as fsConfig from 'config.json'
 
 import hazy from 'hazy'
-import _ from 'lodash'
 import fs from 'fs'
 import path from 'path'
 import {util} from './io'
+
+import isPlainObject from 'lodash.isplainobject'
 
 let enviros  = {}
 let selected = null
@@ -155,13 +156,13 @@ export class Config {
  * @returns {Promise}
  */
 export function use(project: Config, chdir: Boolean = false) {
-  if (project instanceof Config || _.isPlainObject(config)) {
+  if (project instanceof Config || isPlainObject(config)) {
     selected = project.source || project.name
     enviros[selected] = project
 
     const usefuls = ['name', 'host', 'base', 'docs', 'fixtures'] 
 
-    // register certain config objects with hazy for easy access
+    // register certain useful config objects with hazy for easy access
     usefuls.forEach(prop =>
       hazy.fixture.register(`blot.config.${prop}`, project[prop])
     )

@@ -7,7 +7,6 @@ import * as io from './io'
 import hazy from 'hazy'
 import cheerio from 'cheerio'
 import aglio from 'aglio'
-import _ from 'lodash'
 
 import {logger} from './log'
 
