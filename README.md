@@ -1,6 +1,6 @@
 # blot
 
-> The DRY documentation build tool
+> DRY documentation build tool
 
 ## tl;dr
 
@@ -169,7 +169,7 @@
 
     + Response 200 (application/json)
 
-      {"user": "|$..user[0]|", "friends": "|$..user.id[:4]|"}
+      {"user": "|$..user[0]|", "friends": "|$..user.id[:2]|"}
 
   ### Command Line
 
@@ -291,7 +291,7 @@
     hazy.fixture.glob('**/fixtures/*.json')
 
     // load api blueprint, process fixtures against configured hazy pool, then export as a static API blueprint file
-    blot.io
+    blot.apib
       .src('documentation.blot.apib')
       .then(blueprint => blot.dest(blueprint.compiled.markdown, 'dist/documentation.apib'))
       .then(result    => blot.log().info('done exporting!'))
