@@ -113,60 +113,60 @@ describe('Blueprint', () => {
       blot.apib.Blueprint.fixtures('{"invalid":').should.eventually.be.rejected
     })
   })
-})
 
-describe('io', () => {
-  describe('src', () => {
-    it('should be a function', () => {
-      blot.io.src.should.be.a('function')
+  describe('io', () => {
+    describe('src', () => {
+      it('should be a function', () => {
+        blot.apib.src.should.be.a('function')
+      })
+
+      it('should return a Promise', () => {
+        blot.apib.src().should.be.a('promise')
+      })
+
+      it('should compile the API Blueprint file found at the filepath', () => {
+        blot.apib.src('../test/fixtures/apiblueprint/simple.md').should.be.resolved
+      })
+
+      it('should reject if no API Blueprint can be found', () => {
+        blot.apib.src().should.be.rejected
+      })
     })
 
-    it('should return a Promise', () => {
-      blot.io.src().should.be.a('promise')
+    xdescribe('dest', () => {
+
     })
 
-    it('should compile the API Blueprint file found at the filepath', () => {
-      blot.io.src('../test/fixtures/apiblueprint/simple.md').should.be.resolved
+    describe('glob', () => {
+      let globStub
+
+      beforeEach(() => {
+        globStub = '## Response {"id": "|~misc:guid|"}'
+      })
+
+      it('should be a function', () => {
+        blot.apib.glob.should.be.a('function')
+      })
+
+      it('should return a Promise', () => {
+        blot.apib.glob('#').should.be.a('promise')
+      })
+
+      it('should compile each API Blueprint when provided an Array', () => {
+        blot.apib.glob([globStub]).should.be.resolved
+      })
+
+      it('should compile the API Blueprint when provided a String', () => {
+        blot.apib.glob(globStub).should.be.resolved
+      })
+
+      it('should reject if provided anything other than an Array or String', () => {
+        blot.apib.glob(false).should.be.rejected
+      })
     })
 
-    it('should reject if no API Blueprint can be found', () => {
-      blot.io.src().should.be.rejected
+    xdescribe('read', () => {
+
     })
-  })
-
-  xdescribe('dist', () => {
-
-  })
-
-  describe('glob', () => {
-    let globStub
-
-    beforeEach(() => {
-      globStub = '## Response {"id": "|~misc:guid|"}'
-    })
-
-    it('should be a function', () => {
-      blot.io.glob.should.be.a('function')
-    })
-
-    it('should return a Promise', () => {
-      blot.io.glob('#').should.be.a('promise')
-    })
-
-    it('should compile each API Blueprint when provided an Array', () => {
-      blot.io.glob([globStub]).should.be.resolved
-    })
-
-    it('should compile the API Blueprint when provided a String', () => {
-      blot.io.glob(globStub).should.be.resolved
-    })
-
-    it('should reject if provided anything other than an Array or String', () => {
-      blot.io.glob(false).should.be.rejected
-    })
-  })
-
-  xdescribe('read', () => {
-
   })
 })

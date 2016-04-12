@@ -222,7 +222,7 @@ function section(msg) {
 // Command Bindings
 
 program
-  .version('0.0.8')
+  .version(require('../../package.json').version)
   .option('-i, --in-files [files]', 'Source documentation files (*.blot or *.apib)', 'files')
   .option('-d, --in-data [md]', 'Read in plain Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')

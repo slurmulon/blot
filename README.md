@@ -319,6 +319,6 @@
  - [X] Static fixture export
  - [ ] Current working directory flag
  - [ ] Inheritable project config (more DRY)
- - [ ] i18n module based on `gettext`
+ - [ ] Block statements that don't inject whitespace
  - [ ] Support [fury.js](https://github.com/apiaryio/fury.js)
  - [ ] Support `beforeCompile` and `afterCompile` configuration files (root of project)

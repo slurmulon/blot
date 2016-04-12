@@ -101,7 +101,7 @@ export class Document {
   static elementConfig(configKey: String) {
     const config = Document.config().elements[configKey]
 
-    if (_.isArray(config) && !_.isEmpty(config)) {
+    if (config instanceof Array && config.length) {
       return config.length > 1 ? config.join(', ').trim() : config[0]
     }
 
@@ -202,7 +202,7 @@ export class Document {
       const replace = Document.config().replace
       let result = html
 
-      if (_.isArray(replace)) {
+      if (replace instanceof Array) {
         replace.forEach(conf => {
           const pattern  = new RegExp(conf.match, 'gi')
           const template = conf.template
@@ -292,10 +292,10 @@ export class Document {
     return new Promise((resolve, reject) => {
       if (blueprint instanceof Blueprint && blueprint.compiled) {
         const locals  = {blot: env.current().name, fixtures: blueprint.compiled.fixtures}
-        const options = _.merge({locals}, Document.config().options)
+        const options = Object.assign({locals}, Document.config().options)
 
         aglio.render(blueprint.compiled.markdown, options, (err, html, warnings) => {
-          if (!_.isEmpty(warnings)) {
+          if (warnings && warnings.length) {
             log('aglio').warn(`aglio warned: ${warnings}`)
           }
 
