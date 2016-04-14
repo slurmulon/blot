@@ -197,7 +197,7 @@
 
   ### Project
 
-  If you require a lot of flags, or your command just starts to unwieldy and difficult to read, then
+  If you require a lot of flags, or your command just starts to become unwieldy and difficult to read, then
   a project configuration file can spare you from eye strain:
 
     {
