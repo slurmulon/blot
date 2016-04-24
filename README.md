@@ -1,6 +1,6 @@
 # blot
 
-> DRY documentation build tool
+> :umbrella: The DRY documentation build tool
 
 ## tl;dr
 
@@ -12,7 +12,7 @@
 
 ## Features
 
-  * Dynamically build API Blueprints from normalized files (.md, .mson, .json, etc)
+  * Dynamically link and build API Blueprints from normalized files (.md, .mson, .json, etc)
   * Reference, query and embed data using a JSON-friendly syntax
   * Generate random data anywhere using the same syntax
   * Extract and export JSON fixtures from API Blueprints
@@ -33,7 +33,7 @@
   A limitation of API blueprints is that they are static, and there are few (if any) tools for parsing
   documented requests and responses for programmatic (in-code) use in your integration and unit tests.
   My philosophy is that you should strive for a canonical source of fixtures in which all of your tests and documentation inherit from.
-  [Hercule](https://github.com/jamesramsay/hercule), which blot also integrates, promotes normalization by allowing
+  [Hercule](https://github.com/jamesramsay/hercule), a library that blot integrates, promotes normalization by allowing
   data to be transcluded in markdown documents. blot also supports this through hazy, and either syntax may be used as they will
   both be processed. The reason that hazy is also used is because it provides additional interfaces for querying JSON fixtures and generating random data.
 
@@ -252,49 +252,51 @@
     $ cd /path/to/blot
     $ blot render example/render/blot.json --pretty
 
-  ### Help?
+### Help?
 
     $ blot --help
   
   (thorough documentation coming soon!)
 
-  ### Node
+### Node
 
   The node module allows you to monkey-patch special functionality and data to your fixtures.
   You can then inject your monkey-patched hazy pool by setting `blot.interpolator`, which is
   used whenever API blueprints are processed.
-
+  
   The following example attaches a `created` property to all fixtures. It also appends a 
   `fixture` query parameter to any fixture with a `url` property (deep):
-
-    #! /usr/bin/env node
-
-    import hazy from 'hazy'
-    import blot from 'blot'
-    import moment from 'moment'
-
-    // ensure all fixtures have a created date
-    hazy.matcher.config({
-      path   : '$',
-      handle : (fixture) => {
-        return Object.assign({created: moment()}, fixture)
-      }
-    })
-
-    // ensure any fixture urls are appended with a '&fixture' query param
-    hazy.matcher.config({
-      path   : '$..url',
-      handle : (url) => `${url}&fixture=true`
-    })
-
-    // globs and loads data from filesystem into hazy's fixture pool
-    hazy.fixture.glob('**/fixtures/*.json')
-
-    // load api blueprint, process fixtures against configured hazy pool, then export as a static API blueprint file
-    blot.apib
-      .src('documentation.blot.apib')
-      .then(blueprint => blot.dest(blueprint.compiled.markdown, 'dist/documentation.apib'))
-      .then(result    => blot.log().info('done exporting!'))
+  
+  ```javascsript
+  #! /usr/bin/env node
+  
+  import hazy from 'hazy'
+  import blot from 'blot'
+  import moment from 'moment'
+  
+  // ensure all fixtures have a created date
+  hazy.matcher.config({
+    path   : '$',
+    handle : (fixture) => {
+      return Object.assign({created: moment()}, fixture)
+    }
+  })
+  
+  // ensure any fixture urls are appended with a '&fixture' query param
+  hazy.matcher.config({
+    path   : '$..url',
+    handle : (url) => `${url}&fixture=true`
+  })
+  
+  // globs and loads data from filesystem into hazy's fixture pool
+  hazy.fixture.glob('**/fixtures/*.json')
+  
+  // load api blueprint, process fixtures against configured hazy pool, then export as a static API blueprint file
+  blot.apib
+    .src('documentation.blot.apib')
+    .then(apib   => blot.apib.dest(apib.compiled.markdown, 'dist/documentation.apib'))
+    .then(result => blot.log().info('done exporting!'))
+  ```
 
 ## Install
 
@@ -317,6 +319,7 @@
 
  - [X] `--env` CLI flag
  - [X] Static fixture export
+ - [ ] Incorporate `json-rel` 
  - [ ] Current working directory flag
  - [ ] Inheritable project config (more DRY)
  - [ ] Block statements that don't inject whitespace
