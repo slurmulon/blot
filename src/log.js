@@ -32,9 +32,9 @@ export const logger = () => {
   return nothing
 }
 
-export const nothing = () => {
+export const nothing = (() => {
   const noop  = _ => _
   const notta = {info: noop, warn: noop, error: noop}
   
   return Object.assign(notta, {child: () => notta})
-}();
+})()
