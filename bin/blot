@@ -245,6 +245,8 @@ program
   .command('render [env]')
   .description('processes, compiles, and then renders documentation as HTML')
   .action(function(env, cmd) {
+    process.env.NO_CACHE = 1 // TODO - remove once aglio theme cache works for NPM3
+
     loadConfig(env, cmd.parent)
       .then(compileInputs)
       .then(renderBlueprints)
