@@ -287,10 +287,10 @@ export class Document {
    * @returns {Promise}
    */
   static fromBlueprint(blueprint: Blueprint): Promise {
-    log('aglio').info('creating HTML from API blueprint')
-
     return new Promise((resolve, reject) => {
       if (blueprint instanceof Blueprint && blueprint.compiled) {
+        log('aglio').info('creating HTML from API blueprint')
+
         const locals  = {blot: env.current().name, fixtures: blueprint.compiled.fixtures}
         const options = Object.assign({locals}, Document.config().options)
 
