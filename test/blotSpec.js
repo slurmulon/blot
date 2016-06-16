@@ -74,7 +74,7 @@ describe('Blueprint', () => {
       blot.apib.Blueprint.transclude().should.eventually.be.rejected
     })
 
-    xit('should passively parse the provided API blueprint and transclude as appropriate', () => {
+    it('should passively parse the provided API blueprint and transclude as appropriate', () => {
       // TODO
     })
   })
