@@ -4,7 +4,7 @@
   "description": "The DRY documentation builder",
   "main": "src/blot.js",
   "scripts": {
-    "build": "babel src --out-dir lib && babel bin/blot --out-dir exec",
+    "build": "babel src --out-dir lib",
     "lint": "eslint src/blot.js",
     "start": "babel-node src/blot.js",
     "pretest": "npm run build",
@@ -13,7 +13,7 @@
     "prepublish": "npm run build"
   },
   "bin": {
-    "blot": "./exec/bin/blot.js"
+    "blot": "./bin/blot.js"
   },
   "repository": {
     "type": "git",
@@ -43,7 +43,7 @@
     "commander": "^2.9.0",
     "config.json": "0.0.4",
     "glob": "^7.0.3",
-    "hazy": "~0.1.16",
+    "hazy": "^0.1.16",
     "hercule": "~1.2.1",
     "jsonpath": "^0.2.4",
     "lodash.isplainobject": "^4.0.4",

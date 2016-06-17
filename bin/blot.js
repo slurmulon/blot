@@ -2,10 +2,11 @@
 
 'use strict'
 
-var blot = require('../../lib/blot')
+var blot = require('../lib/blot')
 var colors = require('colors')
 var path = require('path')
 var program = require('commander')
+var meta = require('../package.json')
 
 var config = {}
 
@@ -222,7 +223,7 @@ function section(msg) {
 // Command Bindings
 
 program
-  .version(require('../../package.json').version)
+  .version(meta.version)
   .option('-i, --in-files [files]', 'Source documentation files (*.blot or *.apib)', 'files')
   .option('-d, --in-data [md]', 'Read in plain Markdown (UTF-8)', 'markdown')
   .option('-o, --out-file [file]', 'Write result to file(s) (*.apib , *.html or *.json)', 'file')

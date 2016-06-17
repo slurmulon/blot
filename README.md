@@ -321,7 +321,8 @@
  - [X] Static fixture export
  - [ ] Support `blot.fixtures.js` for automated fixture setup for use in API Blueprint (pre-build)
  - [ ] Incorporate `json-where`
- - [ ] Incorporate `ajv` and `deref` for denormalizing JSON Schemas (tv4 doesn't handle external `$ref` properly) 
+ - [ ] Incorporate `ajv` and `deref` for denormalizing JSON Schemas (tv4 doesn't handle external `$ref` properly)
+ - [ ] Listen for `*.blot.*` file changes
  - [ ] Current working directory flag
  - [ ] Inheritable project config (more DRY)
  - [ ] Block statements that don't inject whitespace
