@@ -6,4 +6,4 @@ import * as apib from './apib'
 import * as html from './html'
 import {logger} from './log'
 
-export {io, env, apib, html, logger as log}
+export default {io, env, apib, html, log: logger}
