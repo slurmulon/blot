@@ -2,7 +2,7 @@
 
 'use strict'
 
-var blot = require('../lib/blot')
+var blot = require('../lib/blot').default
 var colors = require('colors')
 var path = require('path')
 var program = require('commander')
