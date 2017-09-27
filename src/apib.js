@@ -5,7 +5,7 @@ import {util} from './io'
 
 import hazy from 'hazy'
 import protagonist from 'protagonist'
-import hercule from 'hercule'
+import { transcludeString } from 'hercule'
 
 import _glob from 'glob'
 import path from 'path'
@@ -22,7 +22,7 @@ export class Blueprint {
   /**
    * @param {String} markdown Valid API blueprint markdown
    */
-  constructor(markdown: String) {
+  constructor (markdown: String) {
     this.markdown = markdown
 
     const markdownFuncs = ['compile', 'fixtures', 'groups', 'interpolate', 'parse', 'transclude', 'validate']
@@ -38,14 +38,14 @@ export class Blueprint {
    * @param {String} markdown
    * @returns {Promise}
    */
-  static compile(markdown: String): Promise {
+  static compile (markdown: String): Promise {
     log().info('compiling')
 
     return Blueprint
       .transclude(markdown)
       .then(embedMd  => Blueprint.interpolate(embedMd))
       .then(staticMd => Blueprint.validate(staticMd))
-      .then(finalMd  => Blueprint.fixtures(finalMd).then(fixtures => 
+      .then(finalMd  => Blueprint.fixtures(finalMd).then(fixtures =>
         Object.assign(new Blueprint(markdown), {compiled: {fixtures, markdown: finalMd}})
       ))
   }
@@ -57,7 +57,7 @@ export class Blueprint {
    * @returns {Promise}
    */
   // TODO - add option that allows fixtures to be parsed from hazy pool
-  static fixtures(markdown: String): Promise {
+  static fixtures (markdown: String): Promise {
     log().info('extracting fixtures')
 
     return new Promise((resolve, reject) => {
@@ -82,7 +82,7 @@ export class Blueprint {
    * @param {String} markdown
    * @returns {Promise}
    */
-  static parse(markdown: String): Promise {
+  static parse (markdown: String): Promise {
     log().info('parsing')
 
     return new Promise((resolve, reject) => {
@@ -108,7 +108,7 @@ export class Blueprint {
    * @param {String} markdown
    * @returns {Promise}
    */
-  static validate(markdown: String): Promise {
+  static validate (markdown: String): Promise {
     log().info('validating')
 
     return new Promise((resolve, reject) => {
@@ -131,17 +131,17 @@ export class Blueprint {
    * @param {String} markdown
    * @returns {Promise}
    */
-  static transclude(markdown: String): Promise {
+  static transclude (markdown: String): Promise {
     return new Promise((resolve, reject) => {
       log().info('transcluding')
 
       if (markdown) {
-        hercule.transcludeString(markdown, (transMd) => {
-          if (transMd) {
-            resolve(transMd)
-          } else {
-            reject('failed to parse hercule transclusions')
+        transcludeString(markdown, (err, transMd) => {
+          if (err) {
+            reject(`failed to parse hercule transclusions`)
           }
+
+          resolve(transMd)
         })
       } else {
         reject('valid markdown required for transclusion')
@@ -156,7 +156,7 @@ export class Blueprint {
    * @param {String} markdown
    * @returns {Promise}
    */
-  static interpolate(markdown: String): Promise {
+  static interpolate (markdown: String): Promise {
     log().info('interpolating')
 
     const locals = {config: env.current()} // FIXME - not accessible in hazy for some reason
@@ -173,7 +173,7 @@ export class Blueprint {
    * @param {String} filetype 'apib' or 'json'
    * @returns {Promise}
    */
-  static marshall(markdown: String, filetype: String): Promise {
+  static marshall (markdown: String, filetype: String): Promise {
     return new Promise((resolve, reject) => {
       log().info(`marshalling to ${filetype}`)
 
@@ -202,7 +202,7 @@ export class Blueprint {
  * @param {String} filepath
  * @returns {Promise}
  */
-export function src(filepath: String): Promise {
+export function src (filepath: String): Promise {
   log().info(`reading content from ${filepath}`)
 
   return new Promise((resolve, reject) => {
@@ -225,7 +225,7 @@ export function src(filepath: String): Promise {
  * @param {String} filepath
  * @returns {Promise}
  */
-export function dest(blueprint, filepath: String): Promise {
+export function dest (blueprint, filepath: String): Promise {
   return new Promise((resolve, reject) => {
     log().info(`writing content to ${filepath}`)
 
@@ -245,7 +245,7 @@ export function dest(blueprint, filepath: String): Promise {
  * @param {Array|String} blueprints
  * @returns {Promise}
  */
-export function glob(pattern, options): Promise {
+export function glob (pattern, options): Promise {
   log().info(`globbing against ${pattern}`)
 
   return new Promise((resolve, reject) => {
@@ -271,7 +271,7 @@ export function glob(pattern, options): Promise {
  * @param {Array|String} blueprints
  * @returns {Promise}
  */ 
-export function read(blueprints): Promise {
+export function read (blueprints): Promise {
   log().info('reading in content')
 
   return new Promise((resolve, reject) => {

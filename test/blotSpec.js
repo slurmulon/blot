@@ -1,6 +1,6 @@
 import 'blanket'
 
-import * as blot from '../src/blot'
+import blot from '../src/blot'
 import _ from 'lodash'
 import fs from 'fs'
 
@@ -61,7 +61,7 @@ describe('Blueprint', () => {
     })
   })
 
-  describe('transclude', () => {
+  describe.only('transclude', () => {
     it('should be a function', () => {
       blueprintStubs.basic.parse.should.be.a('function')
     })
