@@ -43,7 +43,7 @@
     "commander": "^2.9.0",
     "config.json": "0.0.4",
     "glob": "^7.0.3",
-    "hazy": "^0.1.16",
+    "hazy": "^0.1.17",
     "hercule": "~4.1.0",
     "jsonpath": "^0.2.4",
     "lodash.isplainobject": "^4.0.4",
